@@ -1463,6 +1463,7 @@ async function renderUserTicket(){
       <div class="pax-field" style="grid-column:1/-1"><span class="pf-label">Dia(s) da viagem</span><span class="pf-val" style="font-weight:700">${(()=>{try{const d=JSON.parse(myReg.dias||'null');return d?d.map(x=>`<span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700;margin:2px;background:rgba(${x==='Sexta'?'79,142,247':x==='Sábado'?'124,90,247':'247,90,122'},.15);color:var(--${dayClass[x]||'accent'})">${x}</span>`).join(' '):'<span>'+myReg.dia+'</span>';}catch(e){return '<span>'+myReg.dia+'</span>';}})()}</span></div>
       <div class="pax-field"><span class="pf-label">Destino</span><span class="pf-val">${esc(cfg&&cfg.destino||'—')}</span></div>
       <div class="pax-field"><span class="pf-label">Saída</span><span class="pf-val">${(cfg&&cfg.hora)||'—'}</span></div>
+      <div class="pax-field"><span class="pf-label">Assentos</span><span class="pf-val">${myReg.seats_needed||1} assento${(myReg.seats_needed||1)>1?'s':''}</span></div>
       <div class="pax-field"><span class="pf-label">Categoria</span><span class="pf-val">${esc(myReg.category||'Geral')}</span></div>
     </div>
     ${myReg.tel?`<div style="font-size:13px;color:var(--muted);margin-bottom:4px">📞 ${esc(myReg.tel)}</div>`:''}
