@@ -1064,11 +1064,11 @@ async function renderAdminTripOverview(){
     return;
   }
   const days=[
-    {name:'Sexta',key:'seats_viernes'},
-    {name:'Sábado',key:'seats_sabado'},
-    {name:'Domingo',key:'seats_domingo'}
+    {name:'Sexta',key:'seats_viernes',dateKey:'date_fri'},
+    {name:'Sábado',key:'seats_sabado',dateKey:'date_sat'},
+    {name:'Domingo',key:'seats_domingo',dateKey:'date_sun'}
   ];
-  el.innerHTML=days.map(({name,key})=>{
+  el.innerHTML=days.map(({name,key,dateKey})=>{
     const total=cfg[key]||0;
     if(total===0) return '';
     const used=pax.filter(p=>p.dia===name).reduce((sum,p)=>sum+(p.seats_needed||1),0);
