@@ -497,7 +497,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
     </div>
     <div class="search-wrap">
       <span class="si">🔍</span>
-      <input type="search" id="admin-search" placeholder="Nome ou RG…" oninput="adminSearch(this.value)" autocomplete="off" spellcheck="false">
+      <input type="search" id="admin-search" placeholder="Nome, RG ou telefone…" oninput="adminSearch(this.value)" autocomplete="off" spellcheck="false">
       <button class="search-clear" id="admin-search-clear" onclick="clearAdminSearch()">✕</button>
     </div>
     <div class="chip-row" id="admin-pax-chips">
@@ -670,6 +670,36 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 </div>
 
 <!-- CHANGE PW MODAL -->
+<!-- AVISO IMPORTANTE MODAL -->
+<div id="notice-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;overflow-y:auto;padding:16px;">
+  <div style="background:white;border-radius:20px;margin:auto;max-width:480px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="background:linear-gradient(135deg,#1a3a6b,#2563eb);padding:20px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:8px;">📋</div>
+      <div style="color:white;font-family:Syne,sans-serif;font-size:18px;font-weight:800;">Informações Importantes</div>
+      <div style="color:rgba(255,255,255,.75);font-size:12px;margin-top:4px;">Leia com atenção antes de continuar</div>
+    </div>
+    <div style="background:#fef9c3;border-left:4px solid #d97706;padding:14px 18px;margin:16px 16px 0;">
+      <div style="font-weight:800;color:#92400e;font-size:12px;margin-bottom:4px;">⏰ PRAZO PARA PAGAMENTO</div>
+      <div style="font-size:13px;color:#78350f;font-weight:600;">O acerto das passagens poderá ser até o dia <span style="color:#dc2626;font-weight:800;">05/07/2026</span>.</div>
+    </div>
+    <div style="background:#fee2e2;border-left:4px solid #dc2626;padding:14px 18px;margin:10px 16px 0;">
+      <div style="font-weight:800;color:#991b1b;font-size:12px;margin-bottom:4px;">⚠️ POLÍTICA DE CANCELAMENTO</div>
+      <div style="font-size:12px;color:#7f1d1d;line-height:1.5;">Informamos que <strong>não haverá reembolso</strong> para quem desistir de participar do arranjo de ônibus, pois o cálculo para o frete leva em conta as vagas contratadas.</div>
+    </div>
+    <div style="padding:14px 18px 0;">
+      <div style="font-weight:800;color:#1e293b;font-size:12px;margin-bottom:10px;">👶 REGRAS PARA CRIANÇAS</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;"><span style="font-size:15px;flex-shrink:0;">📝</span><div style="font-size:12px;color:#374151;line-height:1.5;">Crianças ou adolescentes <strong>menores de 16 anos</strong> não acompanhados dos pais, familiar ou tutor, só poderão viajar mediante <strong>autorização por escrito com firma reconhecida</strong> de um dos genitores, nomeando um tutor responsável.</div></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;"><span style="font-size:15px;flex-shrink:0;">🍼</span><div style="font-size:12px;color:#374151;line-height:1.5;">É permitido o transporte de uma <strong>criança de colo</strong> com menos de <strong>06 anos completos</strong>. Não haverá assento reservado para ela.</div></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;"><span style="font-size:15px;flex-shrink:0;">💺</span><div style="font-size:12px;color:#374151;line-height:1.5;">Crianças <strong>maiores de 06 anos</strong> deverão ocupar um assento <strong>pagando o valor da passagem</strong>.</div></div>
+      </div>
+    </div>
+    <div style="padding:16px 18px 20px;">
+      <button onclick="closeImportantNotice()" style="width:100%;background:linear-gradient(180deg,#2d74f5,#1a5fd4);border:none;border-radius:12px;padding:15px;color:white;font-family:Syne,sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 #1045a8;">✅ Entendi, continuar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="change-pw-modal">
   <div class="modal-box">
     <div class="modal-handle"></div>
@@ -1156,6 +1186,25 @@ async function renderAdminTripOverview(){
   }).join('');
 }
 
+async function renderDashboard(pax, pays){
+  const el = document.getElementById('admin-dashboard');
+  if(!el) return;
+  const total = pax.length;
+  const pagos = pax.filter(p=>{ const pay=pays[p.rg||p.cpf]||{}; return pay.status==='pago'; }).length;
+  const pendentes = pax.filter(p=>{ const pay=pays[p.rg||p.cpf]||{}; return !pay.status||pay.status==='nao_pago'; }).length;
+  const cards = [
+    {label:'Total',value:total,icon:'👥',bg:'#eff6ff',color:'#1d4ed8'},
+    {label:'Pagos',value:pagos,icon:'✅',bg:'#d1fae5',color:'#059669'},
+    {label:'Pendentes',value:pendentes,icon:'❌',bg:'#fee2e2',color:'#dc2626'},
+  ];
+  el.innerHTML = cards.map(c=>`
+    <div style="background:${c.bg};border-radius:12px;padding:12px 8px;text-align:center;border:1px solid ${c.color}22;">
+      <div style="font-size:20px;">${c.icon}</div>
+      <div style="font-family:Syne,sans-serif;font-size:22px;font-weight:800;color:${c.color};">${c.value}</div>
+      <div style="font-size:11px;font-weight:600;color:${c.color};opacity:.8;">${c.label}</div>
+    </div>`).join('');
+}
+
 async function renderAdminPax(){
   const pax = await getPax();
   const info=document.getElementById('admin-result-info');
@@ -1183,7 +1232,10 @@ async function renderAdminPax(){
     <div class="pax-card">
       <div class="pax-top">
         <div class="pax-name">${hlAdmin(p.nome||'')}</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="toggleEmbarque(${p.id},${!!p.embarque})" style="background:${p.embarque?'#d1fae5':'#f1f5f9'};border:1.5px solid ${p.embarque?'#059669':'#e2e8f0'};border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer;" title="${p.embarque?'Embarcou ✅':'Confirmar embarque'}">${p.embarque?'✅':'🚌'}</button>
         <button class="pax-del" onclick="adminDeletePax(${p.id})" title="Eliminar">🗑</button>
+      </div>
       </div>
       <div class="pax-grid">
         <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${hlAdmin(p.rg||p.cpf||'')}</span></div>
@@ -1221,6 +1273,17 @@ function adminFilter(f,el){
   document.querySelectorAll('#admin-page-pax .chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   renderAdminPax();
+}
+
+async function toggleEmbarque(id, current){
+  try{
+    await supaFetch(`/rest/v1/pasajeros?id=eq.${id}`,{
+      method:'PATCH',prefer:'return=minimal',
+      body:JSON.stringify({embarque:!current})
+    });
+    showToast(!current?'✅ Embarque confirmado!':'↩️ Embarque desmarcado');
+    renderAdminPax();
+  }catch(e){ showToast('Erro: '+e.message,true); }
 }
 
 async function adminDeletePax(id){
@@ -1346,6 +1409,23 @@ async function renderDaySelector(){
     const btnBg = isSelected ? (name==='Sexta'?'#eff6ff':name==='Sábado'?'#f5f3ff':'#fdf2f8') : '#ffffff';
     const btnColor = isSelected ? dayColor : '#64748b';
     const btnShadow = isSelected ? `0 4px 12px rgba(0,0,0,0.15)` : '0 2px 8px rgba(0,0,0,0.06)';
+    // Seat availability info
+    const totalSeats = cfg ? (cfg[keyMap[name]]||0) : 0;
+    const usedSeats = pax.filter(p=>p.dia===name||(p.dias&&p.dias.includes(name))).reduce((sum,p)=>sum+(p.seats_needed||1),0);
+    const freeSeats = Math.max(0, totalSeats - usedSeats);
+    const seatsOn = seatsActive() && totalSeats > 0;
+    let availLabel, availColor, availBg;
+    if(isMine){
+      availLabel = '✓ Meu dia'; availColor = dayColor; availBg = 'transparent';
+    } else if(noSeat){
+      availLabel = '🔴 Esgotado'; availColor = '#dc2626'; availBg = '#fee2e2';
+    } else if(seatsOn && freeSeats <= 5){
+      availLabel = `⚠️ ${freeSeats} restante${freeSeats!==1?'s':''}`; availColor = '#d97706'; availBg = '#fef9c3';
+    } else if(seatsOn && freeSeats > 5){
+      availLabel = `✅ ${freeSeats} livres`; availColor = '#059669'; availBg = '#d1fae5';
+    } else {
+      availLabel = label; availColor = '#94a3b8'; availBg = 'transparent';
+    }
     const calHtml = dateStr
       ? `<div style="width:44px;height:44px;border-radius:10px;border:2px solid ${dayColor};overflow:hidden;display:flex;flex-direction:column;align-items:center;background:white;box-shadow:0 2px 6px rgba(0,0,0,.1);">
            <div style="background:${dayColor};width:100%;text-align:center;padding:2px 0;font-size:9px;font-weight:800;color:white;letter-spacing:.5px;">${monthStr}</div>
@@ -1359,7 +1439,7 @@ async function renderDaySelector(){
       data-day="${name}">
       ${calHtml}
       <span style="font-size:13px;font-weight:700;color:${btnColor};">${name}</span>
-      <span style="font-size:11px;color:${isSelected?dayColor:'#94a3b8'};">${isMine?'✓ Meu dia':label}</span>
+      <span style="font-size:11px;font-weight:600;color:${availColor};background:${availBg};padding:${availBg!=='transparent'?'2px 8px':'0'};border-radius:20px;">${availLabel}</span>
     </div>`;
   }).join('');
 }
@@ -1387,11 +1467,9 @@ function updateDayButtonColors(){
     btn.style.border = selected ? `3px solid ${color}` : '1.5px solid #e2e8f0';
     btn.style.background = selected ? dayBgs[name] : '#ffffff';
     btn.style.boxShadow = selected ? `0 4px 12px rgba(0,0,0,0.15)` : '0 2px 8px rgba(0,0,0,0.06)';
-    // Update text colors
     const spans = btn.querySelectorAll('span');
     if(spans[0]) spans[0].style.color = selected ? color : '#64748b';
     if(spans[1]) spans[1].style.color = selected ? color : '#94a3b8';
-    if(spans[1]) spans[1].textContent = selected ? '✓ Selecionado' : btn.getAttribute('data-label')||'Disponível';
   });
 }
 
@@ -1487,6 +1565,8 @@ async function registerPassenger(){
     await renderUserTicket();
     await updateRegisterBtn();
     showToast('✅ Reservado para '+selectedDays.join(' + ')+'!');
+    // Show important notice modal after registration
+    setTimeout(()=>showImportantNotice(), 800);
     userGoPage('ticket');
   } catch(e){
     showToast('❌ Erro: '+e.message, true);
