@@ -1001,7 +1001,7 @@ async function updatePaxDay(rg, dia){
 // ═══════════════════════════════════════
 // ADMIN APP
 // ═══════════════════════════════════════
-const dayClass={Viernes:'fri',Sábado:'sat',Domingo:'sun'};
+const dayClass={Sexta:'fri',Viernes:'fri',Sábado:'sat',Domingo:'sun'};
 let adminFilterDay='Todos'; let adminQuery='';
 let adminRefreshInterval=null;
 
@@ -1410,6 +1410,7 @@ async function renderDaySelector(){
     const btnColor = isSelected ? dayColor : '#64748b';
     const btnShadow = isSelected ? `0 4px 12px rgba(0,0,0,0.15)` : '0 2px 8px rgba(0,0,0,0.06)';
     // Seat availability info
+    const keyMap={Sexta:'seats_viernes',Sábado:'seats_sabado',Domingo:'seats_domingo'};
     const totalSeats = cfg ? (cfg[keyMap[name]]||0) : 0;
     const usedSeats = pax.filter(p=>p.dia===name||(p.dias&&p.dias.includes(name))).reduce((sum,p)=>sum+(p.seats_needed||1),0);
     const freeSeats = Math.max(0, totalSeats - usedSeats);
