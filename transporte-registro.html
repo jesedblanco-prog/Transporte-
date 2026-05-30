@@ -1402,7 +1402,7 @@ async function renderDaySelector(){
     const monthNum = dateStr ? dateStr.split('/')[1] : '';
     const monthNames = ['','JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
     const monthStr = monthNum ? monthNames[parseInt(monthNum)] : '';
-    if(!dateStr && noConfig) return '';
+    if(!dateStr && noConfig && !cfg.destino) return ''; // Only hide if nothing configured at all
     const dayColor = name==='Sexta'?'#2563eb':name==='Sábado'?'#7c3aed':'#db2777';
     const isSelected = selectedDays.includes(name);
     const btnBorder = isSelected ? `3px solid ${dayColor}` : '1.5px solid #e2e8f0';
@@ -1432,7 +1432,7 @@ async function renderDaySelector(){
            <div style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;color:#1e293b;line-height:1.2;padding-top:1px;">${dayNum}</div>
          </div>`
       : `<span style="font-size:28px;">📅</span>`;
-    if(!dateStr && noConfig) return '';
+    if(!dateStr && noConfig && !cfg.destino) return ''; // Only hide if nothing configured at all
     return `<div id="day-btn-${name}" 
       style="padding:14px 6px;border-radius:14px;border:${btnBorder};background:${btnBg};cursor:${disabled?'not-allowed':'pointer'};text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:95px;justify-content:center;box-shadow:${btnShadow};opacity:${disabled?0.4:1};transition:all .15s;"
       onclick="toggleDay('${name}',${disabled})"
