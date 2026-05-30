@@ -1,154 +1,242 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transporte Jardim do Vale</title>
-    <style>
-        :root {
-            --bg: #f0f4f8;
-            --text: #1e293b;
-            --border: #e2e8f0;
-            --blue: #2563eb;
-            --green: #059669;
-            --red: #dc2626;
-            --yellow: #d97706;
-            --muted: #64748b;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Transporte Jardim do Vale</title>
+<style>
+:root {
+  --bg: #f0f4f8;
+  --text: #1e293b;
+  --border: #e2e8f0;
+  --blue: #2563eb;
+  --green: #059669;
+  --red: #dc2626;
+  --yellow: #d97706;
+  --muted: #64748b;
+}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
-        .container { max-width: 500px; margin: 0 auto; padding: 16px; }
-        .header { background: linear-gradient(135deg, #1e40af, #2563eb); color: white; padding: 24px; border-radius: 16px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-        .header p { color: #bfdbfe; font-size: 12px; }
-        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid var(--border); }
-        .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; tracking: 0.05em; margin-bottom: 12px; }
-        .days-grid { display: grid; grid-cols: 3; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .day-btn { background: white; border: 2px solid var(--border); border-radius: 12px; padding: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .day-btn.selected { border-color: var(--blue); background: #eff6ff; color: var(--blue); }
-        .form-group { margin-bottom: 14px; }
-        .form-label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569; }
-        .form-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; transition: all 0.2s; }
-        .form-input:focus { outline: none; border-color: var(--blue); background: white; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-primary { background: var(--blue); color: white; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .toast { fixed: bottom 16px left 50%; transform: translateX(-50%); padding: 12px 16px; border-radius: 8px; color: white; font-weight: 500; font-size: 13px; display: none; z-index: 1000; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .toast.success { background: #0f172a; display: flex; }
-        .toast.error { background: var(--red); display: flex; }
-    </style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+.container { max-width: 500px; margin: 0 auto; padding: 16px; }
+.header { background: linear-gradient(135deg, #1a3a6b, #2563eb); color: white; padding: 24px; border-radius: 16px; text-align: center; margin-bottom: 24px; }
+.header h1 { font-size: 24px; margin-bottom: 8px; }
+.header p { opacity: 0.9; font-size: 13px; }
+
+.card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.card-title { font-weight: 700; color: var(--text); margin-bottom: 12px; font-size: 15px; }
+
+.day-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.day-btn { 
+  border: 2px solid var(--border); 
+  background: white; 
+  border-radius: 12px; 
+  padding: 12px 8px; 
+  cursor: pointer; 
+  text-align: center; 
+  transition: all .2s;
+  font-size: 13px;
+  font-weight: 600;
+}
+.day-btn:active { transform: scale(0.98); }
+.day-btn.selected-sexta { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
+.day-btn.selected-sabado { border-color: #7c3aed; background: #f5f3ff; color: #7c3aed; }
+.day-btn.selected-domingo { border-color: #db2777; background: #fdf2f8; color: #db2777; }
+
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; }
+.form-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; }
+.form-input:focus { outline: none; border-color: var(--blue); background: #f8fafc; }
+
+.btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; transition: all .2s; }
+.btn-primary { background: linear-gradient(180deg, #2d74f5, #1a5fd4); color: white; box-shadow: 0 4px 0 #1045a8; }
+.btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #1045a8; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 999; animation: slideUp .3s; }
+@keyframes slideUp { from { transform: translateX(-50%) translateY(100px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 400; padding: 16px; overflow-y: auto; }
+.modal.show { display: flex; align-items: center; justify-content: center; }
+.modal-content { background: white; border-radius: 20px; max-width: 480px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.modal-header { background: linear-gradient(135deg, #1a3a6b, #2563eb); padding: 20px; text-align: center; color: white; }
+.modal-header h2 { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+.modal-header p { font-size: 12px; opacity: 0.75; }
+.modal-body { padding: 16px; }
+.modal-footer { padding: 16px; }
+.info-box { background: #fef9c3; border-left: 4px solid #d97706; padding: 12px 14px; margin-bottom: 10px; border-radius: 6px; font-size: 12px; }
+.info-box strong { color: #92400e; display: block; margin-bottom: 4px; }
+.alert-box { background: #fee2e2; border-left: 4px solid #dc2626; padding: 12px 14px; margin-bottom: 10px; border-radius: 6px; font-size: 12px; color: #7f1d1d; }
+
+.info-item { display: flex; gap: 10px; margin-bottom: 12px; font-size: 12px; line-height: 1.5; }
+.info-item-icon { font-size: 18px; flex-shrink: 0; }
+</style>
 </head>
 <body>
-    <div class="container" id="app"></div>
-    <div id="toast" class="toast"></div>
 
-    <script>
-        let selectedDays = [];
-        let config = {};
+<div class="container">
+  <div class="header">
+    <h1>🚌 Transporte Jardim do Vale</h1>
+    <p>Congresso Itatiba 2026</p>
+  </div>
 
-        // Función segura de peticiones para evitar el colapso del JSON
-        async function supaFetch(url, options = {}) {
-            const baseUrl = 'https://substancia-p-supabase-proxy.la-b00.workers.dev';
-            const res = await fetch(baseUrl + url, options);
-            const text = await res.text();
-            if (!res.ok) throw new Error(text || 'Erro na requisição');
-            return text ? JSON.parse(text) : null;
-        }
+  <div id="app"></div>
+</div>
 
-        async function getConfig() { return await supaFetch('/rest/v1/config?id=eq.1&select=*') || []; }
-        async function getPax() { return await supaFetch('/rest/v1/pasajeros?select=*&order=ts.asc') || []; }
+<div id="toast" class="toast" style="display:none;"></div>
+<div id="notice-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div style="font-size:36px;margin-bottom:8px;">📋</div>
+      <h2>Informações Importantes</h2>
+      <p>Leia com atenção antes de continuar</p>
+    </div>
+    <div class="modal-body">
+      <div class="info-box">
+        <strong>⏰ PRAZO PARA PAGAMENTO</strong>
+        O acerto das passagens poderá ser até o dia <strong style="color:#dc2626;">05/07/2026</strong>.
+      </div>
+      <div class="alert-box">
+        <strong>⚠️ POLÍTICA DE CANCELAMENTO</strong>
+        Informamos que <strong>não haverá reembolso</strong> para quem desistir de participar do arranjo de ônibus, pois o cálculo para o frete leva em conta as vagas contratadas.
+      </div>
+      <div style="margin-top:14px;">
+        <strong style="color:#1e293b;font-size:13px;display:block;margin-bottom:10px;">👶 REGRAS PARA CRIANÇAS</strong>
+        <div class="info-item">
+          <span class="info-item-icon">📝</span>
+          <span>Crianças ou adolescentes <strong>menores de 16 anos</strong> não acompanhados dos pais, familiar ou tutor, só poderão viajar mediante <strong>autorização por escrito com firma reconhecida</strong> de um dos genitores, nomeando um tutor responsável.</span>
+        </div>
+        <div class="info-item">
+          <span class="info-item-icon">🍼</span>
+          <span>É permitido o transporte de uma <strong>criança de colo</strong> com menos de <strong>06 anos completos</strong>. Não haverá assento reservado para ela.</span>
+        </div>
+        <div class="info-item">
+          <span class="info-item-icon">💺</span>
+          <span>Crianças <strong>maiores de 06 anos</strong> deverão ocupar um assento <strong>pagando o valor da passagem</strong>.</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeNotice()">✅ Entendi, continuar</button>
+    </div>
+  </div>
+</div>
 
-        function toggleDay(day) {
-            const idx = selectedDays.indexOf(day);
-            if (idx === -1) selectedDays.push(day);
-            else selectedDays.splice(idx, 1);
-            render();
-        }
+<script>
+const SUPABASE_URL = 'https://jjvmtrieudoxjjlkqsng.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_rl5OtnLInXXuCsZ0dN8kLg_fJD6TrN0';
 
-        async function registerPax() {
-            const nome = document.getElementById('nombre').value.trim();
-            const rg = document.getElementById('rg').value.trim();
-            const tel = document.getElementById('tel').value.trim();
+let selectedDays = [];
 
-            if (!nome || !rg || !tel || !selectedDays.length) {
-                showToast('⚠️ Complete todos os campos');
-                return;
-            }
+async function supaFetch(path, opts = {}) {
+  const url = SUPABASE_URL + path;
+  const headers = { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...opts.headers };
+  const res = await fetch(url, { ...opts, headers });
+  if (!res.ok) return null;
+  const text = await res.text();
+  return text ? JSON.parse(text) : true;
+}
 
-            try {
-                const data = { nome, rg, tel, dia: selectedDays[0], dias: JSON.stringify(selectedDays), seats_needed: 1, category: 'Geral', ts: new Date().toISOString() };
-                
-                // Aquí atrapamos el error del JSON vacío de forma segura
-                try {
-                    await supaFetch('/rest/v1/pasajeros', { method: 'POST', body: JSON.stringify(data) });
-                } catch (fetchError) {
-                    if (!fetchError.message.includes('Unexpected end of JSON input')) {
-                        throw fetchError;
-                    }
-                }
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
 
-                showToast('✅ Reservado para ' + selectedDays.join(' + ') + '!');
-                showNotice();
-                selectedDays = [];
-                document.getElementById('nombre').value = '';
-                document.getElementById('rg').value = '';
-                document.getElementById('tel').value = '';
-                render();
-            } catch (err) {
-                console.error(err);
-                showToast('❌ Erro ao salvar dados');
-            }
-        }
+function showNotice() { document.getElementById('notice-modal').classList.add('show'); }
+function closeNotice() { document.getElementById('notice-modal').classList.remove('show'); }
 
-        function showToast(msg, type = 'success') {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.className = `toast ${type}`;
-            setTimeout(() => t.style.display = 'none', 3000);
-        }
+async function getConfig() { return await supaFetch('/rest/v1/config?id=eq.1&select=*') || []; }
+async function getPax() { return await supaFetch('/rest/v1/pasajeros?select=*&order=ts.asc') || []; }
 
-        function showNotice() {}
+function toggleDay(day) {
+  const idx = selectedDays.indexOf(day);
+  if (idx === -1) selectedDays.push(day);
+  else selectedDays.splice(idx, 1);
+  render();
+}
 
-        function render() {
-            const app = document.getElementById('app');
-            app.innerHTML = `
-                <div class="header">
-                    <h1>🚌 Transporte Jardim do Vale</h1>
-                    <p>Congresso Itatiba 2026</p>
-                </div>
+async function registerPax() {
+  const nome = document.getElementById('nombre').value.trim();
+  const rg = document.getElementById('rg').value.trim();
+  const tel = document.getElementById('tel').value.trim();
+  
+  if (!nome || !rg || !selectedDays.length) {
+    showToast('⚠️ Complete todos os campos');
+    return;
+  }
 
-                <div class="card">
-                    <div class="card-title">ESCOLHA SEU DIA DE VIAGEM:</div>
-                    <div class="days-grid">
-                        <button class="day-btn ${selectedDays.includes('Sexta') ? 'selected' : ''}" onclick="toggleDay('Sexta')">📅 Sexta</button>
-                        <button class="day-btn ${selectedDays.includes('Sábado') ? 'selected' : ''}" onclick="toggleDay('Sábado')">📅 Sábado</button>
-                        <button class="day-btn ${selectedDays.includes('Domingo') ? 'selected' : ''}" onclick="toggleDay('Domingo')">📅 Domingo</button>
-                    </div>
-                </div>
+  try {
+    const data = { nome, rg, tel, dia: selectedDays[0], dias: JSON.stringify(selectedDays), seats_needed: 1, category: 'Geral', ts: new Date().toISOString() };
+    await supaFetch('/rest/v1/pasajeros', { method: 'POST', body: JSON.stringify(data) });
+    showToast('✅ Reservado para ' + selectedDays.join(' + ') + '!');
+    showNotice();
+    selectedDays = [];
+    document.getElementById('nombre').value = '';
+    document.getElementById('rg').value = '';
+    document.getElementById('tel').value = '';
+    render();
+  } catch (e) {
+    showToast('❌ Erro: ' + e.message);
+  }
+}
 
-                <div class="card">
-                    <div class="card-title">SEUS DADOS:</div>
-                    <div class="form-group">
-                        <label class="form-label">Nome completo</label>
-                        <input class="form-input" id="nombre" type="text" placeholder="João Silva">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">RG ou RNM</label>
-                        <input class="form-input" id="rg" type="text" placeholder="12.345.678-9">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Telefone (WhatsApp)</label>
-                        <input class="form-input" id="tel" type="tel" placeholder="(19) 99999-9999">
-                    </div>
-                    <button class="btn btn-primary" onclick="registerPax()">
-                        ${selectedDays.length ? '✅ Reservar para ' + selectedDays.join(' + ') : 'Selecione um dia'}
-                    </button>
-                </div>
-            `;
-        }
+async function render() {
+  const [cfg, pax] = await Promise.all([getConfig(), getPax()]);
+  const config = cfg[0] || {};
+  const app = document.getElementById('app');
+  
+  const dayInfo = (name, date) => {
+    const count = pax.filter(p => p.dia === name || (p.dias && p.dias.includes(name))).length;
+    const total = name === 'Sexta' ? config.seats_viernes : name === 'Sábado' ? config.seats_sabado : config.seats_domingo;
+    return `${name} ${date || ''}`;
+  };
 
-        render();
-    </script>
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-title">ESCOLHA SEU DIA DE VIAGEM:</div>
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:12px;">
+        📅 Sexta 17/07/2026 · Sábado 18/07/2026 · Domingo 19/07/2026
+      </div>
+      <div class="day-selector">
+        <button class="day-btn ${selectedDays.includes('Sexta') ? 'selected-sexta' : ''}" onclick="toggleDay('Sexta')">
+          <div style="font-size:18px;margin-bottom:4px;">📅</div>
+          Sexta
+        </button>
+        <button class="day-btn ${selectedDays.includes('Sábado') ? 'selected-sabado' : ''}" onclick="toggleDay('Sábado')">
+          <div style="font-size:18px;margin-bottom:4px;">📅</div>
+          Sábado
+        </button>
+        <button class="day-btn ${selectedDays.includes('Domingo') ? 'selected-domingo' : ''}" onclick="toggleDay('Domingo')">
+          <div style="font-size:18px;margin-bottom:4px;">📅</div>
+          Domingo
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SEUS DADOS:</div>
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input class="form-input" id="nombre" type="text" placeholder="João Silva">
+      </div>
+      <div class="form-group">
+        <label class="form-label">RG ou RNM</label>
+        <input class="form-input" id="rg" type="text" placeholder="12.345.678-9">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefone (WhatsApp)</label>
+        <input class="form-input" id="tel" type="tel" placeholder="(19) 99999-9999">
+      </div>
+      <button class="btn btn-primary" onclick="registerPax()">✅ Reservar para ${selectedDays.length ? selectedDays.join(' + ') : 'selecione um dia'}</button>
+    </div>
+  `;
+}
+
+render();
+</script>
+
 </body>
 </html>
