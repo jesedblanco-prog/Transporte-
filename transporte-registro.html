@@ -12,10 +12,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f0f4ff;
+  --bg:#f0f4f8;
   --surface:#ffffff;
-  --surface2:#f5f7ff;
-  --border:#dce3f5;
+  --surface2:#f8fafc;
+  --border:#e2e8f0;
   --accent:#2563eb;
   --accent2:#7c3aed;
   --green:#059669;
@@ -28,8 +28,10 @@
   --sat:#7c3aed;
   --sun:#db2777;
   --safe-bottom:env(safe-area-inset-bottom,0px);
-  --shadow:0 2px 16px rgba(37,99,235,.08);
-  --shadow-md:0 4px 24px rgba(37,99,235,.12);
+  --shadow:0 2px 12px rgba(0,0,0,.08),0 1px 0 rgba(255,255,255,.9);
+  --shadow-md:0 4px 20px rgba(0,0,0,.1);
+  --shadow-btn:0 4px 0 #1045a8,0 6px 12px rgba(37,99,235,.3);
+  --shadow-btn-green:0 4px 0 #047857,0 6px 12px rgba(5,150,105,.3);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{background:#f0f4ff !important;color-scheme:light !important;}
@@ -60,7 +62,7 @@ body::before{content:'';position:fixed;inset:0;
 @keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
 
 /* LOGIN BOX */
-.login-box{background:#ffffff !important;border:1px solid var(--border);border-radius:28px;padding:40px 32px;width:100%;max-width:380px;box-shadow:var(--shadow-md);position:relative;z-index:1;}
+.login-box{background:#ffffff !important;border:1px solid var(--border);border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);position:relative;z-index:1;}
 .lock-icon{width:72px;height:72px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 24px;box-shadow:var(--shadow);}
 .lock-admin{background:linear-gradient(135deg,#f59e0b,#f97316);}
 .lock-user{background:linear-gradient(135deg,var(--accent),var(--accent2));}
@@ -74,10 +76,10 @@ body::before{content:'';position:fixed;inset:0;
 .pw-wrap input:focus,.plain-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
 .pw-wrap input::placeholder,.plain-input::placeholder{color:var(--light-text);}
 .eye-btn{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;padding:4px;}
-.login-btn{width:100%;padding:18px;border:none;border-radius:14px;color:#fff;font-family:'Syne',sans-serif;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;min-height:58px;transition:opacity .2s,transform .1s,box-shadow .2s;box-shadow:var(--shadow);}
-.login-btn:active{transform:scale(.98);opacity:.9;}
-.btn-admin-color{background:linear-gradient(135deg,#f59e0b,#f97316);}
-.btn-user-color{background:linear-gradient(135deg,var(--accent),var(--accent2));}
+.login-btn{width:100%;padding:16px;border:none;border-radius:12px;color:#fff;font-family:'Syne',sans-serif;font-size:17px;font-weight:700;cursor:pointer;margin-top:10px;min-height:54px;transition:transform .1s,box-shadow .1s;position:relative;top:0;}
+.login-btn:active{transform:translateY(3px);top:3px;}
+.btn-admin-color{background:linear-gradient(180deg,#f59e0b 0%,#d97706 100%);box-shadow:0 4px 0 #92400e,0 6px 12px rgba(217,119,6,.3);}
+.btn-user-color{background:linear-gradient(180deg,#2d74f5 0%,#1a5fd4 100%);box-shadow:0 4px 0 #1045a8,0 6px 12px rgba(37,99,235,.3);}
 .login-error{margin-top:12px;text-align:center;font-size:14px;color:var(--red);min-height:20px;font-weight:600;}
 .attempts-bar{display:flex;gap:8px;justify-content:center;margin-top:16px;}
 .attempt-dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s;}
@@ -99,8 +101,8 @@ body::before{content:'';position:fixed;inset:0;
 #admin-app.show,#user-app.show{display:block;}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#ffffff !important;border-top:2px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:50;box-shadow:0 -4px 20px rgba(37,99,235,.08);}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 4px;background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;min-height:64px;transition:color .2s;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#ffffff !important;border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:50;box-shadow:0 -4px 20px rgba(0,0,0,.08);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px;background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;min-height:60px;transition:color .2s;}
 .nav-btn .nav-icon{font-size:22px;line-height:1;}
 .nav-btn.active{color:var(--accent);}
 .nav-btn.active .nav-icon{transform:scale(1.1);}
@@ -109,7 +111,7 @@ body::before{content:'';position:fixed;inset:0;
 .page{display:none;padding:16px 16px calc(84px + var(--safe-bottom));min-height:100vh;}
 .page.active{display:block;}
 .page-header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 22px;}
-.page-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--text);}
+.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--text);}
 .logout-chip{padding:10px 18px;background:var(--surface2);border:2px solid var(--border);border-radius:22px;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;transition:all .2s;}
 .logout-chip:active{border-color:var(--red);color:var(--red);}
 
@@ -141,37 +143,38 @@ body::before{content:'';position:fixed;inset:0;
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .form-group{display:flex;flex-direction:column;gap:8px;}
 label{font-size:13px;font-weight:600;color:var(--text);}
-input,select{background:#f5f7ff !important;border:2px solid var(--border);border-radius:12px;padding:14px 16px;color:#1e293b !important;font-family:'DM Sans',sans-serif;font-size:16px;transition:border-color .2s,box-shadow .2s;outline:none;width:100%;-webkit-appearance:none;}
-input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+input,select{background:#f8fafc !important;border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:#1e293b !important;font-family:'DM Sans',sans-serif;font-size:16px;transition:border-color .2s,box-shadow .2s;outline:none;width:100%;-webkit-appearance:none;}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12);background:#fff !important;}
 input::placeholder{color:var(--light-text);}
 input[readonly]{opacity:.55;cursor:not-allowed;background:#f8fafc;}
 .save-btn{width:100%;padding:17px;border:none;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;font-family:'Syne',sans-serif;font-size:17px;font-weight:800;cursor:pointer;margin-top:6px;min-height:56px;transition:opacity .2s,box-shadow .2s;box-shadow:0 4px 16px rgba(245,158,11,.3);}
-.save-btn:active{opacity:.88;}
+.save-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #92400e;top:3px;}
 .save-btn:disabled{opacity:.5;cursor:not-allowed;}
 
 /* DAY SELECTOR */
 .day-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-.ds-btn{padding:18px 8px;border-radius:18px;border:2px solid var(--border);background:#ffffff !important;cursor:pointer;text-align:center;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--muted);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:7px;min-height:100px;justify-content:center;box-shadow:var(--shadow);}
+.ds-btn{padding:14px 6px;border-radius:14px;border:1.5px solid var(--border);background:#ffffff !important;cursor:pointer;text-align:center;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--muted);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:95px;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.06),0 1px 0 rgba(255,255,255,.9);}
 .ds-btn:active{transform:scale(.97);}
+.ds-btn>*{pointer-events:none;user-select:none;}
 
-.ds-btn.sel-fri{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;}
-.ds-btn.sel-sat{border-color:#7c3aed;background:#f5f3ff;color:#6d28d9;}
-.ds-btn.sel-sun{border-color:#db2777;background:#fdf2f8;color:#be185d;}
+.ds-btn.sel-fri{border-color:#2563eb !important;border-width:2.5px !important;background:#eff6ff !important;color:#1d4ed8;box-shadow:0 4px 12px rgba(37,99,235,.2),inset 0 1px 0 rgba(255,255,255,.8) !important;}
+.ds-btn.sel-sat{border-color:#7c3aed !important;border-width:2.5px !important;background:#f5f3ff !important;color:#6d28d9;box-shadow:0 4px 12px rgba(124,58,237,.2),inset 0 1px 0 rgba(255,255,255,.8) !important;}
+.ds-btn.sel-sun{border-color:#db2777 !important;border-width:2.5px !important;background:#fdf2f8 !important;color:#be185d;box-shadow:0 4px 12px rgba(219,39,119,.2),inset 0 1px 0 rgba(255,255,255,.8) !important;}
 .ds-btn.disabled{opacity:.4;cursor:not-allowed;background:#f8fafc;}
 .ds-avail{font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;opacity:.9;}
 
 /* SUBMIT BTN */
-.submit-btn{width:100%;padding:17px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'Syne',sans-serif;font-size:17px;font-weight:700;cursor:pointer;min-height:56px;transition:opacity .2s,transform .1s;margin-top:6px;box-shadow:0 4px 16px rgba(37,99,235,.25);}
-.submit-btn:active{transform:scale(.98);opacity:.9;}
-.submit-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;}
+.submit-btn{width:100%;padding:17px;border:none;border-radius:12px;background:linear-gradient(180deg,#2d74f5 0%,#1a5fd4 100%);color:#fff;font-family:'Syne',sans-serif;font-size:17px;font-weight:700;cursor:pointer;min-height:54px;transition:transform .1s,box-shadow .1s;margin-top:6px;box-shadow:var(--shadow-btn);position:relative;top:0;}
+.submit-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #1045a8,0 2px 6px rgba(37,99,235,.2);top:3px;}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;background:#94a3b8;}
 
-.reg-card{background:#ffffff !important;border:2px solid var(--border);border-radius:20px;padding:22px;margin-bottom:16px;box-shadow:var(--shadow);}
+.reg-card{background:#ffffff !important;border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
 /* NOTICE */
 .notice-card{background:#ffffff !important;border:2px dashed var(--border);border-radius:20px;padding:36px 20px;text-align:center;margin-bottom:16px;}
 .nc-icon{font-size:48px;margin-bottom:14px;}
 .notice-card p{color:var(--muted);font-size:15px;line-height:1.8;font-weight:500;}
 /* PAX CARDS */
-.pax-card{background:#ffffff !important;border:2px solid var(--border);border-radius:18px;padding:18px;margin-bottom:12px;box-shadow:var(--shadow);}
+.pax-card{background:#ffffff !important;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
 .pax-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .pax-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);}
 .pax-del{background:none;border:2px solid var(--border);color:var(--muted);font-size:18px;cursor:pointer;padding:6px 10px;border-radius:10px;min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
@@ -192,17 +195,17 @@ input[readonly]{opacity:.55;cursor:not-allowed;background:#f8fafc;}
 /* CHIPS */
 .chip-row{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
 .chip-row::-webkit-scrollbar{display:none;}
-.chip{padding:10px 18px;border-radius:22px;border:2px solid var(--border);background:#ffffff !important;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;min-height:40px;display:flex;align-items:center;transition:all .15s;}
+.chip{padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);background:#ffffff !important;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;min-height:36px;display:flex;align-items:center;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.06);}
 .chip:active{transform:scale(.96);}
-.chip.active{background:var(--accent);border-color:var(--accent);color:#fff !important;}
+.chip.active{background:linear-gradient(180deg,#2d74f5,#1a5fd4);border-color:#1a5fd4;color:#fff !important;box-shadow:0 3px 0 #1045a8,0 4px 8px rgba(37,99,235,.25);}
 .chip.active *{color:#fff !important;}
 
 .result-info{font-size:14px;color:var(--muted);margin-bottom:12px;font-weight:600;}
 
 /* SETTINGS */
 .settings-list{display:flex;flex-direction:column;gap:12px;margin-top:8px;}
-.si-item{background:#ffffff !important;border:2px solid var(--border);border-radius:18px;padding:20px 18px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:background .15s;box-shadow:var(--shadow);}
-.si-item:active{background:#f5f7ff !important;}
+.si-item{background:#ffffff !important;border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.si-item:active{background:#f0f4ff !important;transform:scale(.99);}
 .si-ico{font-size:26px;width:44px;text-align:center;}
 .si-body{flex:1;}
 .si-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:3px;color:var(--text);}
@@ -216,7 +219,7 @@ input[readonly]{opacity:.55;cursor:not-allowed;background:#f8fafc;}
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.4);display:none;align-items:flex-end;justify-content:center;z-index:300;backdrop-filter:blur(4px);}
 .modal-overlay.show{display:flex;}
-.modal-box{background:#ffffff !important;border-radius:28px 28px 0 0;padding:28px 24px calc(24px + var(--safe-bottom));width:100%;max-width:480px;animation:slideUp .25s ease;border-top:2px solid var(--border);}
+.modal-box{background:#ffffff !important;border-radius:24px 24px 0 0;padding:26px 22px calc(22px + var(--safe-bottom));width:100%;max-width:480px;animation:slideUp .25s ease;border-top:1px solid var(--border);box-shadow:0 -8px 32px rgba(0,0,0,.12);}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-handle{width:44px;height:5px;background:var(--border);border-radius:3px;margin:0 auto 22px;}
 .modal-box h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:22px;color:var(--text);}
@@ -226,7 +229,7 @@ input[readonly]{opacity:.55;cursor:not-allowed;background:#f8fafc;}
 .btn-ghost{flex:1;padding:16px;border:2px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;min-height:54px;}
 .btn-ghost:active{background:var(--border);}
 .btn-primary{flex:1;padding:16px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:14px;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;cursor:pointer;min-height:54px;box-shadow:0 4px 14px rgba(37,99,235,.25);}
-.btn-primary:active{opacity:.9;}
+.btn-primary:active{transform:translateY(3px);top:3px;box-shadow:0 1px 0 #1045a8;}
 .modal-error{font-size:13px;color:var(--red);margin-top:8px;min-height:18px;font-weight:600;}
 
 /* TOAST */
@@ -242,7 +245,7 @@ input[readonly]{opacity:.55;cursor:not-allowed;background:#f8fafc;}
 mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 
 /* PAYMENT STYLES */
-.pay-card{background:#fff;border:2px solid var(--border);border-radius:18px;padding:18px;margin-bottom:12px;box-shadow:0 2px 12px rgba(37,99,235,.07);}
+.pay-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
 .pay-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .pay-card-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#1e293b;}
 .status-badge{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
@@ -256,7 +259,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 .pay-btn-green{background:#dcfce7;border-color:#86efac;color:#15803d;}
 .pay-btn-wa{background:#dcfce7;border-color:#86efac;color:#15803d;}
 .pay-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
-.pay-sum-card{background:#fff;border:2px solid var(--border);border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 2px 8px rgba(37,99,235,.06);}
+.pay-sum-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05);}
 .pay-sum-num{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;}
 .pay-sum-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;font-weight:600;}
 .pago-num{color:#15803d;}
@@ -399,9 +402,12 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 <div id="admin-app">
 
   <div class="page active" id="admin-page-config">
-    <div class="page-header">
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div class="page-title">🚌 Painel Admin</div>
+    <div style="background:linear-gradient(135deg,#1a3a6b 0%,#2563eb 100%);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+        <svg width="36" height="36" viewBox="0 0 64 64" fill="none"><rect x="8" y="20" width="48" height="28" rx="6" fill="white" opacity="0.9"/><rect x="11" y="24" width="42" height="14" rx="3" fill="#93c5fd"/><rect x="12" y="25" width="12" height="12" rx="2" fill="#60a5fa"/><rect x="26" y="25" width="12" height="12" rx="2" fill="#60a5fa"/><rect x="40" y="25" width="12" height="12" rx="2" fill="#60a5fa"/><circle cx="17" cy="52" r="5" fill="#1e3a5f"/><circle cx="17" cy="52" r="2.5" fill="white"/><circle cx="47" cy="52" r="5" fill="#1e3a5f"/><circle cx="47" cy="52" r="2.5" fill="white"/></svg>
+        <div><div style="color:white;font-family:Syne,sans-serif;font-size:17px;font-weight:700;">Painel Admin</div><div id="admin-name-badge" style="color:rgba(255,255,255,0.75);font-size:12px;margin-top:2px;"></div></div>
+      </div>
+      <div class="page-header" style="padding:8px 0 16px;">
+      <div style="display:flex;flex-direction:column;gap:4px">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <div class="live-badge"><div class="live-dot"></div>Tempo real</div>
           <div id="admin-name-badge" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:20px;padding:4px 12px;font-size:12px;color:#1d4ed8;font-weight:700;"></div>
@@ -480,6 +486,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
       </div>
       <p style="font-size:11px;color:var(--muted);margin-top:10px;">💡 Deixe a data vazia para desativar aquele dia. Para viagem de 1 dia, preencha apenas o Dia 1.</p>
       <button class="save-btn" id="cfg-save-btn" onclick="saveConfig()">💾 Salvar configuração</button>
+      <div id="seats-activate-container" style="margin-top:12px;"></div>
     </div>
   </div>
 
@@ -494,7 +501,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
       <button class="search-clear" id="admin-search-clear" onclick="clearAdminSearch()">✕</button>
     </div>
     <div class="chip-row" id="admin-pax-chips">
-      <div class="chip active" onclick="adminFilter('Todos',this)">Todos</div>
+      <div class="chip active" id="chip-Todos" onclick="adminFilter('Todos',this)">Todos</div>
       <div class="chip" onclick="adminFilter('Sexta',this)" id="chip-Sexta">Sexta-feira</div>
       <div class="chip" onclick="adminFilter('Sábado',this)" id="chip-Sábado">Sábado</div>
       <div class="chip" onclick="adminFilter('Domingo',this)" id="chip-Domingo">Domingo</div>
@@ -523,7 +530,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
       </div>
       <div class="si-item" onclick="exportCSV()">
         <div class="si-ico">📤</div>
-        <div class="si-body"><div class="si-title">Exportar CSV</div><div class="si-desc">Baixe todos os passageiros</div></div>
+        <div class="si-body"><div class="si-title">📤 Exportar Relatório</div><div class="si-desc">Lista completa com pagamentos e resumo por dia</div></div>
         <div class="si-arrow">›</div>
       </div>
       <div class="si-item danger" onclick="clearAllPax()">
@@ -931,8 +938,9 @@ async function setConfig(cfg){
 
 async function getPax(){
   try {
-    return await supaFetch('/rest/v1/pasajeros?select=*&order=ts.asc') || [];
-  } catch(e){ return []; }
+    const data = await supaFetch('/rest/v1/pasajeros?select=*&order=ts.asc') || [];
+    return data;
+  } catch(e){  return []; }
 }
 
 async function insertPax(p){
@@ -995,14 +1003,16 @@ async function initAdminApp(){
     document.getElementById('cfg-date-sat').value=cfg.date_sat||'';
     document.getElementById('cfg-date-sun').value=cfg.date_sun||'';
   }
+  renderSeatsActivateBtn();
   await renderAdminTripOverview();
   await renderAdminPax();
   // Auto-refresh every 10 seconds
   if(adminRefreshInterval) clearInterval(adminRefreshInterval);
   adminRefreshInterval = setInterval(async()=>{
     await renderAdminTripOverview();
-    await renderAdminPax();
-  }, 10000);
+    const paxPage = document.getElementById('admin-page-pax');
+    if(paxPage && paxPage.classList.contains('active')) await renderAdminPax();
+  }, 8000);
 }
 
 function adminGoPage(name){
@@ -1022,6 +1032,66 @@ function clearLogs(){
   renderLogs();
 }
 
+async function renderSeatsActivateBtn(){
+  const container = document.getElementById('seats-activate-container');
+  if(!container) return;
+  const cfg = await getConfig();
+  const hasSeat = (cfg&&(cfg.seats_viernes||cfg.seats_sabado||cfg.seats_domingo));
+  if(!hasSeat){ container.innerHTML=''; return; }
+  const active = localStorage.getItem('tr_seats_active')==='1';
+  if(active){
+    container.innerHTML=`
+      <div style="background:#d1fae5;border:1.5px solid #059669;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:22px;">✅</span>
+        <div style="flex:1;">
+          <div style="font-weight:700;color:#059669;font-size:14px;">Controle de assentos ATIVO</div>
+          <div style="font-size:12px;color:#047857;margin-top:2px;">Os assentos estão sendo descontados automaticamente.</div>
+        </div>
+        <button onclick="deactivateSeats()" style="background:#fee2e2;border:1.5px solid #dc2626;border-radius:8px;padding:6px 12px;color:#dc2626;font-weight:700;font-size:12px;cursor:pointer;">Desativar</button>
+      </div>`;
+  } else {
+    const pax = await getPax();
+    const fri = pax.filter(p=>p.dia==='Sexta'||(p.dias&&p.dias.includes('Sexta'))).length;
+    const sat = pax.filter(p=>p.dia==='Sábado'||(p.dias&&p.dias.includes('Sábado'))).length;
+    const sun = pax.filter(p=>p.dia==='Domingo'||(p.dias&&p.dias.includes('Domingo'))).length;
+    container.innerHTML=`
+      <div style="background:#fef9c3;border:1.5px solid #d97706;border-radius:12px;padding:14px 16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span style="font-size:22px;">⚠️</span>
+          <div>
+            <div style="font-weight:700;color:#92400e;font-size:14px;">Controle de assentos INATIVO</div>
+            <div style="font-size:12px;color:#a16207;margin-top:2px;">Assentos configurados mas não estão sendo descontados ainda.</div>
+          </div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:#64748b;">
+          <div style="font-weight:600;color:#1e293b;margin-bottom:6px;">Passageiros já registrados:</div>
+          ${cfg.seats_viernes>0?`<div>📅 Sexta: <b>${fri}</b> de <b>${cfg.seats_viernes}</b> assentos ocupados</div>`:''}
+          ${cfg.seats_sabado>0?`<div>📅 Sábado: <b>${sat}</b> de <b>${cfg.seats_sabado}</b> assentos ocupados</div>`:''}
+          ${cfg.seats_domingo>0?`<div>📅 Domingo: <b>${sun}</b> de <b>${cfg.seats_domingo}</b> assentos ocupados</div>`:''}
+        </div>
+        <button onclick="activateSeats()" style="width:100%;background:linear-gradient(180deg,#059669,#047857);border:none;border-radius:10px;padding:13px;color:white;font-family:Syne,sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 #065f46;">🔓 Ativar controle de assentos</button>
+      </div>`;
+  }
+}
+
+function activateSeats(){
+  localStorage.setItem('tr_seats_active','1');
+  renderSeatsActivateBtn();
+  showToast('✅ Controle de assentos ativado!');
+  logAction(sessionStorage.getItem('tr_admin_name')||'Admin','config','Ativou o controle de assentos');
+}
+
+function deactivateSeats(){
+  if(!confirm('Desativar o controle de assentos? Os passageiros poderão se registrar sem limite.')) return;
+  localStorage.setItem('tr_seats_active','0');
+  renderSeatsActivateBtn();
+  showToast('⚠️ Controle de assentos desativado');
+}
+
+function seatsActive(){
+  return localStorage.getItem('tr_seats_active')==='1';
+}
+
 async function saveConfig(){
   const btn=document.getElementById('cfg-save-btn');
   const adminName = sessionStorage.getItem('tr_admin_name')||'Admin';
@@ -1039,6 +1109,9 @@ async function saveConfig(){
       date_sat: document.getElementById('cfg-date-sat').value,
       date_sun: document.getElementById('cfg-date-sun').value
     });
+    // Reset seats_active when config is saved (admin must re-activate)
+    localStorage.setItem('tr_seats_active', '0');
+    await renderSeatsActivateBtn();
     await renderAdminTripOverview();
     showToast('✅ Configuração salva por ' + adminName);
     logAction(adminName,'config','Salvou configuração da viagem');
@@ -1056,11 +1129,11 @@ async function renderAdminTripOverview(){
     return;
   }
   const days=[
-    {name:'Sexta',key:'seats_viernes'},
-    {name:'Sábado',key:'seats_sabado'},
-    {name:'Domingo',key:'seats_domingo'}
+    {name:'Sexta',key:'seats_viernes',dateKey:'date_fri'},
+    {name:'Sábado',key:'seats_sabado',dateKey:'date_sat'},
+    {name:'Domingo',key:'seats_domingo',dateKey:'date_sun'}
   ];
-  el.innerHTML=days.map(({name,key})=>{
+  el.innerHTML=days.map(({name,key,dateKey})=>{
     const total=cfg[key]||0;
     if(total===0) return '';
     const used=pax.filter(p=>p.dia===name).reduce((sum,p)=>sum+(p.seats_needed||1),0);
@@ -1087,7 +1160,10 @@ async function renderAdminPax(){
   const pax = await getPax();
   const info=document.getElementById('admin-result-info');
   const list=document.getElementById('admin-pax-list');
-  let filtered=adminFilterDay==='Todos'?pax:pax.filter(p=>p.dia===adminFilterDay);
+    let filtered=adminFilterDay==='Todos'?pax:pax.filter(p=>{
+    if(p.dia===adminFilterDay) return true;
+    try{ const ds=JSON.parse(p.dias||'null'); return ds&&ds.includes(adminFilterDay); }catch(e){ return false; }
+  });
   if(adminQuery){
     const q=adminQuery.toLowerCase();
     const qd=q.replace(/[^0-9a-zA-Z]/g,'').toLowerCase();
@@ -1097,7 +1173,7 @@ async function renderAdminPax(){
     );
   }
   const total=filtered.length;
-  info.textContent=`${total} passageiro${total!==1?'s':''}${adminQuery?' encontrado'+( total!==1?'s':''):''}`;
+  info.textContent=total===0?'Nenhum passageiro encontrado':`${total} passageiro${total!==1?'s':''}${adminQuery?' encontrado'+(total!==1?'s':''):''}`;
   if(!total){
     list.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:36px;margin-bottom:12px">${adminQuery?'🔍':'👥'}</div><p style="font-size:14px">${adminQuery?'Sem resultados para <strong>'+esc(adminQuery)+'</strong>':'Ainda não há passageiros cadastrados.'}</p></div>`;
     return;
@@ -1159,7 +1235,7 @@ async function adminDeletePax(id){
 async function clearAllPax(){
   const pax=await getPax();
   if(!pax.length){showToast('Não há passageiros.');return;}
-  if(!confirm('¿Eliminar TODOS los passageiros?')) return;
+  if(!confirm('Deseja apagar TODOS os passageiros?')) return;
   await deleteAllPax();
   await renderAdminPax(); await renderAdminTripOverview();
   showToast('🗑 Todos removidos');
@@ -1264,45 +1340,66 @@ async function renderDaySelector(){
     const monthNames = ['','JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
     const monthStr = monthNum ? monthNames[parseInt(monthNum)] : '';
     if(!dateStr && noConfig) return '';
+    const dayColor = name==='Sexta'?'#2563eb':name==='Sábado'?'#7c3aed':'#db2777';
+    const isSelected = selectedDays.includes(name);
+    const btnBorder = isSelected ? `3px solid ${dayColor}` : '1.5px solid #e2e8f0';
+    const btnBg = isSelected ? (name==='Sexta'?'#eff6ff':name==='Sábado'?'#f5f3ff':'#fdf2f8') : '#ffffff';
+    const btnColor = isSelected ? dayColor : '#64748b';
+    const btnShadow = isSelected ? `0 4px 12px rgba(0,0,0,0.15)` : '0 2px 8px rgba(0,0,0,0.06)';
     const calHtml = dateStr
-      ? `<div style="width:44px;height:44px;border-radius:10px;border:2px solid currentColor;overflow:hidden;display:flex;flex-direction:column;align-items:center;background:white;box-shadow:0 2px 6px rgba(0,0,0,.1);">
-           <div style="background:currentColor;width:100%;text-align:center;padding:2px 0;font-size:9px;font-weight:800;color:white;letter-spacing:.5px;">${monthStr}</div>
+      ? `<div style="width:44px;height:44px;border-radius:10px;border:2px solid ${dayColor};overflow:hidden;display:flex;flex-direction:column;align-items:center;background:white;box-shadow:0 2px 6px rgba(0,0,0,.1);">
+           <div style="background:${dayColor};width:100%;text-align:center;padding:2px 0;font-size:9px;font-weight:800;color:white;letter-spacing:.5px;">${monthStr}</div>
            <div style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;color:#1e293b;line-height:1.2;padding-top:1px;">${dayNum}</div>
          </div>`
       : `<span style="font-size:28px;">📅</span>`;
-    return `<div class="ds-btn ${cls}" data-day="${name}" data-disabled="${disabled}" onclick="handleDayClick(event)">
+    if(!dateStr && noConfig) return '';
+    return `<div id="day-btn-${name}" 
+      style="padding:14px 6px;border-radius:14px;border:${btnBorder};background:${btnBg};cursor:${disabled?'not-allowed':'pointer'};text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:95px;justify-content:center;box-shadow:${btnShadow};opacity:${disabled?0.4:1};transition:all .15s;"
+      onclick="toggleDay('${name}',${disabled})"
+      data-day="${name}">
       ${calHtml}
-      <span style="font-size:13px;font-weight:700;">${name}</span>
-      <span class="ds-avail">${isMine?'✓ Meu dia':label}</span>
+      <span style="font-size:13px;font-weight:700;color:${btnColor};">${name}</span>
+      <span style="font-size:11px;color:${isSelected?dayColor:'#94a3b8'};">${isMine?'✓ Meu dia':label}</span>
     </div>`;
   }).join('');
 }
 
-function handleDayClick(e){
-  // Find the ds-btn element
-  let el = e.target;
-  while(el && !el.classList.contains('ds-btn')) el = el.parentElement;
-  if(!el) return;
-  const day = el.dataset.day;
-  const disabled = el.dataset.disabled === 'true';
-  selectDay(day, disabled);
-}
-
-function selectDay(day, disabled){
+async function toggleDay(day, disabled){
   if(disabled) return;
   const idx = selectedDays.indexOf(day);
-  if(idx === -1){
-    selectedDays.push(day);
-  } else {
-    selectedDays.splice(idx, 1);
-  }
-  document.querySelectorAll('.ds-btn').forEach(b=>{
-    b.classList.remove('sel-fri','sel-sat','sel-sun');
-    if(selectedDays.includes(b.dataset.day)){
-      b.classList.add('sel-'+dayClass[b.dataset.day]);
-    }
-  });
+  if(idx === -1){ selectedDays.push(day); } 
+  else { selectedDays.splice(idx, 1); }
+  // Fast visual update - don't wait for DB
+  updateDayButtonColors();
   updateRegisterBtn();
+  // Then full refresh in background
+  renderDaySelector();
+}
+
+function updateDayButtonColors(){
+  ['Sexta','Sábado','Domingo'].forEach(name=>{
+    const btn = document.getElementById('day-btn-'+name);
+    if(!btn) return;
+    const dayColors = {Sexta:'#2563eb',Sábado:'#7c3aed',Domingo:'#db2777'};
+    const dayBgs = {Sexta:'#eff6ff',Sábado:'#f5f3ff',Domingo:'#fdf2f8'};
+    const color = dayColors[name];
+    const selected = selectedDays.includes(name);
+    btn.style.border = selected ? `3px solid ${color}` : '1.5px solid #e2e8f0';
+    btn.style.background = selected ? dayBgs[name] : '#ffffff';
+    btn.style.boxShadow = selected ? `0 4px 12px rgba(0,0,0,0.15)` : '0 2px 8px rgba(0,0,0,0.06)';
+    // Update text colors
+    const spans = btn.querySelectorAll('span');
+    if(spans[0]) spans[0].style.color = selected ? color : '#64748b';
+    if(spans[1]) spans[1].style.color = selected ? color : '#94a3b8';
+    if(spans[1]) spans[1].textContent = selected ? '✓ Selecionado' : btn.getAttribute('data-label')||'Disponível';
+  });
+}
+
+function selectDay(day, disabled){ toggleDay(day, disabled); }
+function handleDayClick(e){ 
+  let el=e.target; 
+  while(el&&!el.dataset.day) el=el.parentElement;
+  if(el&&el.dataset.day) toggleDay(el.dataset.day, false);
 }
 
 async function updateRegisterBtn(){
@@ -1361,10 +1458,12 @@ async function registerPassenger(){
     // Check availability for each day
     for(const day of selectedDays){
       const total=(cfg&&cfg[keyMap[day]])||0;
-      const usedSeats=pax.filter(p=>p.dia===day||(p.dias&&p.dias.includes(day))).reduce((sum,p)=>sum+(p.seats_needed||1),0);
-      if(total>0&&usedSeats+seats_needed>total){
-        showToast('🔴 Sem assentos suficientes para '+day, true);
-        btn.disabled=false; await updateRegisterBtn(); return;
+      if(seatsActive()&&total>0){
+        const usedSeats=pax.filter(p=>p.dia===day||(p.dias&&p.dias.includes(day))).reduce((sum,p)=>sum+(p.seats_needed||1),0);
+        if(usedSeats+seats_needed>total){
+          showToast('🔴 Sem assentos suficientes para '+day, true);
+          btn.disabled=false; await updateRegisterBtn(); return;
+        }
       }
     }
 
@@ -1429,16 +1528,15 @@ async function renderUserTicket(){
     <div style="border-top:2px dashed var(--border);margin:4px 0 16px"></div>
     <div class="pax-grid" style="margin-bottom:12px">
       <div class="pax-field" style="grid-column:1/-1"><span class="pf-label">Dia(s) da viagem</span><span class="pf-val" style="font-weight:700">${(()=>{try{const d=JSON.parse(myReg.dias||'null');return d?d.map(x=>`<span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700;margin:2px;background:rgba(${x==='Sexta'?'79,142,247':x==='Sábado'?'124,90,247':'247,90,122'},.15);color:var(--${dayClass[x]||'accent'})">${x}</span>`).join(' '):'<span>'+myReg.dia+'</span>';}catch(e){return '<span>'+myReg.dia+'</span>';}})()}</span></div>
-      <div class="pax-field"><span class="pf-label">Assento</span><span class="pf-val" style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--${dc})">#${seat}</span></div>
       <div class="pax-field"><span class="pf-label">Destino</span><span class="pf-val">${esc(cfg&&cfg.destino||'—')}</span></div>
       <div class="pax-field"><span class="pf-label">Saída</span><span class="pf-val">${(cfg&&cfg.hora)||'—'}</span></div>
-      <div class="pax-field"><span class="pf-label">Assentos</span><span class="pf-val">${myReg.seats_needed||1}</span></div>
+      <div class="pax-field"><span class="pf-label">Assentos</span><span class="pf-val">${myReg.seats_needed||1} assento${(myReg.seats_needed||1)>1?'s':''}</span></div>
       <div class="pax-field"><span class="pf-label">Categoria</span><span class="pf-val">${esc(myReg.category||'Geral')}</span></div>
     </div>
     ${myReg.tel?`<div style="font-size:13px;color:var(--muted);margin-bottom:4px">📞 ${esc(myReg.tel)}</div>`:''}
     ${myReg.obs?`<div style="font-size:13px;color:var(--muted)">📝 ${esc(myReg.obs)}</div>`:''}
     <div style="border-top:2px dashed var(--border);margin:14px 0 10px"></div>
-    <div style="text-align:center;font-size:12px;color:var(--muted)">${used} de ${total} assentos ocupados en ${myReg.dia}</div>
+    <div style="text-align:center;font-size:12px;color:var(--muted)">${total>0?`${used} de ${total} assentos ocupados em ${myReg.dia}`:''}</div>
     <button class="submit-btn" style="margin-top:14px;background:var(--red)" onclick="cancelMyReservation()">❌ Cancelar minha reserva</button>
   </div>`;
 }
@@ -1486,22 +1584,165 @@ function saveNewPw(){
 // EXPORT CSV
 // ═══════════════════════════════════════
 async function exportCSV(){
-  const pax=await getPax();
+  const pax = await getPax();
   if(!pax.length){showToast('Não há passageiros.');return;}
-  const pays=loadAllPayments();
-  const cfg=loadPayConfig();
-  const stLabel=s=>s==='pago'?'Pago':s==='abono'?'Abono parcial':'Não pago';
-  const h=['Dia','Nome','RG','Telefone','Observações','Status Pagamento','Valor Abonado','Obs Pagamento','Registrado'];
-  const rows=pax.map(p=>{
-    const pay=pays[p.rg]||{};
-    return [p.dia,p.nome,p.rg,p.tel||'',p.obs||'',stLabel(pay.status||'nao_pago'),pay.abono||'',pay.obs||'',p.ts||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
-  });
-  const csv='\uFEFF'+[h.join(','),...rows].join('\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='passageiros.csv';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-  showToast('📤 CSV baixado');
+  const pays = loadAllPayments();
+  const cfg  = await getConfig();
+  const payCfg = loadPayConfig();
+  const today = new Date().toLocaleDateString('pt-BR');
+  const stLabel = s => s==='pago'?'Pago ✅':s==='abono'?'Abono parcial ⚡':'Não pago ❌';
+  const getDias = p => { try{ const d=JSON.parse(p.dias||'null'); return d?d.join(' + '):p.dia||'—'; }catch(e){ return p.dia||'—'; }};
+  const fmtDate = iso => { if(!iso)return '—'; const[y,m,d]=iso.split('-'); return d+'/'+m+'/'+y; };
+
+  // Build HTML with 3 sheets as tabs
+  const rows1 = pax.map((p,i)=>{
+    const pay = pays[p.rg||p.cpf]||{};
+    const st  = pay.status||'nao_pago';
+    const stC = st==='pago'?'#d1fae5':st==='abono'?'#fef9c3':'#fee2e2';
+    const stT = st==='pago'?'#059669':st==='abono'?'#d97706':'#dc2626';
+    const diaStr = getDias(p);
+    const diaC = diaStr.includes('Sexta')?'#dbeafe':diaStr.includes('Sábado')?'#ede9fe':'#fce7f3';
+    const abono = pay.abono ? `R$ ${pay.abono}` : '—';
+    const saldo = pay.abono && payCfg.valor ? `R$ ${(parseFloat(payCfg.valor||0)-parseFloat(pay.abono||0)).toFixed(2)}` : '—';
+    const bg = i%2===0?'#f8fafc':'#ffffff';
+    return `<tr style="background:${bg}">
+      <td style="text-align:center;color:#64748b;font-weight:600">${i+1}</td>
+      <td style="font-weight:600">${p.nome||'—'}</td>
+      <td style="font-family:monospace">${p.rg||p.cpf||'—'}</td>
+      <td>${p.tel||'—'}</td>
+      <td style="background:${diaC};text-align:center;font-weight:600">${diaStr}</td>
+      <td style="text-align:center">${p.seats_needed||1}</td>
+      <td>${p.category||'Geral'}</td>
+      <td style="background:${stC};color:${stT};text-align:center;font-weight:700">${stLabel(st)}</td>
+      <td style="text-align:center">${abono}</td>
+      <td style="text-align:center;color:#d97706;font-weight:600">${saldo}</td>
+      <td style="font-size:11px;color:#94a3b8">${p.ts?new Date(p.ts).toLocaleDateString('pt-BR'):'—'}</td>
+    </tr>`;
+  }).join('');
+
+  // Summary per day
+  const days = [
+    {name:'Sexta', key:'seats_viernes', date:cfg.date_fri, color:'#dbeafe', tc:'#1d4ed8'},
+    {name:'Sábado',key:'seats_sabado',  date:cfg.date_sat, color:'#ede9fe', tc:'#6d28d9'},
+    {name:'Domingo',key:'seats_domingo',date:cfg.date_sun, color:'#fce7f3', tc:'#9d174d'},
+  ];
+  const rows2 = days.map(d=>{
+    const tot = cfg[d.key]||0;
+    const res = pax.filter(p=>p.dia===d.name||(p.dias&&p.dias.includes(d.name))).length;
+    const liv = Math.max(0,tot-res);
+    const pct = tot>0?Math.round(res/tot*100):0;
+    return `<tr>
+      <td style="background:${d.color};color:${d.tc};font-weight:700;text-align:center">${d.name}</td>
+      <td style="text-align:center">${d.date?fmtDate(d.date):'—'}</td>
+      <td style="text-align:center;font-weight:700">${tot||'—'}</td>
+      <td style="text-align:center;font-weight:700;color:#2563eb">${res}</td>
+      <td style="text-align:center;font-weight:700;color:#059669">${tot?liv:'—'}</td>
+      <td style="text-align:center">${tot?pct+'%':'—'}</td>
+    </tr>`;
+  }).join('');
+
+  // Payments
+  const rows3 = pax.map((p,i)=>{
+    const pay = pays[p.rg||p.cpf]||{};
+    const st  = pay.status||'nao_pago';
+    const stC = st==='pago'?'#d1fae5':st==='abono'?'#fef9c3':'#fee2e2';
+    const stT = st==='pago'?'#059669':st==='abono'?'#d97706':'#dc2626';
+    const val = payCfg.valor||'—';
+    const abo = pay.abono||'0';
+    const sal = payCfg.valor?(parseFloat(payCfg.valor)-parseFloat(abo||0)).toFixed(2):'—';
+    const bg  = i%2===0?'#f8fafc':'#ffffff';
+    return `<tr style="background:${bg}">
+      <td style="font-weight:600">${p.nome||'—'}</td>
+      <td style="text-align:center">${getDias(p)}</td>
+      <td style="text-align:center">${p.seats_needed||1}</td>
+      <td style="text-align:center">${val!=='—'?'R$ '+val:val}</td>
+      <td style="text-align:center">${abo!=='0'?'R$ '+abo:'—'}</td>
+      <td style="text-align:center;color:#d97706;font-weight:700">${sal!=='—'&&parseFloat(sal)>0?'R$ '+sal:'—'}</td>
+      <td style="background:${stC};color:${stT};text-align:center;font-weight:700">${stLabel(st)}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>Transporte Jardim do Vale — Relatório</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,sans-serif;font-size:12px;color:#1e293b;background:#f0f4f8;}
+  .sheet{display:none;padding:20px;}
+  .sheet.active{display:block;}
+  .tabs{display:flex;gap:4px;padding:12px 20px 0;background:#1a3a6b;}
+  .tab{padding:10px 20px;border-radius:8px 8px 0 0;cursor:pointer;font-weight:600;font-size:13px;color:rgba(255,255,255,.6);background:rgba(255,255,255,.1);}
+  .tab.active{background:white;color:#1a3a6b;}
+  .header{background:#1a3a6b;color:white;padding:20px;margin-bottom:16px;border-radius:0 0 12px 12px;}
+  .header h1{font-size:20px;margin-bottom:4px;}
+  .header p{font-size:12px;opacity:.75;}
+  table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+  th{background:#2563eb;color:white;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.3px;}
+  td{padding:9px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;}
+  tr:last-child td{border-bottom:none;}
+  .footer{text-align:center;padding:20px;color:#94a3b8;font-size:11px;}
+  @media print{
+    .tabs,.tab,.no-print{display:none!important;}
+    .sheet{display:block!important;padding:10px;}
+    body{background:white;}
+  }
+</style>
+</head>
+<body>
+<div class="tabs">
+  <div class="tab active" onclick="showSheet(0)">📋 Passageiros</div>
+  <div class="tab" onclick="showSheet(1)">📊 Resumo por Dia</div>
+  <div class="tab" onclick="showSheet(2)">💰 Pagamentos</div>
+</div>
+
+<!-- SHEET 1 -->
+<div class="sheet active">
+  <div class="header">
+    <h1>🚌 Transporte Jardim do Vale — Lista de Passageiros</h1>
+    <p>${cfg.destino||'Evento'} &nbsp;|&nbsp; Gerado em ${today} &nbsp;|&nbsp; ${pax.length} passageiro${pax.length!==1?'s':''}</p>
+  </div>
+  <table>
+    <tr><th>#</th><th>Nome Completo</th><th>RG / RNM</th><th>Telefone</th><th>Dia(s)</th><th>Assentos</th><th>Categoria</th><th>Status</th><th>Abono</th><th>Saldo Restante</th><th>Cadastro</th></tr>
+    ${rows1}
+  </table>
+</div>
+
+<!-- SHEET 2 -->
+<div class="sheet">
+  <div class="header">
+    <h1>📊 Resumo por Dia de Viagem</h1>
+    <p>${cfg.destino||'Evento'} &nbsp;|&nbsp; Gerado em ${today}</p>
+  </div>
+  <table>
+    <tr><th>Dia</th><th>Data</th><th>Total Assentos</th><th>Reservados</th><th>Livres</th><th>% Ocupação</th></tr>
+    ${rows2}
+  </table>
+</div>
+
+<!-- SHEET 3 -->
+<div class="sheet">
+  <div class="header">
+    <h1>💰 Controle de Pagamentos</h1>
+    <p>${cfg.destino||'Evento'} &nbsp;|&nbsp; Gerado em ${today}</p>
+  </div>
+  <table>
+    <tr><th>Nome</th><th>Dia(s)</th><th>Assentos</th><th>Valor Total</th><th>Abonado</th><th>Saldo Restante</th><th>Status</th></tr>
+    ${rows3}
+  </table>
+</div>
+
+<div class="footer no-print">Para imprimir: use Ctrl+P ou o botão imprimir do navegador</div>
+
+</body></html>`;
+  const finalHtml = html.replace('</body>', '<'+'script>function showSheet(n){document.querySelectorAll(".sheet").forEach((s,i)=>s.classList.toggle("active",i===n));document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",i===n));}</'+'script></body>');
+
+  const blob = new Blob([finalHtml||html], {type:'text/html;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'transporte-relatorio.html';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('📤 Relatório exportado — abra o arquivo no navegador para imprimir');
 }
 
 // ═══════════════════════════════════════
@@ -1584,8 +1825,8 @@ async function renderPayPage(){
         <div class="pax-field"><span class="pf-label">Prazo</span><span class="pf-val">${prazoFmt}</span></div>
       </div>
       <div class="pay-actions">
-        <button class="pay-btn pay-btn-green" onclick="openPayModal('${p.rg||p.cpf}','${esc(p.nome||'')}')">💳 Registrar pagamento</button>
-        ${p.tel ? `<button class="pay-btn pay-btn-wa" onclick="sendWhatsApp('${p.tel}','${esc(p.nome||'')}','${st}')">📲 WhatsApp</button>` : ''}
+        <button class="pay-btn pay-btn-green" onclick="openPayModal('${(p.rg||p.cpf||'').replace(/'/g,'')}','${esc(p.nome||'').replace(/"/g,'')}')"">💳 Registrar pagamento</button>
+        ${p.tel ? `<button class="pay-btn pay-btn-wa" onclick="sendWhatsApp('${(p.tel||'').replace(/'/g,'')}','${(p.nome||'').replace(/'/g,'')}','${st}')"">📲 WhatsApp</button>` : ''}
       </div>
     </div>`;
   }).join('');
