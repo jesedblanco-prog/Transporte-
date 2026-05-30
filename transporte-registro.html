@@ -1392,11 +1392,11 @@ async function renderDaySelector(){
     const usedReal=pax.filter(p=>p.dia===name).reduce((sum,p)=>sum+(p.seats_needed||1),0);
     const free=Math.max(0,total-usedReal);
     const noConfig=total===0;
-    const full=!noConfig&&free===0;
+    const full=seatsActive()&&!noConfig&&free===0;
     const isMine=myReg&&(()=>{try{const ds=JSON.parse(myReg.dias||'null');return ds?ds.includes(name):myReg.dia===name;}catch(e){return myReg.dia===name;}})();
-    const disabled=(!noConfig&&full);
+    const disabled=full;
     const cls=isMine?`sel-${dayClass[name]}`:disabled?'disabled':'';
-    const label=noConfig?'Disponível':full?'🔴 Lotado':`${free} assento${free!==1?'s':''}`;
+    const label=noConfig?'Disponível':full?'🔴 Esgotado':`${free} assento${free!==1?'s':''}`;
     const dateStr = dates[name] || '';
     const dayNum = dateStr ? dateStr.split('/')[0] : '';
     const monthNum = dateStr ? dateStr.split('/')[1] : '';
@@ -1417,7 +1417,7 @@ async function renderDaySelector(){
     let availLabel, availColor, availBg;
     if(isMine){
       availLabel = '✓ Meu dia'; availColor = dayColor; availBg = 'transparent';
-    } else if(noSeat){
+    } else if(full){
       availLabel = '🔴 Esgotado'; availColor = '#dc2626'; availBg = '#fee2e2';
     } else if(seatsOn && freeSeats <= 5){
       availLabel = `⚠️ ${freeSeats} restante${freeSeats!==1?'s':''}`; availColor = '#d97706'; availBg = '#fef9c3';
