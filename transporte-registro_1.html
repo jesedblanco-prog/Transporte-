@@ -1468,7 +1468,7 @@ async function renderUserTicket(){
     ${myReg.tel?`<div style="font-size:13px;color:var(--muted);margin-bottom:4px">📞 ${esc(myReg.tel)}</div>`:''}
     ${myReg.obs?`<div style="font-size:13px;color:var(--muted)">📝 ${esc(myReg.obs)}</div>`:''}
     <div style="border-top:2px dashed var(--border);margin:14px 0 10px"></div>
-    <div style="text-align:center;font-size:12px;color:var(--muted)">${used} de ${total} assentos ocupados en ${myReg.dia}</div>
+    <div style="text-align:center;font-size:12px;color:var(--muted)">${total>0?`${used} de ${total} assentos ocupados em ${myReg.dia}`:''}</div>
     <button class="submit-btn" style="margin-top:14px;background:var(--red)" onclick="cancelMyReservation()">❌ Cancelar minha reserva</button>
   </div>`;
 }
