@@ -1276,73 +1276,44 @@ async function renderDaySelector(){
     const monthStr = monthNum ? monthNames[parseInt(monthNum)] : '';
     if(!dateStr && noConfig) return '';
     const dayColor = name==='Sexta'?'#2563eb':name==='Sábado'?'#7c3aed':'#db2777';
+    const isSelected = selectedDays.includes(name);
+    const btnBorder = isSelected ? `3px solid ${dayColor}` : '1.5px solid #e2e8f0';
+    const btnBg = isSelected ? (name==='Sexta'?'#eff6ff':name==='Sábado'?'#f5f3ff':'#fdf2f8') : '#ffffff';
+    const btnColor = isSelected ? dayColor : '#64748b';
+    const btnShadow = isSelected ? `0 4px 12px rgba(0,0,0,0.15)` : '0 2px 8px rgba(0,0,0,0.06)';
     const calHtml = dateStr
       ? `<div style="width:44px;height:44px;border-radius:10px;border:2px solid ${dayColor};overflow:hidden;display:flex;flex-direction:column;align-items:center;background:white;box-shadow:0 2px 6px rgba(0,0,0,.1);">
            <div style="background:${dayColor};width:100%;text-align:center;padding:2px 0;font-size:9px;font-weight:800;color:white;letter-spacing:.5px;">${monthStr}</div>
            <div style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;color:#1e293b;line-height:1.2;padding-top:1px;">${dayNum}</div>
          </div>`
       : `<span style="font-size:28px;">📅</span>`;
-    return `<div class="ds-btn ${cls}" data-day="${name}" data-disabled="${disabled}" 
-      onclick="handleDayClick(event)" 
-      ontouchend="handleDayClick(event)"
-      role="button" tabindex="0">
+    if(!dateStr && noConfig) return '';
+    return `<div id="day-btn-${name}" 
+      style="padding:14px 6px;border-radius:14px;border:${btnBorder};background:${btnBg};cursor:${disabled?'not-allowed':'pointer'};text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:95px;justify-content:center;box-shadow:${btnShadow};opacity:${disabled?0.4:1};transition:all .15s;"
+      onclick="toggleDay('${name}',${disabled})"
+      data-day="${name}">
       ${calHtml}
-      <span style="font-size:13px;font-weight:700;pointer-events:none;">${name}</span>
-      <span class="ds-avail" style="pointer-events:none;">${isMine?'✓ Meu dia':label}</span>
+      <span style="font-size:13px;font-weight:700;color:${btnColor};">${name}</span>
+      <span style="font-size:11px;color:${isSelected?dayColor:'#94a3b8'};">${isMine?'✓ Meu dia':label}</span>
     </div>`;
   }).join('');
 }
 
-function handleDayClick(e){
-  e.preventDefault();
-  e.stopPropagation();
-  let el = e.target;
-  let safety = 0;
-  while(el && !el.classList.contains('ds-btn') && safety < 10){
-    el = el.parentElement;
-    safety++;
-  }
-  if(!el || !el.classList.contains('ds-btn')) return;
-  const day = el.dataset.day;
-  const disabled = el.dataset.disabled === 'true';
-  if(disabled) return;
-  selectDay(day, false);
-}
-
-function selectDay(day, disabled){
+function toggleDay(day, disabled){
   if(disabled) return;
   const idx = selectedDays.indexOf(day);
-  if(idx === -1){
-    selectedDays.push(day);
-  } else {
-    selectedDays.splice(idx, 1);
-  }
-  document.querySelectorAll('.ds-btn').forEach(b=>{
-    const d = b.dataset.day;
-    b.classList.remove('sel-fri','sel-sat','sel-sun');
-    b.style.borderColor = '';
-    b.style.background = '';
-    b.style.color = '';
-    if(selectedDays.includes(d)){
-      const dc = dayClass[d];
-      b.classList.add('sel-'+dc);
-      // Force styles directly to avoid any CSS specificity issues
-      if(d==='Sexta'){
-        b.style.borderColor='#2563eb';
-        b.style.background='#eff6ff';
-        b.style.color='#1d4ed8';
-      } else if(d==='Sábado'){
-        b.style.borderColor='#7c3aed';
-        b.style.background='#f5f3ff';
-        b.style.color='#6d28d9';
-      } else if(d==='Domingo'){
-        b.style.borderColor='#db2777';
-        b.style.background='#fdf2f8';
-        b.style.color='#be185d';
-      }
-    }
-  });
+  if(idx === -1){ selectedDays.push(day); } 
+  else { selectedDays.splice(idx, 1); }
+  // Re-render day selector to reflect new state
+  renderDaySelector();
   updateRegisterBtn();
+}
+
+function selectDay(day, disabled){ toggleDay(day, disabled); }
+function handleDayClick(e){ 
+  let el=e.target; 
+  while(el&&!el.dataset.day) el=el.parentElement;
+  if(el&&el.dataset.day) toggleDay(el.dataset.day, false);
 }
 
 async function updateRegisterBtn(){
@@ -1469,10 +1440,8 @@ async function renderUserTicket(){
     <div style="border-top:2px dashed var(--border);margin:4px 0 16px"></div>
     <div class="pax-grid" style="margin-bottom:12px">
       <div class="pax-field" style="grid-column:1/-1"><span class="pf-label">Dia(s) da viagem</span><span class="pf-val" style="font-weight:700">${(()=>{try{const d=JSON.parse(myReg.dias||'null');return d?d.map(x=>`<span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700;margin:2px;background:rgba(${x==='Sexta'?'79,142,247':x==='Sábado'?'124,90,247':'247,90,122'},.15);color:var(--${dayClass[x]||'accent'})">${x}</span>`).join(' '):'<span>'+myReg.dia+'</span>';}catch(e){return '<span>'+myReg.dia+'</span>';}})()}</span></div>
-      <div class="pax-field"><span class="pf-label">Assento</span><span class="pf-val" style="font-weight:700;color:var(--${dc})">#${seat}</span></div>
       <div class="pax-field"><span class="pf-label">Destino</span><span class="pf-val">${esc(cfg&&cfg.destino||'—')}</span></div>
       <div class="pax-field"><span class="pf-label">Saída</span><span class="pf-val">${(cfg&&cfg.hora)||'—'}</span></div>
-      <div class="pax-field"><span class="pf-label">Assentos</span><span class="pf-val">${myReg.seats_needed||1}</span></div>
       <div class="pax-field"><span class="pf-label">Categoria</span><span class="pf-val">${esc(myReg.category||'Geral')}</span></div>
     </div>
     ${myReg.tel?`<div style="font-size:13px;color:var(--muted);margin-bottom:4px">📞 ${esc(myReg.tel)}</div>`:''}
