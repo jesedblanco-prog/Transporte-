@@ -1299,14 +1299,35 @@ async function renderDaySelector(){
   }).join('');
 }
 
-function toggleDay(day, disabled){
+async function toggleDay(day, disabled){
   if(disabled) return;
   const idx = selectedDays.indexOf(day);
   if(idx === -1){ selectedDays.push(day); } 
   else { selectedDays.splice(idx, 1); }
-  // Re-render day selector to reflect new state
-  renderDaySelector();
+  // Fast visual update - don't wait for DB
+  updateDayButtonColors();
   updateRegisterBtn();
+  // Then full refresh in background
+  renderDaySelector();
+}
+
+function updateDayButtonColors(){
+  ['Sexta','Sábado','Domingo'].forEach(name=>{
+    const btn = document.getElementById('day-btn-'+name);
+    if(!btn) return;
+    const dayColors = {Sexta:'#2563eb',Sábado:'#7c3aed',Domingo:'#db2777'};
+    const dayBgs = {Sexta:'#eff6ff',Sábado:'#f5f3ff',Domingo:'#fdf2f8'};
+    const color = dayColors[name];
+    const selected = selectedDays.includes(name);
+    btn.style.border = selected ? `3px solid ${color}` : '1.5px solid #e2e8f0';
+    btn.style.background = selected ? dayBgs[name] : '#ffffff';
+    btn.style.boxShadow = selected ? `0 4px 12px rgba(0,0,0,0.15)` : '0 2px 8px rgba(0,0,0,0.06)';
+    // Update text colors
+    const spans = btn.querySelectorAll('span');
+    if(spans[0]) spans[0].style.color = selected ? color : '#64748b';
+    if(spans[1]) spans[1].style.color = selected ? color : '#94a3b8';
+    if(spans[1]) spans[1].textContent = selected ? '✓ Selecionado' : btn.getAttribute('data-label')||'Disponível';
+  });
 }
 
 function selectDay(day, disabled){ toggleDay(day, disabled); }
