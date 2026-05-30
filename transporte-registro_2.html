@@ -975,15 +975,6 @@ async function getPax(){
 }
 
 async function insertPax(p){
-  if(!navigator.onLine){
-    _oqAdd(p);
-    const local=JSON.parse(localStorage.getItem('tr_local_pax')||'[]');
-    local.push({...p,id:Date.now(),ts:new Date().toISOString()});
-    localStorage.setItem('tr_local_pax',JSON.stringify(local));
-    showToast('📡 Sem internet — reserva salva e enviada quando conectar');
-    return [{...p,id:Date.now()}];
-  }
-  localStorage.removeItem('tr_local_pax');
   return await supaFetch('/rest/v1/pasajeros', {
     method:'POST',
     prefer:'return=representation',
@@ -1775,69 +1766,6 @@ async function exportCSV(){
   }
 </style>
 
-<scr"+"ipt>
-// ── OFFLINE MODE + SERVICE WORKER ──
-const OFFLINE_QUEUE_KEY = 'tr_offline_queue';
-
-function getOfflineQueue(){
-  try{ return JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY)||'[]'); }
-  catch(e){ return []; }
-}
-
-function addToOfflineQueue(action){
-  const q = getOfflineQueue();
-  q.push({...action, ts: Date.now()});
-  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
-}
-
-function clearOfflineQueue(){
-  localStorage.removeItem(OFFLINE_QUEUE_KEY);
-}
-
-async function syncOfflineQueue(){
-  const q = getOfflineQueue();
-  if(!q.length) return;
-  let synced = 0;
-  for(const action of q){
-    try{
-      if(action.type === 'insert_pax'){
-        await supaFetch('/rest/v1/pasajeros', {
-          method:'POST', prefer:'return=minimal',
-          body: JSON.stringify(action.data)
-        });
-        synced++;
-      }
-    }catch(e){ console.warn('Sync failed for action:', action); }
-  }
-  if(synced > 0){
-    clearOfflineQueue();
-    showToast(`✅ ${synced} registro${synced>1?'s':''} sincronizado${synced>1?'s':''} com sucesso!`);
-    renderDaySelector();
-    renderUserTicket();
-  }
-}
-
-// Offline banner
-function updateOnlineStatus(){
-  let banner = document.getElementById('_offline_banner') || null;
-  if(!navigator.onLine){
-    if(!banner){
-      banner = document.createElement('div');
-      banner.id = 'offline-banner';
-      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#d97706;color:white;text-align:center;padding:10px;font-size:13px;font-weight:700;z-index:999;';
-      banner.innerHTML = '📡 Sem conexão — seus dados serão salvos e enviados quando voltar a internet';
-      document.body.prepend(banner);
-    }
-  } else {
-    if(banner) banner.remove();
-    syncOfflineQueue();
-  }
-}
-
-window.addEventListener('online',  updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-document.addEventListener('DOMContentLoaded', updateOnlineStatus);
-
 // Service Worker via inline script tag
 if('serviceWorker' in navigator){
   const swCode = [
@@ -2158,10 +2086,11 @@ function renderLogs(){
 // ═══════════════════════════════════════
 // INIT — test connection then show login
 // ═══════════════════════════════════════
+
+
 function closeImportantNotice(){var m=document.getElementById("notice-modal");if(m)m.style.display="none";}
 function showImportantNotice(){var m=document.getElementById("notice-modal");if(m)m.style.display="block";}
 async function init(){
-  _updateBanner();
   try {
     await getConfig(); // test connection
     document.getElementById('splash').classList.add('hidden');
