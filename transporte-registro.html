@@ -1167,7 +1167,7 @@ async function renderAdminTripOverview(){
   el.innerHTML=days.map(({name,key,dateKey})=>{
     const total=cfg[key]||0;
     if(total===0) return '';
-    const used=pax.filter(p=>p.dia===name).reduce((sum,p)=>sum+(p.seats_needed||1),0);
+    const used=pax.filter(p=>{try{const ds=JSON.parse(p.dias||'null');if(ds&&ds.length)return ds.includes(name);}catch(e){}return p.dia===name;}).reduce((sum,p)=>sum+(p.seats_needed||1),0);
     const free=Math.max(0,total-used);
     const pct=total>0?Math.min(100,Math.round(used/total*100)):0;
     const full=free===0;
@@ -1390,7 +1390,7 @@ async function renderDaySelector(){
   }
   el.innerHTML=days.map(({name,key,dateKey})=>{
     const total=(cfg&&cfg[key])||0;
-    const usedReal=pax.filter(p=>p.dia===name).reduce((sum,p)=>sum+(p.seats_needed||1),0);
+    const usedReal=pax.filter(p=>{try{const ds=JSON.parse(p.dias||'null');if(ds&&ds.length)return ds.includes(name);}catch(e){}return p.dia===name;}).reduce((sum,p)=>sum+(p.seats_needed||1),0);
     const free=Math.max(0,total-usedReal);
     const noConfig=total===0;
     const full=seatsActive()&&!noConfig&&free===0;
@@ -1766,19 +1766,6 @@ async function exportCSV(){
     body{background:white;}
   }
 </style>
-
-// Service Worker via inline script tag
-if('serviceWorker' in navigator){
-  const swCode = [
-    "const CACHE='transporte-v1';",
-    "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll([self.location.pathname])));self.skipWaiting();});",
-    "self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!==CACHE).map(n=>caches.delete(n)))));self.clients.claim();});",
-    "self.addEventListener('fetch',e=>{if(e.request.url.includes('supabase.co'))return;e.respondWith(fetch(e.request).then(r=>{caches.open(CACHE).then(c=>c.put(e.request,r.clone()));return r;}).catch(()=>caches.match(e.request)));});"
-  ].join('\n');
-  const blob = new Blob([swCode], {type:'application/javascript'});
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(()=>{});
-}
 <\/script>
 </head>
 <body>
@@ -1919,7 +1906,7 @@ async function renderPayPage(){
       </div>
       <div class="pay-actions">
         <button class="pay-btn pay-btn-green" onclick="openPayModal('${(p.rg||p.cpf||'').replace(/'/g,'')}','${esc(p.nome||'').replace(/"/g,'')}')"">💳 Registrar pagamento</button>
-        ${p.tel ? `<button class="pay-btn pay-btn-wa" onclick="sendWhatsApp('${(p.tel||'').replace(/'/g,'')}','${(p.nome||'').replace(/'/g,'')}','${st}')"">📲 WhatsApp</button>` : ''}
+        ${p.tel ? `<button class="pay-btn pay-btn-wa" onclick="sendWhatsApp('${(p.tel||'').replace(/'/g,'')}','${(p.nome||'').replace(/'/g,'')}','${st}')">📲 WhatsApp</button>` : ''}
       </div>
     </div>`;
   }).join('');
