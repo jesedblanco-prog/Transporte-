@@ -380,6 +380,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
       <select id="doc-type-select" onchange="updateDocInput()" style="font-size:17px;padding:16px;border-radius:12px;border:2px solid var(--border);background:#f5f7ff;color:#1e293b;width:100%;">
         <option value="RG">🪪 RG — Registro Geral (brasileiro)</option>
         <option value="RNM">🌎 RNM — Registro Nacional Migratório (estrangeiro)</option>
+        <option value="CPF">🔢 CPF — Cadastro de Pessoa Física</option>
       </select>
     </div>
 
@@ -557,8 +558,39 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
     <p style="text-align:center;color:var(--muted);font-size:11px;margin-top:28px;line-height:1.8">Transporte Jardim do Vale v4.0<br>🔴 Dados em tempo real via Supabase</p>
   </div>
 
-  <!-- PAGE: PAGAMENTOS -->
-  <div class="page" id="admin-page-pay">
+  <!-- PAGE: LEMBRETES -->
+  <div class="page" id="admin-page-lembrete">
+    <div class="page-header"><div class="page-title">📲 Lembretes</div></div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Config horario/ponto -->
+      <div class="section-card" style="padding:18px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px;color:var(--text);">⚙️ Configuração do lembrete</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Horário de saída</label>
+            <input type="text" id="lem-horario" placeholder="Ex: 06:00" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Ponto de encontro</label>
+            <input type="text" id="lem-ponto" placeholder="Ex: Praça Central" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;">
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Mensagem (editável)</label>
+          <textarea id="lem-msg" rows="5" style="width:100%;padding:11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;line-height:1.6;resize:vertical;background:#f8fafc;"></textarea>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px;">Variáveis: <strong>{nome}</strong> <strong>{dias}</strong> <strong>{horario}</strong> <strong>{ponto}</strong></p>
+        </div>
+        <button onclick="saveLembreteConfig()" style="width:100%;padding:11px;background:linear-gradient(180deg,#2d74f5,#1a5fd4);color:white;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;">💾 Salvar configuração</button>
+      </div>
+
+      <!-- Grupos -->
+      <div id="lem-grupos"></div>
+    </div>
+  </div>
+
+  <!-- PAGE: LOG -->
+  <div class="page" id="admin-page-log">
     <div class="page-header">
       <div class="page-title">💰 Pagamentos</div>
       <div class="live-badge"><div class="live-dot"></div>Tempo real</div>
@@ -606,7 +638,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
     <button class="nav-btn active" id="anav-config" onclick="adminGoPage('config')"><span class="nav-icon">⚙️</span>Viagem</button>
     <button class="nav-btn" id="anav-pax" onclick="adminGoPage('pax')"><span class="nav-icon">👥</span>Passageiros</button>
     <button class="nav-btn" id="anav-pay" onclick="adminGoPage('pay')"><span class="nav-icon">💰</span>Pagamentos</button>
-    <button class="nav-btn" id="anav-log" onclick="adminGoPage('log')"><span class="nav-icon">📋</span>Registro</button>
+    <button class="nav-btn" id="anav-lembrete" onclick="adminGoPage('lembrete')"><span class="nav-icon">📲</span>Lembretes</button>
     <button class="nav-btn" id="anav-settings" onclick="adminGoPage('settings')"><span class="nav-icon">🛠</span>Config</button>
   </nav>
 </div>
@@ -640,10 +672,6 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
             <label>Telefone / WhatsApp</label>
             <input type="tel" id="u-tel" placeholder="(11) 99999-9999" maxlength="15">
           </div>
-        </div>
-        <div class="form-group">
-          <label>CPF (opcional)</label>
-          <input type="text" id="u-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off">
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -892,24 +920,47 @@ function updateDocInput(){
     input.placeholder = 'Ex: W123456-7';
     input.maxLength   = 20;
     input.style.textTransform = 'uppercase';
+    input.inputMode   = 'text';
+  } else if(type === 'CPF'){
+    label.textContent = 'Número do CPF';
+    hint.textContent  = 'Ex: 000.000.000-00 (11 dígitos)';
+    input.placeholder = '000.000.000-00';
+    input.maxLength   = 14;
+    input.style.textTransform = 'none';
+    input.inputMode   = 'numeric';
   } else {
     label.textContent = 'Número do RG';
     hint.textContent  = 'Ex: 1.234.567 / 12.345.678 / 12.345.678-X (7, 8 ou 9 dígitos)';
     input.placeholder = '00.000.000-X';
     input.maxLength   = 12;
     input.style.textTransform = 'uppercase';
+    input.inputMode   = 'text';
   }
   input.value = '';
 }
 
 function doUserLogin(){
   const docType = document.getElementById('doc-type-select').value;
-  const rawVal  = document.getElementById('user-rg-input').value.trim().toUpperCase();
-  const rg = docType === 'RG' ? formatRG(rawVal) : rawVal;
-  if(rg.replace(/[^0-9A-Za-z]/g,'').length<6){
-    document.getElementById('user-login-error').textContent=
-      docType==='RNM'?'RNM inválido — verifique o número.':'RG inválido — mínimo 7 caracteres.';
-    return;
+  const rawVal  = document.getElementById('user-rg-input').value.trim();
+  let rg;
+  if(docType === 'RG'){
+    rg = formatRG(rawVal.toUpperCase());
+    if(rg.replace(/[^0-9A-Za-z]/g,'').length < 6){
+      document.getElementById('user-login-error').textContent = 'RG inválido — mínimo 7 caracteres.';
+      return;
+    }
+  } else if(docType === 'CPF'){
+    rg = formatCPF(rawVal);
+    if(rg.replace(/[^0-9]/g,'').length < 11){
+      document.getElementById('user-login-error').textContent = 'CPF inválido — informe os 11 dígitos.';
+      return;
+    }
+  } else {
+    rg = rawVal.toUpperCase();
+    if(rg.replace(/[^0-9A-Za-z]/g,'').length < 6){
+      document.getElementById('user-login-error').textContent = 'RNM inválido — verifique o número.';
+      return;
+    }
   }
   sessionStorage.setItem('tr_role','user');
   sessionStorage.setItem('tr_user_rg', rg);
@@ -925,6 +976,7 @@ function doUserLogin(){
 document.getElementById('user-rg-input').addEventListener('input',function(){
   const type = document.getElementById('doc-type-select').value;
   if(type === 'RG') this.value = formatRG(this.value);
+  else if(type === 'CPF') this.value = formatCPF(this.value);
   else this.value = this.value.toUpperCase();
 });
 document.getElementById('user-rg-input').addEventListener('keydown',e=>{ if(e.key==='Enter') doUserLogin(); });
@@ -1072,6 +1124,7 @@ function adminGoPage(name){
   if(name==='config') renderAdminTripOverview();
   if(name==='pay') renderPayPage();
   if(name==='log') renderLogs();
+  if(name==='lembrete') renderLembretes();
 }
 
 function clearLogs(){
@@ -1257,8 +1310,8 @@ async function renderAdminPax(){
       </div>
       </div>
       <div class="pax-grid">
-        <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${hlAdmin(p.rg||'')}</span></div>
-        <div class="pax-field"><span class="pf-label">CPF</span><span class="pf-val">${esc(p.cpf||'—')}</span></div>
+        <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${hlAdmin(p.doc_type==='CPF'?p.cpf||'':p.rg||'')}</span></div>
+        ${p.doc_type!=='CPF'&&p.cpf?`<div class="pax-field"><span class="pf-label">CPF</span><span class="pf-val">${esc(p.cpf)}</span></div>`:''}
         <div class="pax-field"><span class="pf-label">Telefone</span><span class="pf-val">${esc(p.tel||'—')}</span></div>
         <div class="pax-field"><span class="pf-label">Valor</span><span class="pf-val" style="color:#059669;font-weight:700">R$ ${(()=>{try{const ds=JSON.parse(p.dias||'null');return ds&&ds.length?ds.length*55:55;}catch(e){return 55;}})()}</span></div>
         <div class="pax-field"><span class="pf-label">Assentos</span><span class="pf-val">${p.seats_needed||1}</span></div>
@@ -1580,8 +1633,10 @@ async function registerPassenger(){
     const docType=sessionStorage.getItem('tr_user_doc_type')||'RG';
     const diaMain=selectedDays[0];
     const diasJson=JSON.stringify(selectedDays);
-    const cpfVal=(document.getElementById('u-cpf')||{}).value||'';
-    await insertPax({cpf:cpfVal,rg,nome,tel,obs,dia:diaMain,dias:diasJson,doc_type:docType,seats_needed,category});
+    const isCPF = docType === 'CPF';
+    const rgVal  = isCPF ? '' : rg;
+    const cpfVal = isCPF ? rg : '';
+    await insertPax({cpf:cpfVal,rg:rgVal,nome,tel,obs,dia:diaMain,dias:diasJson,doc_type:docType,seats_needed,category});
     await renderDaySelector();
     await renderUserTicket();
     await updateRegisterBtn();
@@ -1849,17 +1904,17 @@ async function exportCSV(){
     const st  = pay.status||'nao_pago';
     const stC = st==='pago'?'#d1fae5':st==='abono'?'#fef9c3':'#fee2e2';
     const stT = st==='pago'?'#059669':st==='abono'?'#d97706':'#dc2626';
-    const val = payCfg.valor||'—';
+    const val = calcValor(p);
     const abo = pay.abono||'0';
-    const sal = payCfg.valor?(parseFloat(payCfg.valor)-parseFloat(abo||0)).toFixed(2):'—';
+    const sal = (parseFloat(val)-parseFloat(abo||0)).toFixed(2);
     const bg  = i%2===0?'#f8fafc':'#ffffff';
     return `<tr style="background:${bg}">
       <td style="font-weight:600">${p.nome||'—'}</td>
       <td style="text-align:center">${getDias(p)}</td>
       <td style="text-align:center">${p.seats_needed||1}</td>
-      <td style="text-align:center">${val!=='—'?'R$ '+val:val}</td>
+      <td style="text-align:center">R$ ${val}</td>
       <td style="text-align:center">${abo!=='0'?'R$ '+abo:'—'}</td>
-      <td style="text-align:center;color:#d97706;font-weight:700">${sal!=='—'&&parseFloat(sal)>0?'R$ '+sal:'—'}</td>
+      <td style="text-align:center;color:#d97706;font-weight:700">${parseFloat(sal)>0?'R$ '+sal:'—'}</td>
       <td style="background:${stC};color:${stT};text-align:center;font-weight:700">${stLabel(st)}</td>
     </tr>`;
   }).join('');
@@ -2021,7 +2076,7 @@ async function renderPayPage(){
       <div class="pay-card-grid">
         <div class="pax-field"><span class="pf-label">RG</span><span class="pf-val">${esc(p.rg)}</span></div>
         <div class="pax-field"><span class="pf-label">Dia</span><span class="pf-val">${p.dia||'—'}</span></div>
-        <div class="pax-field"><span class="pf-label">Valor total</span><span class="pf-val">R$ ${cfg.valor||'—'}</span></div>
+        <div class="pax-field"><span class="pf-label">Valor total</span><span class="pf-val" style="color:#059669;font-weight:700">R$ ${calcValor(p)}</span></div>
         <div class="pax-field"><span class="pf-label">Abonado</span><span class="pf-val">${pay.abono?'R$ '+pay.abono:'—'}</span></div>
         ${pay.obs?`<div class="pax-field" style="grid-column:1/-1"><span class="pf-label">Obs</span><span class="pf-val">${esc(pay.obs)}</span></div>`:''}
         ${pay.updatedBy?`<div class="pax-field" style="grid-column:1/-1"><span class="pf-label">Atualizado por</span><span class="pf-val" style="color:var(--accent)">👤 ${esc(pay.updatedBy)} — ${esc(pay.updatedAt||'')}</span></div>`:''}
@@ -2118,6 +2173,179 @@ function sendWhatsApp(tel, nome, status){
 }
 
 // ═══════════════════════════════════════
+// LEMBRETES
+// ═══════════════════════════════════════
+const LEM_KEY = 'tr_lembrete_config';
+
+function loadLembreteConfig(){
+  return JSON.parse(localStorage.getItem(LEM_KEY)||'null') || {
+    horario: '',
+    ponto: '',
+    msg: 'Olá {nome}! 🚌 Lembramos que o transporte para o *Congresso Itatiba* sai *amanhã*!\n\n📅 Dia(s): *{dias}*\n⏰ Horário de saída: *{horario}*\n📍 Ponto de encontro: *{ponto}*\n\nNão se atrase! Qualquer dúvida pode responder aqui. 😊'
+  };
+}
+
+function saveLembreteConfig(){
+  const cfg = {
+    horario: document.getElementById('lem-horario').value.trim(),
+    ponto:   document.getElementById('lem-ponto').value.trim(),
+    msg:     document.getElementById('lem-msg').value
+  };
+  localStorage.setItem(LEM_KEY, JSON.stringify(cfg));
+  showToast('✅ Configuração de lembrete salva');
+  renderLembreteGrupos();
+}
+
+async function renderLembretes(){
+  const cfg = loadLembreteConfig();
+  document.getElementById('lem-horario').value = cfg.horario||'';
+  document.getElementById('lem-ponto').value   = cfg.ponto||'';
+  document.getElementById('lem-msg').value     = cfg.msg||'';
+  renderLembreteGrupos();
+}
+
+async function renderLembreteGrupos(){
+  const cfg  = loadLembreteConfig();
+  const pax  = await getPax();
+  const container = document.getElementById('lem-grupos');
+
+  // Filtra pasajeros con telefone
+  const comTel    = pax.filter(p => p.tel && p.tel.replace(/\D/g,'').length >= 10);
+  const semTel    = pax.filter(p => !p.tel || p.tel.replace(/\D/g,'').length < 10);
+
+  // Agrupa por combinação de dias (chave = dias ordenados)
+  const grupos = {};
+  comTel.forEach(p => {
+    let dias = [];
+    try{ dias = JSON.parse(p.dias||'null') || [p.dia]; }catch(e){ dias = [p.dia||'?']; }
+    const key = [...dias].sort((a,b)=>{
+      const order = ['Sexta','Sábado','Domingo'];
+      return order.indexOf(a) - order.indexOf(b);
+    }).join(' + ');
+    if(!grupos[key]) grupos[key] = {dias: key, passageiros: []};
+    grupos[key].passageiros.push(p);
+  });
+
+  const dayColor = {'Sexta':'#2563eb','Sábado':'#7c3aed','Domingo':'#db2777'};
+  const dayBg    = {'Sexta':'#eff6ff','Sábado':'#f5f3ff','Domingo':'#fdf2f8'};
+
+  function getGrupoCor(diasStr){
+    if(diasStr.includes('Sexta') && diasStr.includes('Domingo')) return {bg:'#f5f0ff',border:'#7c3aed',color:'#6d28d9'};
+    if(diasStr.includes('Sexta'))   return {bg:'#eff6ff', border:'#2563eb', color:'#1d4ed8'};
+    if(diasStr.includes('Domingo')) return {bg:'#fdf2f8', border:'#db2777', color:'#9d174d'};
+    return {bg:'#f5f3ff', border:'#7c3aed', color:'#6d28d9'};
+  }
+
+  let html = '';
+
+  // ── Grupos con teléfono ──
+  const keys = Object.keys(grupos).sort((a,b)=>{
+    const order = ['Sexta','Sábado','Domingo'];
+    const ai = order.findIndex(d=>a.includes(d));
+    const bi = order.findIndex(d=>b.includes(d));
+    return ai - bi;
+  });
+
+  if(keys.length === 0){
+    html += `<div class="section-card" style="padding:24px;text-align:center;color:var(--muted);">
+      <div style="font-size:36px;margin-bottom:10px">📭</div>
+      <p style="font-size:14px;">Nenhum passageiro com telefone cadastrado.</p>
+    </div>`;
+  } else {
+    keys.forEach(key => {
+      const g   = grupos[key];
+      const cor = getGrupoCor(key);
+      const n   = g.passageiros.length;
+      const diasTags = key.split(' + ').map(d =>
+        `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${dayBg[d]||'#f0f4ff'};color:${dayColor[d]||'#2563eb'}">${d}</span>`
+      ).join(' ');
+
+      // Lista de nomes
+      const nomes = g.passageiros.map(p =>
+        `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:13px;">👤</span>
+          <span style="font-size:13px;font-weight:600;color:var(--text);flex:1">${esc(p.nome||'—')}</span>
+          <span style="font-size:12px;color:var(--muted);">${p.tel||''}</span>
+        </div>`
+      ).join('');
+
+      html += `
+      <div class="section-card" style="padding:18px;border-left:4px solid ${cor.border};">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:${cor.color};margin-bottom:6px;">${diasTags}</div>
+            <div style="font-size:13px;color:var(--muted);">${n} passageiro${n!==1?'s':''} com telefone</div>
+          </div>
+          <button onclick="enviarLembreteGrupo(${JSON.stringify(key)})"
+            style="padding:10px 18px;background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+            📲 Enviar para ${n} passageiro${n!==1?'s':''}
+          </button>
+        </div>
+        <div style="max-height:200px;overflow-y:auto;">${nomes}</div>
+      </div>`;
+    });
+  }
+
+  // ── Sin teléfono ──
+  if(semTel.length > 0){
+    const nomesSemTel = semTel.map(p =>
+      `<span style="display:inline-block;background:#fee2e2;color:#b91c1c;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;margin:3px;">${esc(p.nome||'—')}</span>`
+    ).join('');
+    html += `
+    <div class="section-card" style="padding:16px;border-left:4px solid #f87171;opacity:.85;">
+      <div style="font-size:13px;font-weight:700;color:#b91c1c;margin-bottom:8px;">⚠️ ${semTel.length} passageiro${semTel.length!==1?'s':''} sem telefone</div>
+      <div>${nomesSemTel}</div>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+async function enviarLembreteGrupo(diasKey){
+  const cfg = loadLembreteConfig();
+  if(!cfg.horario || !cfg.ponto){
+    showToast('⚠️ Preencha horário e ponto de encontro antes!', true);
+    return;
+  }
+  const pax = await getPax();
+  const grupo = pax.filter(p => {
+    let dias = [];
+    try{ dias = JSON.parse(p.dias||'null') || [p.dia]; }catch(e){ dias = [p.dia||'?']; }
+    const key = [...dias].sort((a,b)=>{
+      const order = ['Sexta','Sábado','Domingo'];
+      return order.indexOf(a) - order.indexOf(b);
+    }).join(' + ');
+    return key === diasKey && p.tel && p.tel.replace(/\D/g,'').length >= 10;
+  });
+
+  if(!grupo.length){ showToast('Nenhum passageiro com telefone neste grupo', true); return; }
+
+  let idx = 0;
+  function abrirProximo(){
+    if(idx >= grupo.length) return;
+    const p = grupo[idx++];
+    let dias = [];
+    try{ dias = JSON.parse(p.dias||'null') || [p.dia]; }catch(e){ dias=[p.dia||'?']; }
+    const diasStr = [...dias].sort((a,b)=>{
+      const order=['Sexta','Sábado','Domingo']; return order.indexOf(a)-order.indexOf(b);
+    }).join(', ');
+    const msg = (cfg.msg||'')
+      .replace(/\{nome\}/g, p.nome||'')
+      .replace(/\{dias\}/g, diasStr)
+      .replace(/\{horario\}/g, cfg.horario)
+      .replace(/\{ponto\}/g, cfg.ponto);
+    const tel = p.tel.replace(/\D/g,'');
+    const url = 'https://wa.me/55'+tel+'?text='+encodeURIComponent(msg);
+    window.open(url, '_blank');
+    if(idx < grupo.length){
+      setTimeout(abrirProximo, 1500);
+    }
+  }
+  abrirProximo();
+  showToast(`📲 Abrindo WhatsApp para ${grupo.length} passageiro${grupo.length!==1?'s':''}...`);
+}
+
+// ═══════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════
 function formatRG(v){
@@ -2142,6 +2370,13 @@ function formatRG(v){
   if(lastChar && digits.length >= 7) result += '-' + lastChar;
   else if(lastChar) result += lastChar;
   return result;
+}
+function formatCPF(v){
+  v = v.replace(/\D/g,'').slice(0,11);
+  if(v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if(v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if(v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+  return v;
 }
 function formatTel(v){
   v=v.replace(/\D/g,'').slice(0,11);
