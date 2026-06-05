@@ -521,16 +521,6 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
     <div id="admin-pax-list"></div>
   </div>
 
-  <!-- PAGE: LOG -->
-  <div class="page" id="admin-page-log">
-    <div class="page-header">
-      <div class="page-title">📋 Registro</div>
-      <button onclick="clearLogs()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;">Limpar</button>
-    </div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Histórico de acessos e modificações de cada administrador.</p>
-    <div id="log-list"></div>
-  </div>
-
   <div class="page" id="admin-page-settings">
     <div class="page-header"><div class="page-title">⚙️ Configurações</div></div>
     <div class="settings-list">
@@ -589,8 +579,8 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
     </div>
   </div>
 
-  <!-- PAGE: LOG -->
-  <div class="page" id="admin-page-log">
+  <!-- PAGE: PAGAMENTOS -->
+  <div class="page" id="admin-page-pay">
     <div class="page-header">
       <div class="page-title">💰 Pagamentos</div>
       <div class="live-badge"><div class="live-dot"></div>Tempo real</div>
@@ -632,6 +622,16 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 
     <div class="result-info" id="pay-result-info"></div>
     <div id="pay-list"></div>
+  </div>
+
+  <!-- PAGE: LOG -->
+  <div class="page" id="admin-page-log">
+    <div class="page-header">
+      <div class="page-title">📋 Registro</div>
+      <button onclick="clearLogs()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;">Limpar</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Histórico de acessos e modificações de cada administrador.</p>
+    <div id="log-list"></div>
   </div>
 
   <nav class="bottom-nav">
@@ -2276,7 +2276,7 @@ async function renderLembreteGrupos(){
             <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:${cor.color};margin-bottom:6px;">${diasTags}</div>
             <div style="font-size:13px;color:var(--muted);">${n} passageiro${n!==1?'s':''} com telefone</div>
           </div>
-          <button onclick="enviarLembreteGrupo(${JSON.stringify(key)})"
+          <button onclick="enviarLembreteGrupo(this.dataset.key)" data-key="${key.replace(/"/g,'&quot;')}"
             style="padding:10px 18px;background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;">
             📲 Enviar para ${n} passageiro${n!==1?'s':''}
           </button>
