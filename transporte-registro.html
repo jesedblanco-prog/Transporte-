@@ -496,6 +496,9 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
       <div class="live-badge"><div class="live-dot"></div>Live</div>
     </div>
     <div id="admin-dashboard" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+      <button onclick="openEditPax(null)" style="padding:8px 16px;background:#eff6ff;border:1.5px solid #2563eb;border-radius:10px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;">✏️ Editar Passageiro</button>
+    </div>
     <div class="search-wrap">
       <span class="si">🔍</span>
       <input type="search" id="admin-search" placeholder="Nome, RG ou telefone…" oninput="adminSearch(this.value)" autocomplete="off" spellcheck="false">
@@ -532,6 +535,11 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
       <div class="si-item" onclick="exportCSV()">
         <div class="si-ico">📤</div>
         <div class="si-body"><div class="si-title">📤 Exportar Relatório</div><div class="si-desc">Lista completa com pagamentos e resumo por dia</div></div>
+        <div class="si-arrow">›</div>
+      </div>
+      <div class="si-item" onclick="getPax().then(p=>generateExcelCSV(p))">
+        <div class="si-ico">📊</div>
+        <div class="si-body"><div class="si-title">📊 Baixar Excel (CSV)</div><div class="si-desc">Arquivo para abrir no Excel com todos os dados</div></div>
         <div class="si-arrow">›</div>
       </div>
       <div class="si-item danger" onclick="clearAllPax()">
@@ -626,6 +634,10 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
             <label>Telefone / WhatsApp</label>
             <input type="tel" id="u-tel" placeholder="(11) 99999-9999" maxlength="15">
           </div>
+        </div>
+        <div class="form-group">
+          <label>CPF (opcional)</label>
+          <input type="text" id="u-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off">
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -796,12 +808,11 @@ async function supaFetch(path, options={}) {
 // ═══════════════════════════════════════
 // TWO ADMINS — Jesus and Sergio
 const ADMINS = {
-  Jesus: { pwKey: 'tr_pw_jesus', default: btoa('jesus2025') },
-  Sergio: { pwKey: 'tr_pw_sergio', default: btoa('sergio2025') }
+  Jesus: { pw: 'jesus2025' },
+  Sergio: { pw: 'sergio2025' }
 };
 
-function getAdminPw(name){ return localStorage.getItem(ADMINS[name].pwKey) || ADMINS[name].default; }
-function checkAdminPw(name, v){ return btoa(v) === getAdminPw(name); }
+function checkAdminPw(name, v){ return v === ADMINS[name].pw; }
 
 // Keep legacy for change-pw modal
 const ADMIN_PW_KEY = 'tr_admin_pw';
@@ -840,7 +851,7 @@ function doAdminLogin(){
   // Identify who by password
   let adminName = null;
   for(const [name, cfg] of Object.entries(ADMINS)){
-    if(btoa(v) === getAdminPw(name)){ adminName = name; break; }
+    if(v === ADMINS[name].pw){ adminName = name; break; }
   }
 
   if(adminName){
@@ -1235,12 +1246,15 @@ async function renderAdminPax(){
         <div class="pax-name">${hlAdmin(p.nome||'')}</div>
         <div style="display:flex;gap:6px;align-items:center;">
         <button onclick="toggleEmbarque(${p.id},${!!p.embarque})" style="background:${p.embarque?'#d1fae5':'#f1f5f9'};border:1.5px solid ${p.embarque?'#059669':'#e2e8f0'};border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer;" title="${p.embarque?'Embarcou ✅':'Confirmar embarque'}">${p.embarque?'✅':'🚌'}</button>
+        <button onclick="openEditPax(${p.id})" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer;" title="Editar">✏️</button>
         <button class="pax-del" onclick="adminDeletePax(${p.id})" title="Eliminar">🗑</button>
       </div>
       </div>
       <div class="pax-grid">
-        <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${hlAdmin(p.rg||p.cpf||'')}</span></div>
+        <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${hlAdmin(p.rg||'')}</span></div>
+        <div class="pax-field"><span class="pf-label">CPF</span><span class="pf-val">${esc(p.cpf||'—')}</span></div>
         <div class="pax-field"><span class="pf-label">Telefone</span><span class="pf-val">${esc(p.tel||'—')}</span></div>
+        <div class="pax-field"><span class="pf-label">Valor</span><span class="pf-val" style="color:#059669;font-weight:700">R$ ${(()=>{try{const ds=JSON.parse(p.dias||'null');return ds&&ds.length?ds.length*55:55;}catch(e){return 55;}})()}</span></div>
         <div class="pax-field"><span class="pf-label">Assentos</span><span class="pf-val">${p.seats_needed||1}</span></div>
         <div class="pax-field"><span class="pf-label">Categoria</span><span class="pf-val">${esc(p.category||'Geral')}</span></div>
       </div>
@@ -1560,7 +1574,8 @@ async function registerPassenger(){
     const docType=sessionStorage.getItem('tr_user_doc_type')||'RG';
     const diaMain=selectedDays[0];
     const diasJson=JSON.stringify(selectedDays);
-    await insertPax({cpf:rg,rg,nome,tel,obs,dia:diaMain,dias:diasJson,doc_type:docType,seats_needed,category});
+    const cpfVal=(document.getElementById('u-cpf')||{}).value||'';
+    await insertPax({cpf:cpfVal,rg,nome,tel,obs,dia:diaMain,dias:diasJson,doc_type:docType,seats_needed,category});
     await renderDaySelector();
     await renderUserTicket();
     await updateRegisterBtn();
@@ -1652,18 +1667,115 @@ function saveNewPw(){
   if(!checkAdminPw(adminName, cur)){ err.textContent='Senha atual incorreta.'; return; }
   if(nw.length<6){ err.textContent='Mínimo 6 caracteres.'; return; }
   if(nw!==cf){ err.textContent='As senhas não coincidem.'; return; }
-  // Save to the correct key for this admin
-  localStorage.setItem(ADMINS[adminName].pwKey, btoa(nw));
+  ADMINS[adminName].pw = nw;
   closeChangePw();
-  showToast('✓ Senha de ' + adminName + ' atualizada com sucesso!');
+  showToast('Senha de ' + adminName + ' atualizada (válida até recarregar a página)');
   logAction(adminName,'senha','Alterou sua própria senha');
 }
 
 // ═══════════════════════════════════════
+
+// ═══════════════════════════════════════
+// EDIT PASSENGER
+// ═══════════════════════════════════════
+let editPaxData = null;
+let editAllPax = [];
+
+async function openEditPax(id){
+  // Load all passengers fresh every time
+  editAllPax = await getPax();
+  const sel = document.getElementById('edit-pax-select');
+  // Populate dropdown
+  sel.innerHTML = '<option value="">— Selecione um passageiro —</option>';
+  editAllPax.slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = (p.nome||'Sem nome') + '  —  ' + (p.rg||p.cpf||'s/doc');
+    sel.appendChild(opt);
+  });
+  // Pre-select if id provided (from ✏️ button)
+  if(id){
+    sel.value = String(id);
+    loadEditPaxFromSelect();
+  } else {
+    document.getElementById('edit-fields').style.display = 'none';
+    document.getElementById('edit-fields-hidden').style.display = 'flex';
+  }
+  document.getElementById('edit-pax-modal').classList.add('show');
+}
+
+function loadEditPaxFromSelect(){
+  const selVal = document.getElementById('edit-pax-select').value;
+  if(!selVal){
+    document.getElementById('edit-fields').style.display='none';
+    document.getElementById('edit-fields-hidden').style.display='flex';
+    return;
+  }
+  // Compare as string since DOM values are always strings
+  editPaxData = editAllPax.find(p=> String(p.id) === String(selVal));
+  if(!editPaxData) return;
+  document.getElementById('edit-pax-id').value = editPaxData.id;
+  document.getElementById('edit-nome').value = editPaxData.nome||'';
+  document.getElementById('edit-rg').value = editPaxData.rg||'';
+  document.getElementById('edit-cpf').value = editPaxData.cpf||'';
+  document.getElementById('edit-tel').value = editPaxData.tel||'';
+  document.getElementById('edit-fields').style.display='block';
+  document.getElementById('edit-fields-hidden').style.display='none';
+}
+function closeEditPax(){ document.getElementById('edit-pax-modal').classList.remove('show'); editPaxData=null; }
+async function saveEditPax(){
+  const id = document.getElementById('edit-pax-id').value;
+  const nome = document.getElementById('edit-nome').value.trim();
+  const rg = document.getElementById('edit-rg').value.trim();
+  const cpf = document.getElementById('edit-cpf').value.trim();
+  const tel = document.getElementById('edit-tel').value.trim();
+  if(!nome){showToast('Nome obrigatorio');return;}
+  try {
+    await supaFetch('/rest/v1/pasajeros?id=eq.'+id, {
+      method: 'PATCH',
+      body: JSON.stringify({nome, rg, cpf, tel})
+    });
+    showToast('Dados atualizados!');
+    closeEditPax();
+    logAction(adminName,'editar','Editou '+nome);
+    renderAdminPax();
+  } catch(e){ showToast('Erro: '+e.message); }
+}
+
+const PRECO_DIA = 55;
+function calcValor(p){
+  try{ const ds=JSON.parse(p.dias||'null'); return ds&&ds.length?ds.length*PRECO_DIA:PRECO_DIA; }catch(e){return PRECO_DIA;}
+}
+
+
+function generateExcelCSV(pax){
+  const pays = loadAllPayments();
+  let csv = '\uFEFF'; // BOM for Excel UTF-8
+  csv += 'Nome,RG,CPF,Telefone,Dias,Assentos,Categoria,Valor Total (R$),Status Pagamento,Cadastro\n';
+  pax.forEach(p => {
+    let dias=''; try{const ds=JSON.parse(p.dias||'null');dias=ds?ds.join('+'):p.dia||'';}catch(e){dias=p.dia||'';}
+    const valor = calcValor(p);
+    const pay = pays[p.rg||p.cpf]||{};
+    const status = pay.status==='pago'?'Pago':pay.status==='abono'?'Abono Parcial':'Nao Pago';
+    const dt = p.ts?new Date(p.ts).toLocaleDateString('pt-BR'):'';
+    csv += [p.nome,p.rg,p.cpf||'',p.tel||'',dias,p.seats_needed||1,p.category||'Geral',valor,status,dt].map(v=>'"'+(v+'').replace(/"/g,'""')+'"').join(',')+'\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Transporte_Jardim_do_Vale_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV baixado! Abra no Excel.');
+}
+
 // EXPORT CSV
 // ═══════════════════════════════════════
 async function exportCSV(){
   const pax = await getPax();
+  // Also generate CSV for Excel
+  generateExcelCSV(pax);
   if(!pax.length){showToast('Não há passageiros.');return;}
   const pays = loadAllPayments();
   const cfg  = await getConfig();
@@ -1687,10 +1799,12 @@ async function exportCSV(){
     return `<tr style="background:${bg}">
       <td style="text-align:center;color:#64748b;font-weight:600">${i+1}</td>
       <td style="font-weight:600">${p.nome||'—'}</td>
-      <td style="font-family:monospace">${p.rg||p.cpf||'—'}</td>
+      <td style="font-family:monospace">${p.rg||'—'}</td>
+      <td style="font-family:monospace">${p.cpf||'—'}</td>
       <td>${p.tel||'—'}</td>
       <td style="background:${diaC};text-align:center;font-weight:600">${diaStr}</td>
       <td style="text-align:center">${p.seats_needed||1}</td>
+      <td style="text-align:center;color:#059669;font-weight:700">R$ ${calcValor(p)}</td>
       <td>${p.category||'Geral'}</td>
       <td style="background:${stC};color:${stT};text-align:center;font-weight:700">${stLabel(st)}</td>
       <td style="text-align:center">${abono}</td>
@@ -1769,7 +1883,7 @@ async function exportCSV(){
 <\/script>
 </head>
 <body>
-<div class="tabs">
+<div style="text-align:center;padding:12px;"><button onclick="window.print()" style="padding:12px 32px;background:#2563eb;color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Imprimir</button></div>\n<div class="tabs">
   <div class="tab active" onclick="showSheet(0)">📋 Passageiros</div>
   <div class="tab" onclick="showSheet(1)">📊 Resumo por Dia</div>
   <div class="tab" onclick="showSheet(2)">💰 Pagamentos</div>
@@ -1782,7 +1896,7 @@ async function exportCSV(){
     <p>${cfg.destino||'Evento'} &nbsp;|&nbsp; Gerado em ${today} &nbsp;|&nbsp; ${pax.length} passageiro${pax.length!==1?'s':''}</p>
   </div>
   <table>
-    <tr><th>#</th><th>Nome Completo</th><th>RG / RNM</th><th>Telefone</th><th>Dia(s)</th><th>Assentos</th><th>Categoria</th><th>Status</th><th>Abono</th><th>Saldo Restante</th><th>Cadastro</th></tr>
+    <tr><th>#</th><th>Nome Completo</th><th>RG / RNM</th><th>CPF</th><th>Telefone</th><th>Dia(s)</th><th>Assentos</th><th>Valor (R$)</th><th>Categoria</th><th>Status</th><th>Abono</th><th>Saldo Restante</th><th>Cadastro</th></tr>
     ${rows1}
   </table>
 </div>
@@ -2124,5 +2238,36 @@ async function init(){
 
 init();
 </script>
+
+<div id="edit-pax-modal" class="modal">
+  <div class="modal-content" style="max-width:420px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#1a3a6b,#2563eb);">
+      <h2 style="font-size:18px;">Editar Passageiro</h2>
+    </div>
+    <div class="modal-body" style="padding:20px;">
+      <input type="hidden" id="edit-pax-id">
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Selecionar Passageiro</label>
+        <select id="edit-pax-select" onchange="loadEditPaxFromSelect()" style="width:100%;padding:11px;border:1.5px solid #2563eb;border-radius:8px;font-size:14px;background:#f0f7ff;font-weight:600;">
+          <option value="">— Selecione um passageiro —</option>
+        </select>
+      </div>
+      <div id="edit-fields" style="display:none;">
+        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Nome</label><input type="text" id="edit-nome" style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;"></div>
+        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">RG</label><input type="text" id="edit-rg" style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;"></div>
+        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">CPF</label><input type="text" id="edit-cpf" style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;"></div>
+        <div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">Telefone</label><input type="tel" id="edit-tel" style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;"></div>
+        <div style="display:flex;gap:10px;">
+          <button onclick="closeEditPax()" style="flex:1;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;background:white;font-weight:700;cursor:pointer;">Cancelar</button>
+          <button onclick="saveEditPax()" style="flex:1;padding:12px;border:none;border-radius:10px;background:linear-gradient(180deg,#2d74f5,#1a5fd4);color:white;font-weight:700;cursor:pointer;">Salvar</button>
+        </div>
+      </div>
+      <div id="edit-fields-hidden" style="display:flex;gap:10px;margin-top:4px;">
+        <button onclick="closeEditPax()" style="flex:1;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;background:white;font-weight:700;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
