@@ -1310,8 +1310,8 @@ async function renderAdminPax(){
       </div>
       </div>
       <div class="pax-grid">
-        <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${hlAdmin(p.doc_type==='CPF'?p.cpf||'':p.rg||'')}</span></div>
-        ${p.doc_type!=='CPF'&&p.cpf?`<div class="pax-field"><span class="pf-label">CPF</span><span class="pf-val">${esc(p.cpf)}</span></div>`:''}
+        <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${hlAdmin(p.doc_type==='CPF'?(p.cpf||'—'):(p.rg||'—'))}</span></div>
+        ${p.doc_type!=='CPF'&&p.cpf&&p.cpf.trim()!==''&&p.cpf!==p.rg?`<div class="pax-field"><span class="pf-label">CPF</span><span class="pf-val">${esc(p.cpf)}</span></div>`:''}
         <div class="pax-field"><span class="pf-label">Telefone</span><span class="pf-val">${esc(p.tel||'—')}</span></div>
         <div class="pax-field"><span class="pf-label">Valor</span><span class="pf-val" style="color:#059669;font-weight:700">R$ ${(()=>{try{const ds=JSON.parse(p.dias||'null');return ds&&ds.length?ds.length*55:55;}catch(e){return 55;}})()}</span></div>
         <div class="pax-field"><span class="pf-label">Assentos</span><span class="pf-val">${p.seats_needed||1}</span></div>
@@ -1634,8 +1634,8 @@ async function registerPassenger(){
     const diaMain=selectedDays[0];
     const diasJson=JSON.stringify(selectedDays);
     const isCPF = docType === 'CPF';
-    const rgVal  = isCPF ? '' : rg;
-    const cpfVal = isCPF ? rg : '';
+    const rgVal  = isCPF ? null : (rg||null);
+    const cpfVal = isCPF ? rg : null;
     await insertPax({cpf:cpfVal,rg:rgVal,nome,tel,obs,dia:diaMain,dias:diasJson,doc_type:docType,seats_needed,category});
     await renderDaySelector();
     await renderUserTicket();
