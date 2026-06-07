@@ -48,7 +48,7 @@ body::before{content:'';position:fixed;inset:0;
     radial-gradient(ellipse 50% 60% at 0% 100%,rgba(124,58,237,.05) 0%,transparent 60%);
   pointer-events:none;z-index:0;}
 
-.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;background:#f0f4ff !important;padding:20px;}
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;background:#f0f4ff !important;padding:20px;overflow-y:auto;}
 .screen.hidden{display:none;}
 #splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;background:#f0f4ff !important;gap:16px;}
 #splash.hidden{display:none;}
@@ -322,86 +322,99 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 </div>
 
 <!-- LOGIN ADMIN (hidden, called by button) -->
-<div class="screen hidden" id="screen-admin-login">
-  <div class="login-box" style="max-width:400px;">
-    <div style="text-align:center;margin-bottom:16px;">
-      <div style="width:64px;height:64px;background:linear-gradient(135deg,#f59e0b,#f97316);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:32px;">🔐</div>
-    </div>
-    <h2 style="font-size:22px;margin-bottom:6px;">Acesso Administrativo</h2>
-    <p style="font-size:14px;margin-bottom:24px;">Digite sua senha para entrar.<br>Ela identifica quem está acessando.</p>
-    <div class="login-field">
-      <label>Senha</label>
-      <div class="pw-wrap">
-        <input type="password" id="admin-pw-input" placeholder="Digite sua senha" autocomplete="current-password">
-        <button class="eye-btn" onclick="toggleEye('admin-pw-input',this)" type="button">👁</button>
+<div class="screen hidden" id="screen-admin-login" style="z-index:110;">
+  <div style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:0;">
+
+    <div style="background:linear-gradient(135deg,#92400e 0%,#d97706 60%,#f59e0b 100%);border-radius:24px 24px 0 0;padding:28px 28px 24px;text-align:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2285%22 cy=%2215%22 r=%2225%22 fill=%22rgba(255,255,255,.06)%22/></svg>');pointer-events:none;"></div>
+      <div style="position:relative;">
+        <div style="width:60px;height:60px;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;border:1.5px solid rgba(255,255,255,.25);">🔐</div>
+        <div style="color:white;font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px;">Acesso Administrativo</div>
+        <div style="color:rgba(255,255,255,.75);font-size:13px;">Digite sua senha para continuar</div>
       </div>
     </div>
-    <button class="login-btn btn-admin-color" onclick="doAdminLogin()" style="font-size:17px;padding:18px;">Entrar →</button>
-    <div class="login-error" id="admin-login-error"></div>
-    <div class="attempts-bar">
-      <div class="attempt-dot" id="adot-1"></div><div class="attempt-dot" id="adot-2"></div>
-      <div class="attempt-dot" id="adot-3"></div><div class="attempt-dot" id="adot-4"></div>
-      <div class="attempt-dot" id="adot-5"></div>
+
+    <div style="background:#ffffff;border-radius:0 0 24px 24px;padding:28px;box-shadow:0 8px 32px rgba(0,0,0,.12);">
+      <div class="login-field">
+        <label style="font-size:13px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;">Senha</label>
+        <div class="pw-wrap">
+          <input type="password" id="admin-pw-input" placeholder="Digite sua senha" autocomplete="current-password" style="font-size:17px;padding:16px 52px 16px 18px;border-radius:12px;border:2px solid #e2e8f0;">
+          <button class="eye-btn" onclick="toggleEye('admin-pw-input',this)" type="button">👁</button>
+        </div>
+      </div>
+      <button class="login-btn btn-admin-color" onclick="doAdminLogin()" style="font-size:17px;padding:18px;border-radius:14px;font-family:'Syne',sans-serif;font-weight:800;margin-top:6px;">Entrar →</button>
+      <div class="login-error" id="admin-login-error"></div>
+      <div class="attempts-bar">
+        <div class="attempt-dot" id="adot-1"></div><div class="attempt-dot" id="adot-2"></div>
+        <div class="attempt-dot" id="adot-3"></div><div class="attempt-dot" id="adot-4"></div>
+        <div class="attempt-dot" id="adot-5"></div>
+      </div>
+      <div style="text-align:center;margin-top:20px;">
+        <a onclick="showScreen('screen-user-login')" style="font-size:13px;color:#94a3b8;cursor:pointer;font-weight:600;">← Voltar</a>
+      </div>
     </div>
-    <div style="text-align:center;margin-top:20px;">
-      <a onclick="showScreen('screen-user-login')" style="font-size:13px;color:var(--muted);cursor:pointer;">← Voltar</a>
-    </div>
+
   </div>
 </div>
 
 <!-- LOGIN USER -->
 <div class="screen" id="screen-user-login">
-  <div class="login-box" style="max-width:420px;">
+  <div style="width:100%;max-width:440px;display:flex;flex-direction:column;gap:0;">
 
-    <!-- Bus icon -->
-    <div style="text-align:center;margin-bottom:20px;">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none" style="width:80px;height:80px;margin:0 auto">
-        <rect x="8" y="20" width="64" height="36" rx="8" fill="#2563eb"/>
-        <rect x="12" y="24" width="56" height="20" rx="4" fill="#bfdbfe"/>
-        <rect x="13" y="25" width="16" height="17" rx="3" fill="#93c5fd"/>
-        <rect x="32" y="25" width="16" height="17" rx="3" fill="#93c5fd"/>
-        <rect x="51" y="25" width="16" height="17" rx="3" fill="#93c5fd"/>
-        <rect x="8" y="46" width="64" height="7" rx="3" fill="#1d4ed8"/>
-        <circle cx="20" cy="57" r="7" fill="#1e293b"/>
-        <circle cx="20" cy="57" r="3.5" fill="white"/>
-        <circle cx="60" cy="57" r="7" fill="#1e293b"/>
-        <circle cx="60" cy="57" r="3.5" fill="white"/>
-        <rect x="5" y="28" width="5" height="14" rx="2.5" fill="#60a5fa"/>
-        <rect x="70" y="28" width="5" height="14" rx="2.5" fill="#60a5fa"/>
-        <rect x="34" y="14" width="12" height="8" rx="3" fill="#93c5fd"/>
-      </svg>
+    <!-- Header banner -->
+    <div style="background:linear-gradient(135deg,#1a3a6b 0%,#2563eb 60%,#4f46e5 100%);border-radius:24px 24px 0 0;padding:32px 28px 28px;text-align:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2290%22 cy=%2210%22 r=%2230%22 fill=%22rgba(255,255,255,.04)%22/><circle cx=%220%22 cy=%2280%22 r=%2240%22 fill=%22rgba(255,255,255,.03)%22/></svg>');pointer-events:none;"></div>
+      <div style="position:relative;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none" style="width:64px;height:64px;margin:0 auto 16px;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))">
+          <rect x="8" y="20" width="64" height="36" rx="8" fill="white" opacity="0.95"/>
+          <rect x="12" y="24" width="56" height="20" rx="4" fill="#bfdbfe"/>
+          <rect x="13" y="25" width="16" height="17" rx="3" fill="#93c5fd"/>
+          <rect x="32" y="25" width="16" height="17" rx="3" fill="#93c5fd"/>
+          <rect x="51" y="25" width="16" height="17" rx="3" fill="#93c5fd"/>
+          <rect x="8" y="46" width="64" height="7" rx="3" fill="#1d4ed8"/>
+          <circle cx="20" cy="57" r="7" fill="#1e293b"/>
+          <circle cx="20" cy="57" r="3.5" fill="white"/>
+          <circle cx="60" cy="57" r="7" fill="#1e293b"/>
+          <circle cx="60" cy="57" r="3.5" fill="white"/>
+          <rect x="5" y="28" width="5" height="14" rx="2.5" fill="#60a5fa"/>
+          <rect x="70" y="28" width="5" height="14" rx="2.5" fill="#60a5fa"/>
+          <rect x="34" y="14" width="12" height="8" rx="3" fill="#93c5fd"/>
+        </svg>
+        <div style="color:white;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px;">Transporte Jardim do Vale</div>
+        <div style="color:rgba(255,255,255,.75);font-size:13px;font-weight:500;">Congresso Itatiba 2026 · Reserve seu assento</div>
+      </div>
     </div>
 
-    <h2 style="font-size:26px;margin-bottom:8px;">Reservar meu assento</h2>
-    <p style="font-size:16px;margin-bottom:28px;color:var(--muted);">Informe seu RG para acessar<br>e escolher seu dia de viagem. 🚌</p>
+    <!-- Form card -->
+    <div style="background:#ffffff;border-radius:0 0 24px 24px;padding:28px;box-shadow:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);">
 
-    <div class="login-field">
-      <label style="font-size:14px;">Tipo de documento</label>
-      <select id="doc-type-select" onchange="updateDocInput()" style="font-size:17px;padding:16px;border-radius:12px;border:2px solid var(--border);background:#f5f7ff;color:#1e293b;width:100%;">
-        <option value="RG">🪪 RG — Registro Geral (brasileiro)</option>
-        <option value="RNM">🌎 RNM — Registro Nacional Migratório (estrangeiro)</option>
-        <option value="CPF">🔢 CPF — Cadastro de Pessoa Física</option>
-      </select>
-    </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px;">Tipo de documento</label>
+        <select id="doc-type-select" onchange="updateDocInput()" style="font-size:15px;padding:14px 16px;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;color:#1e293b;width:100%;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;">
+          <option value="RG">🪪 RG — Registro Geral (brasileiro)</option>
+          <option value="RNM">🌎 RNM — Registro Nacional Migratório (estrangeiro)</option>
+          <option value="CPF">🔢 CPF — Cadastro de Pessoa Física</option>
+        </select>
+      </div>
 
-    <div class="login-field">
-      <label style="font-size:14px;" id="doc-input-label">Número do RG</label>
-      <input class="plain-input" type="text" id="user-rg-input" placeholder="1.234.567 ou 12.345.678-9" maxlength="12" inputmode="text" autocapitalize="characters" autocomplete="off" style="font-size:18px;padding:18px;">
-      <p id="doc-input-hint" style="font-size:11px;color:var(--muted);margin-top:4px;">Ex: 12.345.678-9 ou 12.345.678-X</p>
-    </div>
+      <div style="margin-bottom:24px;">
+        <label style="font-size:13px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px;" id="doc-input-label">Número do RG</label>
+        <input class="plain-input" type="text" id="user-rg-input" placeholder="1.234.567 ou 12.345.678-9" maxlength="12" inputmode="text" autocapitalize="characters" autocomplete="off" style="font-size:18px;padding:16px 18px;border-radius:12px;border:2px solid #e2e8f0;width:100%;font-family:'DM Sans',sans-serif;">
+        <p id="doc-input-hint" style="font-size:11px;color:#94a3b8;margin-top:6px;font-weight:500;">Ex: 12.345.678-9 ou 12.345.678-X</p>
+      </div>
 
-    <button class="login-btn btn-user-color" onclick="doUserLogin()" style="font-size:19px;padding:20px;margin-top:12px;">
-      Reservar assento →
-    </button>
-    <div class="login-error" id="user-login-error"></div>
-
-    <!-- Admin button - discrete at bottom -->
-    <div style="text-align:center;margin-top:28px;padding-top:16px;border-top:1px solid var(--border);">
-      <button onclick="showScreen('screen-admin-login')" style="background:none;border:none;color:var(--light-text);font-size:12px;cursor:pointer;font-family:DM Sans,sans-serif;padding:8px 16px;border-radius:8px;transition:color .2s;">
-        🔒 Administrador
+      <button class="login-btn btn-user-color" onclick="doUserLogin()" style="font-size:17px;padding:18px;border-radius:14px;font-family:'Syne',sans-serif;font-weight:800;letter-spacing:.3px;">
+        Reservar meu assento →
       </button>
-    </div>
+      <div class="login-error" id="user-login-error"></div>
 
+      <div style="text-align:center;margin-top:24px;padding-top:20px;border-top:1px solid #f1f5f9;">
+        <button onclick="showScreen('screen-admin-login')" style="background:none;border:none;color:#94a3b8;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:6px 12px;border-radius:8px;transition:color .2s;font-weight:600;">
+          🔒 Acesso Administrativo
+        </button>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -417,7 +430,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
       <div style="display:flex;flex-direction:column;gap:4px">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <div class="live-badge"><div class="live-dot"></div>Tempo real</div>
-          <div id="admin-name-badge" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:20px;padding:4px 12px;font-size:12px;color:#1d4ed8;font-weight:700;"></div>
+          <div id="admin-name-badge2" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:20px;padding:4px 12px;font-size:12px;color:#1d4ed8;font-weight:700;"></div>
         </div>
       </div>
       <button class="logout-chip" onclick="doLogout('admin')">Sair 🚪</button>
@@ -639,6 +652,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
     <button class="nav-btn" id="anav-pax" onclick="adminGoPage('pax')"><span class="nav-icon">👥</span>Passageiros</button>
     <button class="nav-btn" id="anav-pay" onclick="adminGoPage('pay')"><span class="nav-icon">💰</span>Pagamentos</button>
     <button class="nav-btn" id="anav-lembrete" onclick="adminGoPage('lembrete')"><span class="nav-icon">📲</span>Lembretes</button>
+    <button class="nav-btn" id="anav-log" onclick="adminGoPage('log')"><span class="nav-icon">📋</span>Registro</button>
     <button class="nav-btn" id="anav-settings" onclick="adminGoPage('settings')"><span class="nav-icon">🛠</span>Config</button>
   </nav>
 </div>
@@ -1078,6 +1092,8 @@ async function initAdminApp(){
   const adminName = sessionStorage.getItem('tr_admin_name')||'Admin';
   const badge = document.getElementById('admin-name-badge');
   if(badge) badge.textContent = '👤 ' + adminName;
+  const badge2 = document.getElementById('admin-name-badge2');
+  if(badge2) badge2.textContent = '👤 ' + adminName;
   const cfg = await getConfig();
   // Update chip labels with dates if configured
   if(cfg){
@@ -1311,7 +1327,6 @@ async function renderAdminPax(){
       </div>
       <div class="pax-grid">
         <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${hlAdmin(p.doc_type==='CPF'?(p.cpf||'—'):(p.rg||'—'))}</span></div>
-        ${p.doc_type!=='CPF'&&p.cpf&&p.cpf.trim()!==''&&p.cpf!==p.rg?`<div class="pax-field"><span class="pf-label">CPF</span><span class="pf-val">${esc(p.cpf)}</span></div>`:''}
         <div class="pax-field"><span class="pf-label">Telefone</span><span class="pf-val">${esc(p.tel||'—')}</span></div>
         <div class="pax-field"><span class="pf-label">Valor</span><span class="pf-val" style="color:#059669;font-weight:700">R$ ${(()=>{try{const ds=JSON.parse(p.dias||'null');return ds&&ds.length?ds.length*55:55;}catch(e){return 55;}})()}</span></div>
         <div class="pax-field"><span class="pf-label">Assentos</span><span class="pf-val">${p.seats_needed||1}</span></div>
@@ -1637,12 +1652,17 @@ async function registerPassenger(){
     const rgVal  = isCPF ? null : (rg||null);
     const cpfVal = isCPF ? rg : null;
     await insertPax({cpf:cpfVal,rg:rgVal,nome,tel,obs,dia:diaMain,dias:diasJson,doc_type:docType,seats_needed,category});
-    await renderDaySelector();
-    await renderUserTicket();
-    await updateRegisterBtn();
     showToast('✅ Reservado para '+selectedDays.join(' + ')+'!');
-    setTimeout(()=>showImportantNotice(), 800);
-    userGoPage('ticket');
+    setTimeout(()=>{
+      showImportantNotice();
+      // Após fechar aviso, voltar ao login para próximo cadastro
+      const origClose = window.closeImportantNotice;
+      window.closeImportantNotice = function(){
+        document.getElementById('notice-modal').style.display='none';
+        window.closeImportantNotice = origClose;
+        doLogout('user');
+      };
+    }, 600);
   } catch(e){
     showToast('❌ Erro: '+e.message, true);
     btn.disabled=false; await updateRegisterBtn();
@@ -1797,11 +1817,16 @@ async function saveEditPax(){
   try {
     await supaFetch('/rest/v1/pasajeros?id=eq.'+id, {
       method: 'PATCH',
-      body: JSON.stringify({nome, rg, cpf, tel})
+      body: JSON.stringify({
+        nome,
+        rg:  rg  || null,
+        cpf: cpf || null,
+        tel: tel  || null
+      })
     });
     showToast('Dados atualizados!');
     closeEditPax();
-    logAction(adminName,'editar','Editou '+nome);
+    logAction(sessionStorage.getItem('tr_admin_name')||'Admin','editar','Editou '+nome);
     renderAdminPax();
   } catch(e){ showToast('Erro: '+e.message); }
 }
@@ -1815,14 +1840,14 @@ function calcValor(p){
 function generateExcelCSV(pax){
   const pays = loadAllPayments();
   let csv = '\uFEFF'; // BOM for Excel UTF-8
-  csv += 'Nome,RG,CPF,Telefone,Dias,Assentos,Categoria,Valor Total (R$),Status Pagamento,Cadastro\n';
+  csv += 'Nome,RG / RNM / CPF,Telefone,Dias,Assentos,Categoria,Valor Total (R$),Status Pagamento,Cadastro\n';
   pax.forEach(p => {
     let dias=''; try{const ds=JSON.parse(p.dias||'null');dias=ds?ds.join('+'):p.dia||'';}catch(e){dias=p.dia||'';}
     const valor = calcValor(p);
     const pay = pays[p.rg||p.cpf]||{};
     const status = pay.status==='pago'?'Pago':pay.status==='abono'?'Abono Parcial':'Nao Pago';
     const dt = p.ts?new Date(p.ts).toLocaleDateString('pt-BR'):'';
-    csv += [p.nome,p.rg,p.cpf||'',p.tel||'',dias,p.seats_needed||1,p.category||'Geral',valor,status,dt].map(v=>'"'+(v+'').replace(/"/g,'""')+'"').join(',')+'\n';
+    csv += [p.nome,p.rg||p.cpf||'',p.tel||'',dias,p.seats_needed||1,p.category||'Geral',valor,status,dt].map(v=>'"'+(v+'').replace(/"/g,'""')+'"').join(',')+'\n';
   });
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
@@ -1838,8 +1863,6 @@ function generateExcelCSV(pax){
 // ═══════════════════════════════════════
 async function exportCSV(){
   const pax = await getPax();
-  // Also generate CSV for Excel
-  generateExcelCSV(pax);
   if(!pax.length){showToast('Não há passageiros.');return;}
   const pays = loadAllPayments();
   const cfg  = await getConfig();
@@ -1863,8 +1886,7 @@ async function exportCSV(){
     return `<tr style="background:${bg}">
       <td style="text-align:center;color:#64748b;font-weight:600">${i+1}</td>
       <td style="font-weight:600">${p.nome||'—'}</td>
-      <td style="font-family:monospace">${p.rg||'—'}</td>
-      <td style="font-family:monospace">${p.cpf||'—'}</td>
+      <td style="font-family:monospace">${p.rg||p.cpf||'—'}</td>
       <td>${p.tel||'—'}</td>
       <td style="background:${diaC};text-align:center;font-weight:600">${diaStr}</td>
       <td style="text-align:center">${p.seats_needed||1}</td>
@@ -1960,7 +1982,7 @@ async function exportCSV(){
     <p>${cfg.destino||'Evento'} &nbsp;|&nbsp; Gerado em ${today} &nbsp;|&nbsp; ${pax.length} passageiro${pax.length!==1?'s':''}</p>
   </div>
   <table>
-    <tr><th>#</th><th>Nome Completo</th><th>RG / RNM</th><th>CPF</th><th>Telefone</th><th>Dia(s)</th><th>Assentos</th><th>Valor (R$)</th><th>Categoria</th><th>Status</th><th>Abono</th><th>Saldo Restante</th><th>Cadastro</th></tr>
+    <tr><th>#</th><th>Nome Completo</th><th>RG / RNM / CPF</th><th>Telefone</th><th>Dia(s)</th><th>Assentos</th><th>Valor (R$)</th><th>Categoria</th><th>Status</th><th>Abono</th><th>Saldo Restante</th><th>Cadastro</th></tr>
     ${rows1}
   </table>
 </div>
@@ -2074,7 +2096,7 @@ async function renderPayPage(){
         <span class="status-badge status-${st}">${stLabel}</span>
       </div>
       <div class="pay-card-grid">
-        <div class="pax-field"><span class="pf-label">RG</span><span class="pf-val">${esc(p.rg)}</span></div>
+        <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${esc(p.doc_type==='CPF'?p.cpf||'—':p.rg||'—')}</span></div>
         <div class="pax-field"><span class="pf-label">Dia</span><span class="pf-val">${p.dia||'—'}</span></div>
         <div class="pax-field"><span class="pf-label">Valor total</span><span class="pf-val" style="color:#059669;font-weight:700">R$ ${calcValor(p)}</span></div>
         <div class="pax-field"><span class="pf-label">Abonado</span><span class="pf-val">${pay.abono?'R$ '+pay.abono:'—'}</span></div>
