@@ -101,7 +101,7 @@ body::before{content:'';position:fixed;inset:0;
 #admin-app.show,#user-app.show{display:block;}
 
 /* DASHBOARD ADMIN */
-.admin-dashboard{display:none;}
+.admin-dashboard{display:none;padding:0;}
 .admin-dashboard.active{display:block;}
 .admin-dashboard-hero{background:linear-gradient(135deg,#92400e 0%,#d97706 60%,#f59e0b 100%);
   border-radius:20px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden;}
@@ -531,7 +531,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 <div id="admin-app">
 
   <!-- ADMIN DASHBOARD PAGE (NUEVO) -->
-  <div class="page admin-dashboard" id="admin-page-dashboard">
+  <div class="page admin-dashboard active" id="admin-page-dashboard">
     <div style="padding:16px 16px calc(84px + var(--safe-bottom));min-height:100vh;">
       <!-- Hero -->
       <div class="admin-dashboard-hero">
@@ -628,15 +628,17 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
       <!-- Botón para ir a pestañas -->
       <div style="margin-top:20px;padding:16px;background:#eff6ff;border:2px solid #bfdbfe;border-radius:14px;text-align:center;">
         <div style="font-size:12px;color:#1e40af;font-weight:700;margin-bottom:8px;">
-          🔽 ACCESO A 6 PESTAÑAS
+          🔄 ¿No ves datos? Prueba esto:
         </div>
-        <button class="submit-btn" onclick="adminGoPage('pax')" style="background:#2563eb;margin-top:8px;">Ir para Passageiros →</button>
+        <button class="submit-btn" onclick="location.reload()" style="background:#2563eb;margin:4px 4px;width:48%;">🔄 Refrescar</button>
+        <button class="submit-btn" onclick="adminGoPage('pax')" style="background:#2563eb;margin:4px 4px;width:48%;">👥 Passageiros</button>
+        <div style="font-size:11px;color:#3b5998;margin-top:8px;">Los datos se cargan de Supabase cada 8 segundos</div>
       </div>
     </div>
   </div>
 
   <!-- ADMIN CONFIG PAGE (EXISTENTE) -->
-  <div class="page active" id="admin-page-config">
+  <div class="page" id="admin-page-config">
     <div style="background:linear-gradient(135deg,#1a3a6b 0%,#2563eb 100%);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
         <svg width="36" height="36" viewBox="0 0 64 64" fill="none"><rect x="8" y="20" width="48" height="28" rx="6" fill="white" opacity="0.9"/><rect x="11" y="24" width="42" height="14" rx="3" fill="#93c5fd"/><rect x="12" y="25" width="12" height="12" rx="2" fill="#60a5fa"/><rect x="26" y="25" width="12" height="12" rx="2" fill="#60a5fa"/><rect x="40" y="25" width="12" height="12" rx="2" fill="#60a5fa"/><circle cx="17" cy="52" r="5" fill="#1e3a5f"/><circle cx="17" cy="52" r="2.5" fill="white"/><circle cx="47" cy="52" r="5" fill="#1e3a5f"/><circle cx="47" cy="52" r="2.5" fill="white"/></svg>
         <div><div style="color:white;font-family:Syne,sans-serif;font-size:17px;font-weight:700;">Painel Admin</div><div id="admin-name-badge" style="color:rgba(255,255,255,0.75);font-size:12px;margin-top:2px;"></div></div>
@@ -863,12 +865,12 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-btn active" id="anav-config" onclick="adminGoPage('config')"><span class="nav-icon">⚙️</span>Viagem</button>
+    <button class="nav-btn active" id="anav-dashboard" onclick="adminGoPage('dashboard')"><span class="nav-icon">📊</span>Dashboard</button>
     <button class="nav-btn" id="anav-pax" onclick="adminGoPage('pax')"><span class="nav-icon">👥</span>Passageiros</button>
     <button class="nav-btn" id="anav-pay" onclick="adminGoPage('pay')"><span class="nav-icon">💰</span>Pagamentos</button>
     <button class="nav-btn" id="anav-lembrete" onclick="adminGoPage('lembrete')"><span class="nav-icon">📲</span>Lembretes</button>
     <button class="nav-btn" id="anav-log" onclick="adminGoPage('log')"><span class="nav-icon">📋</span>Registro</button>
-    <button class="nav-btn" id="anav-settings" onclick="adminGoPage('settings')"><span class="nav-icon">🛠</span>Config</button>
+    <button class="nav-btn" id="anav-config" onclick="adminGoPage('config')"><span class="nav-icon">⚙️</span>Config</button>
   </nav>
 </div>
 
@@ -1318,8 +1320,13 @@ async function setConfig(cfg){
 async function getPax(){
   try {
     const data = await supaFetch('/rest/v1/pasajeros?select=*&order=ts.asc') || [];
+    console.log('✅ Datos de Supabase:', data);
     return data;
-  } catch(e){  return []; }
+  } catch(e){
+    console.error('❌ Error Supabase:', e);
+    // Fallback: retornar array vacío para que no rompa
+    return [];
+  }
 }
 
 async function insertPax(p){
@@ -1404,115 +1411,110 @@ async function initAdminApp(){
 }
 
 async function renderAdminDashboard(adminName, cfg){
-  // Mostrar dashboard, ocultar config
-  document.getElementById('admin-page-config').classList.remove('active');
-  document.getElementById('admin-page-dashboard').classList.add('active');
-  
-  // Llenar nombre
-  document.getElementById('admin-dashboard-name').textContent = adminName || 'Jesús';
-  
-  // Obtener datos
-  const pax = await getPax();
-  const payments = await getPayments();
-  
-  // Calcular métricas
-  const totalPax = pax.length;
-  let totalValue = 0;
-  let totalPaid = 0;
-  const dayStats = {
-    Sexta: {count: 0, value: 0},
-    Sábado: {count: 0, value: 0},
-    Domingo: {count: 0, value: 0}
-  };
-  
-  pax.forEach(p => {
-    const valor = calcValor(p);
-    totalValue += valor;
+  try {
+    console.log('🔍 Dashboard: Iniciando renderizado...');
     
-    // Obtener estado de pago
-    const payKey = p.rg || p.cpf;
-    const payment = payments[payKey] || {};
-    const paid = parseFloat(payment.abono || 0);
-    totalPaid += paid;
+    const dashEl = document.getElementById('admin-page-dashboard');
+    if(!dashEl) {
+      console.error('❌ Dashboard element not found');
+      return;
+    }
     
-    // Contar por día
-    let dias = [];
-    try {
-      const diasArray = JSON.parse(p.dias || 'null');
-      if(diasArray && Array.isArray(diasArray)) dias = diasArray;
-    } catch(e){}
-    if(!dias.length && p.dia) dias = [p.dia];
+    dashEl.classList.add('active');
+    const nameEl = document.getElementById('admin-dashboard-name');
+    if(nameEl) nameEl.textContent = adminName || 'Jesús';
     
-    dias.forEach(day => {
-      if(dayStats[day]) {
-        dayStats[day].count++;
-        dayStats[day].value += valor;
+    console.log('📡 Obteniendo datos de Supabase...');
+    const pax = await getPax();
+    console.log('👥 Pasajeros obtenidos:', pax);
+    
+    const payments = await getPayments();
+    console.log('💳 Pagos obtenidos:', payments);
+    
+    if(!cfg) cfg = await getConfig();
+    console.log('⚙️ Config obtenida:', cfg);
+    
+    const totalPax = (pax && Array.isArray(pax)) ? pax.length : 0;
+    let totalValue = 0, totalPaid = 0;
+    const dayStats = { Sexta: {count:0,value:0}, Sábado: {count:0,value:0}, Domingo: {count:0,value:0} };
+    
+    if(pax && Array.isArray(pax)) {
+      pax.forEach(p => {
+        if(!p) return;
+        const valor = calcValor(p);
+        totalValue += valor;
+        const payKey = p.rg || p.cpf;
+        const payment = (payments && payments[payKey]) || {};
+        totalPaid += parseFloat(payment.abono || 0);
+        
+        let dias = [];
+        try { const da = JSON.parse(p.dias || 'null'); if(da&&Array.isArray(da)) dias=da; } catch(e){}
+        if(!dias.length && p.dia) dias = [p.dia];
+        dias.forEach(day => { if(dayStats[day]) {dayStats[day].count++; dayStats[day].value+=valor;} });
+      });
+    }
+    
+    const totalPending = totalValue - totalPaid;
+    
+    const el = (id) => document.getElementById(id);
+    const set = (id, val) => { const e = el(id); if(e) e.textContent = val; };
+    
+    set('admin-metric-pax', totalPax);
+    set('admin-metric-total', 'R$' + totalValue.toFixed(0).replace('.', ','));
+    set('admin-metric-pago', 'R$' + totalPaid.toFixed(0).replace('.', ','));
+    set('admin-metric-pend', 'R$' + totalPending.toFixed(0).replace('.', ','));
+    
+    const friSeats = (cfg && cfg.seats_viernes) ? parseInt(cfg.seats_viernes) : 0;
+    const satSeats = (cfg && cfg.seats_sabado) ? parseInt(cfg.seats_sabado) : 0;
+    const sunSeats = (cfg && cfg.seats_domingo) ? parseInt(cfg.seats_domingo) : 0;
+    
+    const updateBar = (day, seats) => {
+      const stat = dayStats[day];
+      const pct = seats > 0 ? (stat.count / seats) * 100 : 0;
+      const key = day === 'Sexta' ? 'fri' : day === 'Sábado' ? 'sat' : 'sun';
+      set(`admin-dia-${key}-count`, `${stat.count} reservados`);
+      set(`admin-dia-${key}-pax`, `${stat.count} pax`);
+      set(`admin-dia-${key}-val`, `R$ ${stat.value.toFixed(0).replace('.', ',')}`);
+      const b = el(`admin-dia-${key}-bar`);
+      if(b) b.style.width = Math.min(pct, 100) + '%';
+    };
+    
+    updateBar('Sexta', friSeats);
+    updateBar('Sábado', satSeats);
+    updateBar('Domingo', sunSeats);
+    
+    set('admin-fin-total', 'R$ ' + totalValue.toFixed(2).replace('.', ','));
+    set('admin-fin-pago', 'R$ ' + totalPaid.toFixed(2).replace('.', ','));
+    set('admin-fin-pend', 'R$ ' + totalPending.toFixed(2).replace('.', ','));
+    
+    const paidPct = totalValue > 0 ? (totalPaid / totalValue) * 100 : 0;
+    const pendPct = totalValue > 0 ? (totalPending / totalValue) * 100 : 0;
+    const bPago = el('admin-fin-bar-pago');
+    if(bPago) bPago.style.width = paidPct + '%';
+    const bPend = el('admin-fin-bar-pend');
+    if(bPend) bPend.style.width = pendPct + '%';
+    
+    const recEl = el('admin-recentes-list');
+    if(recEl) {
+      if(pax && pax.length > 0) {
+        const rec = pax.slice(-5).reverse();
+        recEl.innerHTML = rec.map(p => {
+          if(!p) return '';
+          const payKey = p.rg || p.cpf;
+          const payment = (payments && payments[payKey]) || {};
+          const status = payment.status || 'Não pago';
+          const statusClass = status==='Pago'?'admin-st-pago':status==='Abono'?'admin-st-abono':'admin-st-pend';
+          const statusText = status==='Pago'?'Pago':status==='Abono'?'Abono':'Pendente';
+          const avatar = (p.nome || '?')[0].toUpperCase();
+          const avatarBg = p.nome ? `hsl(${p.nome.length * 30},70%,60%)` : '#94a3b8';
+          return `<div class="admin-recente-item"><div class="admin-recente-avatar" style="background:${avatarBg};">${avatar}</div><div class="admin-recente-info"><div class="admin-recente-name">${p.nome||'—'}</div><div class="admin-recente-dias">${p.dias?JSON.parse(p.dias||'[]').length:1} dia(s)</div></div><div class="admin-recente-status ${statusClass}">${statusText}</div></div>`;
+        }).join('');
+      } else {
+        recEl.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:13px;padding:20px;">Nenhum registrado ainda</div>';
       }
-    });
-  });
-  
-  const totalPending = totalValue - totalPaid;
-  
-  // Actualizar métricas
-  document.getElementById('admin-metric-pax').textContent = totalPax;
-  document.getElementById('admin-metric-total').textContent = 'R$' + totalValue.toFixed(0).replace('.', ',');
-  document.getElementById('admin-metric-pago').textContent = 'R$' + totalPaid.toFixed(0).replace('.', ',');
-  document.getElementById('admin-metric-pend').textContent = 'R$' + totalPending.toFixed(0).replace('.', ',');
-  
-  // Calcular capacidad de asientos
-  const friSeats = cfg && cfg.seats_viernes ? parseInt(cfg.seats_viernes) : 0;
-  const satSeats = cfg && cfg.seats_sabado ? parseInt(cfg.seats_sabado) : 0;
-  const sunSeats = cfg && cfg.seats_domingo ? parseInt(cfg.seats_domingo) : 0;
-  
-  // Actualizar barras de días
-  const updateDayBar = (day, seatsTotal) => {
-    const stats = dayStats[day];
-    const percent = seatsTotal > 0 ? (stats.count / seatsTotal) * 100 : 0;
-    const dayKey = day === 'Sexta' ? 'fri' : day === 'Sábado' ? 'sat' : 'sun';
-    document.getElementById(`admin-dia-${dayKey}-count`).textContent = `${stats.count} reservados`;
-    document.getElementById(`admin-dia-${dayKey}-pax`).textContent = `${stats.count} pax`;
-    document.getElementById(`admin-dia-${dayKey}-val`).textContent = `R$ ${stats.value.toFixed(0).replace('.', ',')}`;
-    document.getElementById(`admin-dia-${dayKey}-bar`).style.width = Math.min(percent, 100) + '%';
-  };
-  
-  updateDayBar('Sexta', friSeats);
-  updateDayBar('Sábado', satSeats);
-  updateDayBar('Domingo', sunSeats);
-  
-  // Actualizar resumen financiero
-  document.getElementById('admin-fin-total').textContent = 'R$ ' + totalValue.toFixed(2).replace('.', ',');
-  document.getElementById('admin-fin-pago').textContent = 'R$ ' + totalPaid.toFixed(2).replace('.', ',');
-  document.getElementById('admin-fin-pend').textContent = 'R$ ' + totalPending.toFixed(2).replace('.', ',');
-  
-  // Barras de porcentaje
-  const paidPercent = totalValue > 0 ? (totalPaid / totalValue) * 100 : 0;
-  const pendPercent = totalValue > 0 ? (totalPending / totalValue) * 100 : 0;
-  document.getElementById('admin-fin-bar-pago').style.width = paidPercent + '%';
-  document.getElementById('admin-fin-bar-pend').style.width = pendPercent + '%';
-  
-  // Últimos registros
-  const recentEl = document.getElementById('admin-recentes-list');
-  if(pax.length > 0) {
-    const recent = pax.slice(-5).reverse();
-    recentEl.innerHTML = recent.map(p => {
-      const payKey = p.rg || p.cpf;
-      const payment = payments[payKey] || {};
-      const status = payment.status || 'Não pago';
-      const statusClass = status === 'Pago' ? 'admin-st-pago' : status === 'Abono' ? 'admin-st-abono' : 'admin-st-pend';
-      const statusText = status === 'Pago' ? 'Pago' : status === 'Abono' ? 'Abono' : 'Pendente';
-      const avatar = (p.nome || '?')[0].toUpperCase();
-      const avatarBg = p.nome ? `hsl(${p.nome.length * 30},70%,60%)` : '#94a3b8';
-      return `
-        <div class="admin-recente-item">
-          <div class="admin-recente-avatar" style="background:${avatarBg};">${avatar}</div>
-          <div class="admin-recente-info">
-            <div class="admin-recente-name">${p.nome || '—'}</div>
-            <div class="admin-recente-dias">${p.dias ? JSON.parse(p.dias || '[]').length : 1} dia(s)</div>
-          </div>
-          <div class="admin-recente-status ${statusClass}">${statusText}</div>
-        </div>
-      `;
-    }).join('');
+    }
+  } catch(err) {
+    console.error('Dashboard error:', err);
   }
 }
 
@@ -1520,7 +1522,10 @@ function adminGoPage(name){
   document.querySelectorAll('#admin-app .page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('#admin-app .nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('admin-page-'+name).classList.add('active');
-  document.getElementById('anav-'+name).classList.add('active');
+  const navBtn = document.getElementById('anav-'+name);
+  if(navBtn) navBtn.classList.add('active');
+  
+  if(name==='dashboard') renderAdminDashboard(sessionStorage.getItem('tr_admin_name')||'Admin', null);
   if(name==='pax') renderAdminPax();
   if(name==='config') renderAdminTripOverview();
   if(name==='pay') renderPayPage();
@@ -2718,6 +2723,10 @@ function payFilter(f, el){
 
 function loadAllPayments(){
   return JSON.parse(localStorage.getItem('tr_payments')||'{}');
+}
+
+function getPayments(){
+  return Promise.resolve(loadAllPayments());
 }
 
 function saveAllPayments(obj){
