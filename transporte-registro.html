@@ -1359,6 +1359,7 @@ async function updatePaxDay(rg, dia){
 const dayClass={Sexta:'fri',Viernes:'fri',Sábado:'sat',Domingo:'sun'};
 let adminFilterDay='Todos'; let adminQuery='';
 let adminRefreshInterval=null;
+let globalPaxCache = [];
 
 async function initAdminApp(){
   const adminName = sessionStorage.getItem('tr_admin_name')||'Admin';
@@ -1424,15 +1425,16 @@ async function renderAdminDashboard(adminName, cfg){
     const nameEl = document.getElementById('admin-dashboard-name');
     if(nameEl) nameEl.textContent = adminName || 'Jesús';
     
-    console.log('📡 Obteniendo datos de Supabase...');
-    const pax = await getPax();
-    console.log('👥 Pasajeros obtenidos:', pax);
+    console.log('📡 Obteniendo datos...');
+    // Usar cache global si existe, si no, obtener de Supabase
+    let pax = globalPaxCache && globalPaxCache.length > 0 ? globalPaxCache : await getPax();
+    console.log('👥 Pasajeros:', pax);
     
     const payments = await getPayments();
-    console.log('💳 Pagos obtenidos:', payments);
+    console.log('💳 Pagos:', payments);
     
     if(!cfg) cfg = await getConfig();
-    console.log('⚙️ Config obtenida:', cfg);
+    console.log('⚙️ Config:', cfg);
     
     const totalPax = (pax && Array.isArray(pax)) ? pax.length : 0;
     let totalValue = 0, totalPaid = 0;
@@ -1684,6 +1686,7 @@ async function renderDashboard(pax, pays){
 
 async function renderAdminPax(){
   const pax = await getPax();
+  globalPaxCache = pax; // 💾 Guardar en cache global
   const info=document.getElementById('admin-result-info');
   const list=document.getElementById('admin-pax-list');
     let filtered=adminFilterDay==='Todos'?pax:pax.filter(p=>{
