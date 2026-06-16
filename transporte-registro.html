@@ -100,6 +100,115 @@ body::before{content:'';position:fixed;inset:0;
 #admin-app,#user-app{display:none;}
 #admin-app.show,#user-app.show{display:block;}
 
+/* DASHBOARD ADMIN */
+.admin-dashboard{display:none;}
+.admin-dashboard.active{display:block;}
+.admin-dashboard-hero{background:linear-gradient(135deg,#92400e 0%,#d97706 60%,#f59e0b 100%);
+  border-radius:20px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden;}
+.admin-dashboard-hero::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;
+  background:rgba(255,255,255,.08);border-radius:50%;}
+.admin-dashboard-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+.admin-dashboard-title{color:white;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;}
+.admin-dashboard-sub{color:rgba(255,255,255,.75);font-size:12px;margin-top:2px;}
+.admin-dashboard-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);
+  border-radius:20px;padding:5px 12px;color:white;font-size:12px;font-weight:700;}
+.admin-metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.admin-metric-card{background:white;border-radius:18px;padding:16px;
+  box-shadow:0 2px 12px rgba(0,0,0,.07);border:1px solid #f1f5f9;}
+.admin-metric-icon{font-size:22px;margin-bottom:8px;}
+.admin-metric-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#1e293b;line-height:1;}
+.admin-metric-label{font-size:11px;color:#94a3b8;font-weight:600;margin-top:4px;}
+.admin-dias{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+.admin-dia-card{background:white;border-radius:16px;padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid #f1f5f9;}
+.admin-dia-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.admin-dia-name{font-weight:800;font-size:14px;font-family:'Syne',sans-serif;}
+.admin-dia-count{font-size:13px;font-weight:700;color:#64748b;}
+.admin-progress-bar{height:8px;background:#f1f5f9;border-radius:20px;overflow:hidden;margin:8px 0;}
+.admin-progress-fill{height:100%;border-radius:20px;transition:width .6s ease;}
+.admin-progress-sex{background:linear-gradient(90deg,#3b82f6,#2563eb);}
+.admin-progress-sab{background:linear-gradient(90deg,#a78bfa,#7c3aed);}
+.admin-progress-dom{background:linear-gradient(90deg,#f472b6,#db2777);}
+.admin-dia-footer{display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;font-weight:500;}
+.admin-fin-card{background:white;border-radius:18px;padding:18px;
+  box-shadow:0 2px 12px rgba(0,0,0,.07);border:1px solid #f1f5f9;margin-bottom:14px;}
+.admin-fin-title{font-size:12px;font-weight:700;color:#94a3b8;
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.admin-fin-total{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#1e293b;margin-bottom:4px;}
+.admin-fin-total-label{font-size:12px;color:#64748b;margin-bottom:16px;}
+.admin-fin-bars{display:flex;flex-direction:column;gap:10px;}
+.admin-fin-bar-row{display:flex;align-items:center;gap:10px;}
+.admin-fin-bar-label{font-size:12px;font-weight:600;color:#64748b;width:70px;flex-shrink:0;}
+.admin-fin-bar-track{flex:1;height:10px;background:#f1f5f9;border-radius:20px;overflow:hidden;}
+.admin-fin-bar-fill-pago{height:100%;border-radius:20px;background:linear-gradient(90deg,#4ade80,#16a34a);}
+.admin-fin-bar-fill-pend{height:100%;border-radius:20px;background:linear-gradient(90deg,#fb923c,#ea580c);}
+.admin-fin-bar-val{font-size:12px;font-weight:700;width:70px;text-align:right;flex-shrink:0;}
+.admin-recentes-card{background:white;border-radius:18px;padding:18px;
+  box-shadow:0 2px 12px rgba(0,0,0,.07);border:1px solid #f1f5f9;}
+.admin-recente-item{display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid #f1f5f9;}
+.admin-recente-item:last-child{border-bottom:none;}
+.admin-recente-avatar{width:36px;height:36px;border-radius:12px;display:flex;
+  align-items:center;justify-content:center;font-size:14px;font-weight:800;
+  color:white;flex-shrink:0;}
+.admin-recente-name{font-size:13px;font-weight:700;color:#1e293b;}
+.admin-recente-dias{font-size:11px;color:#94a3b8;margin-top:2px;}
+.admin-recente-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;}
+.admin-st-pago{background:#dcfce7;color:#16a34a;}
+.admin-st-pend{background:#fee2e2;color:#dc2626;}
+.admin-st-abono{background:#fef9c3;color:#d97706;}
+.admin-btn-back{background:none;border:none;color:var(--muted);font-size:14px;font-weight:600;
+  margin-bottom:16px;cursor:pointer;padding:0;}
+.user-dashboard.active{display:block;}
+.dashboard-hero{background:linear-gradient(135deg,#1a3a6b 0%,#2563eb 55%,#4f46e5 100%);
+  border-radius:20px;padding:28px 24px;margin-bottom:16px;position:relative;overflow:hidden;}
+.dashboard-hero::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;
+  background:rgba(255,255,255,.06);border-radius:50%;}
+.dashboard-greeting{color:rgba(255,255,255,.7);font-size:12px;margin-bottom:4px;}
+.dashboard-name{color:white;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+  margin-bottom:12px;position:relative;z-index:1;}
+.dashboard-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 14px;font-size:12px;
+  color:white;font-weight:600;position:relative;z-index:1;}
+.dashboard-badge .dot{width:7px;height:7px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.dashboard-card{background:white;border-radius:18px;padding:16px;margin-bottom:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);border:1px solid #f1f5f9;}
+.dashboard-card-label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:8px;}
+.dashboard-card-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#1e293b;margin-bottom:4px;}
+.dashboard-card-subtitle{font-size:13px;color:#64748b;}
+.dashboard-dias{display:flex;flex-direction:column;gap:10px;}
+.dashboard-dia-row{display:flex;align-items:center;gap:12px;background:#f8fafc;
+  border-radius:12px;padding:12px;border:1px solid #e2e8f0;}
+.dashboard-dia-icon{width:40px;height:40px;border-radius:12px;display:flex;
+  align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.dashboard-dia-icon.sex{background:#eff6ff;}
+.dashboard-dia-icon.sab{background:#f5f3ff;}
+.dashboard-dia-icon.dom{background:#fdf2f8;}
+.dashboard-dia-info{flex:1;}
+.dashboard-dia-name{font-weight:700;font-size:13px;}
+.dashboard-dia-date{font-size:11px;color:#94a3b8;margin-top:2px;}
+.dashboard-pay-status{display:flex;align-items:center;gap:14px;
+  background:linear-gradient(135deg,#fef9c3,#fef3c7);border:1.5px solid #fde68a;
+  border-radius:14px;padding:16px;margin-bottom:14px;}
+.dashboard-pay-icon{font-size:28px;}
+.dashboard-pay-label{font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;}
+.dashboard-pay-val{font-size:18px;font-weight:800;color:#92400e;font-family:'Syne',sans-serif;}
+.dashboard-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.dashboard-info-item{background:#f8fafc;border-radius:12px;padding:12px;border:1px solid #e2e8f0;}
+.dashboard-info-icon{font-size:18px;margin-bottom:6px;}
+.dashboard-info-label{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;}
+.dashboard-info-val{font-size:13px;font-weight:700;color:#1e293b;margin-top:4px;}
+.dashboard-btn{width:100%;padding:14px;background:linear-gradient(135deg,#16a34a,#15803d);
+  color:white;border:none;border-radius:14px;font-family:'Syne',sans-serif;font-size:14px;
+  font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 16px rgba(22,163,74,.3);}
+.dashboard-btn-secondary{width:100%;padding:12px;background:var(--surface2);color:var(--accent);
+  border:1.5px solid var(--border);border-radius:12px;font-family:'Syne',sans-serif;
+  font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;}
+.dashboard-btn-secondary:active{transform:translateY(2px);}
+
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#ffffff !important;border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:50;box-shadow:0 -4px 20px rgba(0,0,0,.08);}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px;background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;min-height:60px;transition:color .2s;}
@@ -421,6 +530,112 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 <!-- ═══════ ADMIN APP ═══════ -->
 <div id="admin-app">
 
+  <!-- ADMIN DASHBOARD PAGE (NUEVO) -->
+  <div class="page admin-dashboard" id="admin-page-dashboard">
+    <div style="padding:16px 16px calc(84px + var(--safe-bottom));min-height:100vh;">
+      <!-- Hero -->
+      <div class="admin-dashboard-hero">
+        <div class="admin-dashboard-top">
+          <div>
+            <div class="admin-dashboard-title">Painel Admin</div>
+            <div class="admin-dashboard-sub">Congresso Itatiba</div>
+          </div>
+          <div class="admin-dashboard-badge">👤 <span id="admin-dashboard-name">Jesús</span></div>
+        </div>
+      </div>
+
+      <!-- Métricas -->
+      <div class="admin-metrics-grid">
+        <div class="admin-metric-card">
+          <div class="admin-metric-icon">👥</div>
+          <div class="admin-metric-val" id="admin-metric-pax">0</div>
+          <div class="admin-metric-label">Passageiros</div>
+        </div>
+        <div class="admin-metric-card">
+          <div class="admin-metric-icon">💰</div>
+          <div class="admin-metric-val" id="admin-metric-total">R$0</div>
+          <div class="admin-metric-label">Total a cobrar</div>
+        </div>
+        <div class="admin-metric-card">
+          <div class="admin-metric-icon">✅</div>
+          <div class="admin-metric-val" id="admin-metric-pago">R$0</div>
+          <div class="admin-metric-label">Recebido</div>
+        </div>
+        <div class="admin-metric-card">
+          <div class="admin-metric-icon">⏳</div>
+          <div class="admin-metric-val" id="admin-metric-pend">R$0</div>
+          <div class="admin-metric-label">Pendente</div>
+        </div>
+      </div>
+
+      <!-- Dias -->
+      <div class="admin-dias">
+        <div class="admin-dia-card">
+          <div class="admin-dia-top">
+            <div class="admin-dia-name" style="color:#2563eb;">Sexta · 17/07</div>
+            <div class="admin-dia-count" id="admin-dia-fri-count">0 reservados</div>
+          </div>
+          <div class="admin-progress-bar"><div class="admin-progress-fill admin-progress-sex" id="admin-dia-fri-bar" style="width:0%"></div></div>
+          <div class="admin-dia-footer"><span id="admin-dia-fri-pax">0 pax</span><span id="admin-dia-fri-val">R$ 0</span></div>
+        </div>
+        <div class="admin-dia-card">
+          <div class="admin-dia-top">
+            <div class="admin-dia-name" style="color:#7c3aed;">Sábado · 18/07</div>
+            <div class="admin-dia-count" id="admin-dia-sat-count">0 reservados</div>
+          </div>
+          <div class="admin-progress-bar"><div class="admin-progress-fill admin-progress-sab" id="admin-dia-sat-bar" style="width:0%"></div></div>
+          <div class="admin-dia-footer"><span id="admin-dia-sat-pax">0 pax</span><span id="admin-dia-sat-val">R$ 0</span></div>
+        </div>
+        <div class="admin-dia-card">
+          <div class="admin-dia-top">
+            <div class="admin-dia-name" style="color:#db2777;">Domingo · 19/07</div>
+            <div class="admin-dia-count" id="admin-dia-sun-count">0 reservados</div>
+          </div>
+          <div class="admin-progress-bar"><div class="admin-progress-fill admin-progress-dom" id="admin-dia-sun-bar" style="width:0%"></div></div>
+          <div class="admin-dia-footer"><span id="admin-dia-sun-pax">0 pax</span><span id="admin-dia-sun-val">R$ 0</span></div>
+        </div>
+      </div>
+
+      <!-- Financeiro -->
+      <div class="admin-fin-card">
+        <div class="admin-fin-title">Resumo Financeiro</div>
+        <div class="admin-fin-total" id="admin-fin-total">R$ 0,00</div>
+        <div class="admin-fin-total-label">total a receber</div>
+        <div class="admin-fin-bars">
+          <div class="admin-fin-bar-row">
+            <div class="admin-fin-bar-label" style="color:#16a34a;">Recebido</div>
+            <div class="admin-fin-bar-track"><div class="admin-fin-bar-fill-pago" id="admin-fin-bar-pago" style="width:0%"></div></div>
+            <div class="admin-fin-bar-val" style="color:#16a34a;" id="admin-fin-pago">R$ 0</div>
+          </div>
+          <div class="admin-fin-bar-row">
+            <div class="admin-fin-bar-label" style="color:#ea580c;">Pendente</div>
+            <div class="admin-fin-bar-track"><div class="admin-fin-bar-fill-pend" id="admin-fin-bar-pend" style="width:0%"></div></div>
+            <div class="admin-fin-bar-val" style="color:#ea580c;" id="admin-fin-pend">R$ 0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recentes -->
+      <div class="admin-recentes-card">
+        <div class="admin-fin-title" style="margin-bottom:10px;">Últimos registros</div>
+        <div id="admin-recentes-list">
+          <div style="text-align:center;color:#94a3b8;font-size:13px;padding:20px;">
+            Nenhum registrado ainda
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón para ir a pestañas -->
+      <div style="margin-top:20px;padding:16px;background:#eff6ff;border:2px solid #bfdbfe;border-radius:14px;text-align:center;">
+        <div style="font-size:12px;color:#1e40af;font-weight:700;margin-bottom:8px;">
+          🔽 ACCESO A 6 PESTAÑAS
+        </div>
+        <button class="submit-btn" onclick="adminGoPage('pax')" style="background:#2563eb;margin-top:8px;">Ir para Passageiros →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN CONFIG PAGE (EXISTENTE) -->
   <div class="page active" id="admin-page-config">
     <div style="background:linear-gradient(135deg,#1a3a6b 0%,#2563eb 100%);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
         <svg width="36" height="36" viewBox="0 0 64 64" fill="none"><rect x="8" y="20" width="48" height="28" rx="6" fill="white" opacity="0.9"/><rect x="11" y="24" width="42" height="14" rx="3" fill="#93c5fd"/><rect x="12" y="25" width="12" height="12" rx="2" fill="#60a5fa"/><rect x="26" y="25" width="12" height="12" rx="2" fill="#60a5fa"/><rect x="40" y="25" width="12" height="12" rx="2" fill="#60a5fa"/><circle cx="17" cy="52" r="5" fill="#1e3a5f"/><circle cx="17" cy="52" r="2.5" fill="white"/><circle cx="47" cy="52" r="5" fill="#1e3a5f"/><circle cx="47" cy="52" r="2.5" fill="white"/></svg>
@@ -660,6 +875,56 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 <!-- ═══════ USER APP ═══════ -->
 <div id="user-app">
 
+  <!-- USER DASHBOARD PAGE (NUEVO) -->
+  <div class="page" id="user-page-dashboard">
+    <div class="page-header">
+      <div class="page-title">🎟 Meu Cadastro</div>
+      <button class="logout-chip" onclick="doLogout('user')">Sair 🚪</button>
+    </div>
+    <div style="margin-bottom:16px;">
+      <!-- Hero -->
+      <div class="dashboard-hero">
+        <div class="dashboard-greeting">Bem-vindo de volta</div>
+        <div class="dashboard-name" id="dashboard-user-name">—</div>
+        <div class="dashboard-badge"><span class="dot"></span> Reserva confirmada</div>
+      </div>
+
+      <!-- Días -->
+      <div class="dashboard-card">
+        <div class="dashboard-card-label">Seus dias de viagem</div>
+        <div class="dashboard-dias" id="dashboard-dias-container"></div>
+      </div>
+
+      <!-- Status pago -->
+      <div class="dashboard-pay-status">
+        <div class="dashboard-pay-icon" id="dashboard-pay-icon">⏳</div>
+        <div>
+          <div class="dashboard-pay-label" id="dashboard-pay-label">Pagamento pendente</div>
+          <div class="dashboard-pay-val" id="dashboard-pay-val">R$ 0,00</div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="dashboard-info-grid">
+        <div class="dashboard-info-item">
+          <div class="dashboard-info-icon">⏰</div>
+          <div class="dashboard-info-label">Saída</div>
+          <div class="dashboard-info-val" id="dashboard-time">—</div>
+        </div>
+        <div class="dashboard-info-item">
+          <div class="dashboard-info-icon">📍</div>
+          <div class="dashboard-info-label">Ponto</div>
+          <div class="dashboard-info-val" id="dashboard-point">—</div>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <button class="dashboard-btn" onclick="downloadUserComprovante()">⬇ Baixar comprovante</button>
+      <button class="dashboard-btn-secondary" onclick="userGoPage('register')">📝 Editar dados</button>
+    </div>
+  </div>
+
+  <!-- USER REGISTRATION PAGE (EXISTENTE) -->
   <div class="page active" id="user-page-register">
     <div class="page-header">
       <div class="page-title">🎟 Meu Cadastro</div>
@@ -1095,6 +1360,10 @@ async function initAdminApp(){
   const badge2 = document.getElementById('admin-name-badge2');
   if(badge2) badge2.textContent = '👤 ' + adminName;
   const cfg = await getConfig();
+  
+  // NUEVO: Mostrar dashboard admin primero
+  await renderAdminDashboard(adminName, cfg);
+  
   // Update chip labels with dates if configured
   if(cfg){
     const chipDates = {
@@ -1128,7 +1397,123 @@ async function initAdminApp(){
     await renderAdminTripOverview();
     const paxPage = document.getElementById('admin-page-pax');
     if(paxPage && paxPage.classList.contains('active')) await renderAdminPax();
+    // También refrescar dashboard si está activo
+    const dashboardPage = document.getElementById('admin-page-dashboard');
+    if(dashboardPage && dashboardPage.classList.contains('active')) await renderAdminDashboard(adminName, cfg);
   }, 8000);
+}
+
+async function renderAdminDashboard(adminName, cfg){
+  // Mostrar dashboard, ocultar config
+  document.getElementById('admin-page-config').classList.remove('active');
+  document.getElementById('admin-page-dashboard').classList.add('active');
+  
+  // Llenar nombre
+  document.getElementById('admin-dashboard-name').textContent = adminName || 'Jesús';
+  
+  // Obtener datos
+  const pax = await getPax();
+  const payments = await getPayments();
+  
+  // Calcular métricas
+  const totalPax = pax.length;
+  let totalValue = 0;
+  let totalPaid = 0;
+  const dayStats = {
+    Sexta: {count: 0, value: 0},
+    Sábado: {count: 0, value: 0},
+    Domingo: {count: 0, value: 0}
+  };
+  
+  pax.forEach(p => {
+    const valor = calcValor(p);
+    totalValue += valor;
+    
+    // Obtener estado de pago
+    const payKey = p.rg || p.cpf;
+    const payment = payments[payKey] || {};
+    const paid = parseFloat(payment.abono || 0);
+    totalPaid += paid;
+    
+    // Contar por día
+    let dias = [];
+    try {
+      const diasArray = JSON.parse(p.dias || 'null');
+      if(diasArray && Array.isArray(diasArray)) dias = diasArray;
+    } catch(e){}
+    if(!dias.length && p.dia) dias = [p.dia];
+    
+    dias.forEach(day => {
+      if(dayStats[day]) {
+        dayStats[day].count++;
+        dayStats[day].value += valor;
+      }
+    });
+  });
+  
+  const totalPending = totalValue - totalPaid;
+  
+  // Actualizar métricas
+  document.getElementById('admin-metric-pax').textContent = totalPax;
+  document.getElementById('admin-metric-total').textContent = 'R$' + totalValue.toFixed(0).replace('.', ',');
+  document.getElementById('admin-metric-pago').textContent = 'R$' + totalPaid.toFixed(0).replace('.', ',');
+  document.getElementById('admin-metric-pend').textContent = 'R$' + totalPending.toFixed(0).replace('.', ',');
+  
+  // Calcular capacidad de asientos
+  const friSeats = cfg && cfg.seats_viernes ? parseInt(cfg.seats_viernes) : 0;
+  const satSeats = cfg && cfg.seats_sabado ? parseInt(cfg.seats_sabado) : 0;
+  const sunSeats = cfg && cfg.seats_domingo ? parseInt(cfg.seats_domingo) : 0;
+  
+  // Actualizar barras de días
+  const updateDayBar = (day, seatsTotal) => {
+    const stats = dayStats[day];
+    const percent = seatsTotal > 0 ? (stats.count / seatsTotal) * 100 : 0;
+    const dayKey = day === 'Sexta' ? 'fri' : day === 'Sábado' ? 'sat' : 'sun';
+    document.getElementById(`admin-dia-${dayKey}-count`).textContent = `${stats.count} reservados`;
+    document.getElementById(`admin-dia-${dayKey}-pax`).textContent = `${stats.count} pax`;
+    document.getElementById(`admin-dia-${dayKey}-val`).textContent = `R$ ${stats.value.toFixed(0).replace('.', ',')}`;
+    document.getElementById(`admin-dia-${dayKey}-bar`).style.width = Math.min(percent, 100) + '%';
+  };
+  
+  updateDayBar('Sexta', friSeats);
+  updateDayBar('Sábado', satSeats);
+  updateDayBar('Domingo', sunSeats);
+  
+  // Actualizar resumen financiero
+  document.getElementById('admin-fin-total').textContent = 'R$ ' + totalValue.toFixed(2).replace('.', ',');
+  document.getElementById('admin-fin-pago').textContent = 'R$ ' + totalPaid.toFixed(2).replace('.', ',');
+  document.getElementById('admin-fin-pend').textContent = 'R$ ' + totalPending.toFixed(2).replace('.', ',');
+  
+  // Barras de porcentaje
+  const paidPercent = totalValue > 0 ? (totalPaid / totalValue) * 100 : 0;
+  const pendPercent = totalValue > 0 ? (totalPending / totalValue) * 100 : 0;
+  document.getElementById('admin-fin-bar-pago').style.width = paidPercent + '%';
+  document.getElementById('admin-fin-bar-pend').style.width = pendPercent + '%';
+  
+  // Últimos registros
+  const recentEl = document.getElementById('admin-recentes-list');
+  if(pax.length > 0) {
+    const recent = pax.slice(-5).reverse();
+    recentEl.innerHTML = recent.map(p => {
+      const payKey = p.rg || p.cpf;
+      const payment = payments[payKey] || {};
+      const status = payment.status || 'Não pago';
+      const statusClass = status === 'Pago' ? 'admin-st-pago' : status === 'Abono' ? 'admin-st-abono' : 'admin-st-pend';
+      const statusText = status === 'Pago' ? 'Pago' : status === 'Abono' ? 'Abono' : 'Pendente';
+      const avatar = (p.nome || '?')[0].toUpperCase();
+      const avatarBg = p.nome ? `hsl(${p.nome.length * 30},70%,60%)` : '#94a3b8';
+      return `
+        <div class="admin-recente-item">
+          <div class="admin-recente-avatar" style="background:${avatarBg};">${avatar}</div>
+          <div class="admin-recente-info">
+            <div class="admin-recente-name">${p.nome || '—'}</div>
+            <div class="admin-recente-dias">${p.dias ? JSON.parse(p.dias || '[]').length : 1} dia(s)</div>
+          </div>
+          <div class="admin-recente-status ${statusClass}">${statusText}</div>
+        </div>
+      `;
+    }).join('');
+  }
 }
 
 function adminGoPage(name){
@@ -1408,7 +1793,207 @@ async function initUserApp(){
   const rg=sessionStorage.getItem('tr_user_rg')||'';
   const pax=await getPax();
   const me=pax.find(p=>(p.rg||p.cpf)===rg);
-  if(me) document.getElementById('u-nombre').value=me.nome||'';
+  if(me){
+    document.getElementById('u-nombre').value=me.nome||'';
+    // NUEVO: Mostrar dashboard si ya está registrado
+    await showUserDashboard(me);
+  }
+}
+
+async function showUserDashboard(passenger){
+  // Ocultar página de registro, mostrar dashboard
+  document.getElementById('user-page-register').classList.remove('active');
+  document.getElementById('user-page-dashboard').classList.add('active');
+  
+  // Llenar datos del dashboard
+  document.getElementById('dashboard-user-name').textContent = passenger.nome || '—';
+  
+  // Días
+  let dias = [];
+  try{
+    const diasArray = JSON.parse(passenger.dias || 'null');
+    if(diasArray && Array.isArray(diasArray)) dias = diasArray;
+  } catch(e){}
+  if(!dias.length && passenger.dia) dias = [passenger.dia];
+  
+  const diasContainer = document.getElementById('dashboard-dias-container');
+  diasContainer.innerHTML = dias.map(day => {
+    const dayConfig = {
+      'Sexta': {icon:'🗓', color:'sex', name:'Sexta-feira', date:'17 de julho'},
+      'Sábado': {icon:'🗓', color:'sab', name:'Sábado', date:'18 de julho'},
+      'Domingo': {icon:'🗓', color:'dom', name:'Domingo', date:'19 de julho'}
+    }[day] || {icon:'🗓', color:'sex', name:day, date:''};
+    return `
+      <div class="dashboard-dia-row">
+        <div class="dashboard-dia-icon ${dayConfig.color}">${dayConfig.icon}</div>
+        <div class="dashboard-dia-info">
+          <div class="dashboard-dia-name">${dayConfig.name}</div>
+          <div class="dashboard-dia-date">${dayConfig.date}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Valor y estado de pago
+  const valor = calcValor(passenger);
+  document.getElementById('dashboard-pay-val').textContent = 'R$ ' + valor.toFixed(2).replace('.', ',');
+  
+  // Obtener config para horario y punto
+  const cfg = await getConfig();
+  document.getElementById('dashboard-time').textContent = cfg && cfg.hora ? cfg.hora : '—';
+  document.getElementById('dashboard-point').textContent = cfg && cfg.obs ? cfg.obs : 'Ponto a confirmar';
+  
+  // Actualizar nav para mostrar dashboard como activo
+  document.getElementById('unav-register').classList.add('active');
+}
+
+function calcValor(passenger){
+  try{
+    const dias = JSON.parse(passenger.dias || 'null');
+    if(dias && Array.isArray(dias) && dias.length) return dias.length * 55;
+  } catch(e){}
+  return 55;
+}
+
+async function downloadUserComprovante(){
+  try {
+    // Mostrar loading
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = '⏳ Gerando...';
+    btn.disabled = true;
+    
+    const rg = sessionStorage.getItem('tr_user_rg') || '';
+    const [pax, cfg, payments] = await Promise.all([getPax(), getConfig(), getPayments()]);
+    const myReg = pax.find(p => (p.rg || p.cpf) === rg);
+    
+    if (!myReg) {
+      alert('Erro: usuário não encontrado');
+      btn.textContent = originalText;
+      btn.disabled = false;
+      return;
+    }
+    
+    // Criar elemento HTML para o comprovante
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.width = '600px';
+    container.style.padding = '0';
+    container.style.background = 'white';
+    
+    // Preparar dados
+    let dias = [];
+    try {
+      const diasArray = JSON.parse(myReg.dias || 'null');
+      if (diasArray && Array.isArray(diasArray)) dias = diasArray;
+    } catch (e) {}
+    if (!dias.length && myReg.dia) dias = [myReg.dia];
+    
+    const valor = calcValor(myReg);
+    const payKey = myReg.rg || myReg.cpf;
+    const payment = payments[payKey] || {};
+    const statusPago = payment.status === 'Pago' ? 'Pago' : 'Pendente';
+    const reservaNum = myReg.id ? String(myReg.id).padStart(4, '0') : '0001';
+    
+    // HTML do comprovante
+    container.innerHTML = `
+      <div style="background: linear-gradient(135deg, #1a3a6b, #2563eb); padding: 40px 30px; text-align: center; border-radius: 0; position: relative; overflow: hidden;">
+        <div style="position: absolute; right: -30px; top: -30px; width: 200px; height: 200px; background: rgba(255,255,255,.06); border-radius: 50%;"></div>
+        <div style="font-size: 48px; margin-bottom: 12px; position: relative; z-index: 1;">🚌</div>
+        <div style="color: white; font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 4px; position: relative; z-index: 1;">Transporte Jardim do Vale</div>
+        <div style="color: rgba(255,255,255,.75); font-size: 13px; margin-bottom: 16px; position: relative; z-index: 1;">Congresso Itatiba 2026</div>
+        <div style="background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); border-radius: 20px; padding: 6px 18px; color: white; font-size: 12px; font-weight: 700; display: inline-block; letter-spacing: 1px; position: relative; z-index: 1;">Nº ${reservaNum}</div>
+      </div>
+      
+      <div style="padding: 40px 30px; background: white;">
+        <div style="margin-bottom: 20px;">
+          <div style="font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 6px;">${myReg.nome || '—'}</div>
+          <div style="font-size: 13px; color: #94a3b8;">${myReg.rg || myReg.cpf || '—'}</div>
+        </div>
+        
+        <div style="display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+          <div style="font-size: 20px; width: 30px; text-align: center;">📅</div>
+          <div style="flex: 1;">
+            <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px;">Dias de viagem</div>
+            <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 4px;">${dias.join(', ')}</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+          <div style="font-size: 20px; width: 30px; text-align: center;">⏰</div>
+          <div style="flex: 1;">
+            <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px;">Horário de saída</div>
+            <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 4px;">${(cfg && cfg.hora) || 'A confirmar'}</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+          <div style="font-size: 20px; width: 30px; text-align: center;">📍</div>
+          <div style="flex: 1;">
+            <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px;">Ponto de encontro</div>
+            <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 4px;">${(cfg && cfg.obs) || 'A confirmar'}</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: flex-start; gap: 14px; padding: 12px 0;">
+          <div style="font-size: 20px; width: 30px; text-align: center;">💰</div>
+          <div style="flex: 1;">
+            <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px;">Valor total</div>
+            <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 4px;">R$ ${valor.toFixed(2).replace('.', ',')}</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${statusPago}</div>
+          </div>
+        </div>
+        
+        <div style="background: #f8fafc; padding: 14px; border-radius: 12px; text-align: center; margin-top: 20px; border-top: 1px solid #e2e8f0;">
+          <div style="font-size: 12px; color: #94a3b8;">Prazo de pagamento: <strong>05/07/2026</strong></div>
+          <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Conserve este comprovante</div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(container);
+    
+    // Usar html2canvas para convertir a PNG
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    script.onload = async function() {
+      try {
+        const canvas = await html2canvas(container, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true
+        });
+        
+        // Descargar
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = `Comprovante_${myReg.nome || 'Passageiro'}_${new Date().getTime()}.png`;
+        link.click();
+        
+        showToast('✅ Comprovante descargado!');
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Erro ao gerar comprovante. Tente novamente.');
+      } finally {
+        document.body.removeChild(container);
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    };
+    script.onerror = function() {
+      alert('Erro ao carregar biblioteca. Tente novamente.');
+      btn.textContent = originalText;
+      btn.disabled = false;
+      document.body.removeChild(container);
+    };
+    document.head.appendChild(script);
+    
+  } catch(err) {
+    console.error('Error:', err);
+    alert('Erro ao processar. Tente novamente.');
+    event.target.disabled = false;
+  }
 }
 
 async function renderUserTripInfo(){
@@ -1941,6 +2526,17 @@ async function exportCSV(){
     </tr>`;
   }).join('');
 
+  const totalGeral = pax.reduce((acc,p)=>acc+parseFloat(calcValor(p)),0).toFixed(2);
+  const totalAbono = pax.reduce((acc,p)=>{ const pay=pays[p.rg||p.cpf]||{}; return acc+parseFloat(pay.abono||0); },0).toFixed(2);
+  const totalSaldo = (parseFloat(totalGeral)-parseFloat(totalAbono)).toFixed(2);
+  const rowTotal = `<tr style="background:#1a3a6b;color:white;font-weight:800;font-size:13px;">
+    <td colspan="3" style="color:white;padding:12px;">TOTAL GERAL (${pax.length} passageiros)</td>
+    <td style="text-align:center;color:#fbbf24;">R$ ${totalGeral}</td>
+    <td style="text-align:center;color:#86efac;">${parseFloat(totalAbono)>0?'R$ '+totalAbono:'—'}</td>
+    <td style="text-align:center;color:#fca5a5;">R$ ${totalSaldo}</td>
+    <td style="text-align:center;color:white;">—</td>
+  </tr>`;
+
   const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <title>Transporte Jardim do Vale — Relatório</title>
@@ -2008,6 +2604,7 @@ async function exportCSV(){
   <table>
     <tr><th>Nome</th><th>Dia(s)</th><th>Assentos</th><th>Valor Total</th><th>Abonado</th><th>Saldo Restante</th><th>Status</th></tr>
     ${rows3}
+    ${rowTotal}
   </table>
 </div>
 
