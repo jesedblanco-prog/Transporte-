@@ -1721,7 +1721,7 @@ async function renderAdminPax(){
       <div class="pax-grid">
         <div class="pax-field"><span class="pf-label">${p.doc_type||'RG'}</span><span class="pf-val">${hlAdmin(p.doc_type==='CPF'?(p.cpf||'—'):(p.rg||'—'))}</span></div>
         <div class="pax-field"><span class="pf-label">Telefone</span><span class="pf-val">${esc(p.tel||'—')}</span></div>
-        <div class="pax-field"><span class="pf-label">Valor</span><span class="pf-val" style="color:#059669;font-weight:700">R$ ${(()=>{try{const ds=JSON.parse(p.dias||'null');return ds&&ds.length?ds.length*55:55;}catch(e){return 55;}})()}</span></div>
+        <div class="pax-field"><span class="pf-label">Valor</span><span class="pf-val" style="color:#059669;font-weight:700">R$ ${(()=>{try{const cfg=localStorage.getItem('tr_pay_config');const precio=cfg?(parseFloat(JSON.parse(cfg).valor)||55):55;const ds=JSON.parse(p.dias||'null');return ds&&ds.length?ds.length*precio:precio;}catch(e){return 55;}})()}</span></div>
         <div class="pax-field"><span class="pf-label">Assentos</span><span class="pf-val">${p.seats_needed||1}</span></div>
         <div class="pax-field"><span class="pf-label">Categoria</span><span class="pf-val">${esc(p.category||'Geral')}</span></div>
       </div>
@@ -1857,8 +1857,11 @@ async function showUserDashboard(passenger){
 
 function calcValor(passenger){
   try{
+    const payCfg = localStorage.getItem('tr_pay_config');
+    const precio = payCfg ? (parseFloat(JSON.parse(payCfg).valor) || 55) : 55;
     const dias = JSON.parse(passenger.dias || 'null');
-    if(dias && Array.isArray(dias) && dias.length) return dias.length * 55;
+    if(dias && Array.isArray(dias) && dias.length) return dias.length * precio;
+    return precio;
   } catch(e){}
   return 55;
 }
@@ -2424,9 +2427,13 @@ async function saveEditPax(){
   } catch(e){ showToast('Erro: '+e.message); }
 }
 
-const PRECO_DIA = 55;
 function calcValor(p){
-  try{ const ds=JSON.parse(p.dias||'null'); return ds&&ds.length?ds.length*PRECO_DIA:PRECO_DIA; }catch(e){return PRECO_DIA;}
+  try{
+    const cfg=localStorage.getItem('tr_pay_config');
+    const PRECO_DIA=cfg?(parseFloat(JSON.parse(cfg).valor)||55):55;
+    const ds=JSON.parse(p.dias||'null');
+    return ds&&ds.length?ds.length*PRECO_DIA:PRECO_DIA;
+  }catch(e){return 55;}
 }
 
 
