@@ -1092,31 +1092,12 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 
 <script>
 // ═══════════════════════════════════════
-// SUPABASE CONFIG
+// SUPABASE CONFIG - NO LONGER USED (100% OFFLINE)
 // ═══════════════════════════════════════
-const SUPA_URL = 'https://jjvmtrieudoxjjlkqsng.supabase.co';
-const SUPA_KEY = 'sb_publishable_rl5OtnLInXXuCsZ0dN8kLg_fJD6TrN0';
-
-async function supaFetch(path, options={}) {
-  const res = await fetch(SUPA_URL + path, {
-    ...options,
-    headers: {
-      'apikey': SUPA_KEY,
-      'Authorization': 'Bearer ' + SUPA_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': options.prefer || 'return=representation',
-      ...(options.headers||{})
-    }
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    let errMsg = err;
-    try { const j=JSON.parse(err); errMsg=j.message||j.hint||err; } catch(e){}
-    throw new Error(errMsg);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
-}
+// const SUPA_URL = 'https://jjvmtrieudoxjjlkqsng.supabase.co';
+// const SUPA_KEY = 'sb_publishable_rl5OtnLInXXuCsZ0dN8kLg_fJD6TrN0';
+// 
+// async function supaFetch(path, options={}) { ... }
 
 // ═══════════════════════════════════════
 // AUTH (local — contraseña solo del admin)
@@ -1289,68 +1270,124 @@ function toggleEye(id,btn){
 }
 
 // ═══════════════════════════════════════
-// SUPABASE DATA LAYER
+// LOCALSTORAGE DATA LAYER (100% OFFLINE)
 // ═══════════════════════════════════════
+const CONFIG_KEY = 'tr_config';
+const PAX_KEY = 'tr_pax';
+
+// INICIALIZAR CON DATOS DE PRUEBA SI ESTÁ VACÍO
+function initializeWithTestData(){
+  if(!localStorage.getItem(CONFIG_KEY)){
+    const testConfig = {
+      destino: "Congreso Itatiba SP",
+      hora: "06:00",
+      hora_chegada: "18:00",
+      obs: "Salida del Jardín",
+      seats_viernes: 25,
+      seats_sabado: 25,
+      seats_domingo: 25,
+      date_fri: "2026-07-10",
+      date_sat: "2026-07-11",
+      date_sun: "2026-07-12"
+    };
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(testConfig));
+  }
+  
+  if(!localStorage.getItem(PAX_KEY)){
+    const testPax = [
+      {id: "pax_1", nome: "Jesus Blanco", rg: "12345678", cpf: "123.456.789-00", tel: "5511999999999", dia: "Sábado", dias: '["Sábado"]', seats_needed: 1, category: "Geral", doc_type: "RG", ts: new Date().toISOString()},
+      {id: "pax_2", nome: "Sergio García", rg: "87654321", cpf: "987.654.321-00", tel: "5511888888888", dia: "Domingo", dias: '["Domingo"]', seats_needed: 1, category: "Geral", doc_type: "RG", ts: new Date().toISOString()},
+      {id: "pax_3", nome: "María López", rg: "11111111", cpf: "111.111.111-00", tel: "5511777777777", dia: "Sábado", dias: '["Sábado"]', seats_needed: 1, category: "Geral", doc_type: "RG", ts: new Date().toISOString()},
+      {id: "pax_4", nome: "Carlos Díaz", rg: "22222222", cpf: "222.222.222-00", tel: "5511666666666", dia: "Domingo", dias: '["Domingo"]', seats_needed: 1, category: "Geral", doc_type: "RG", ts: new Date().toISOString()},
+      {id: "pax_5", nome: "Ana Silva", rg: "33333333", cpf: "333.333.333-00", tel: "5511555555555", dia: "Sexta", dias: '["Sexta"]', seats_needed: 1, category: "Geral", doc_type: "RG", ts: new Date().toISOString()}
+    ];
+    localStorage.setItem(PAX_KEY, JSON.stringify(testPax));
+  }
+  
+  if(!localStorage.getItem(PAY_CONFIG_KEY)){
+    const testPayConfig = {valor: "55", prazo: "2026-07-20", msg: "Olá {nome}! Lembre-se do pagamento"};
+    localStorage.setItem(PAY_CONFIG_KEY, JSON.stringify(testPayConfig));
+  }
+}
+
+// EJECUTAR INICIALIZACIÓN CUANDO CARGA LA PÁGINA
+window.addEventListener('load', () => {
+  initializeWithTestData();
+  document.getElementById('splash').classList.add('hidden');
+  showScreen('screen-user-login');
+});
+
+
 async function getConfig(){
   try {
-    const data = await supaFetch('/rest/v1/config?id=eq.1&select=*');
-    return data && data[0] ? data[0] : null;
+    const data = localStorage.getItem(CONFIG_KEY);
+    return data ? JSON.parse(data) : null;
   } catch(e){ return null; }
 }
 
 async function setConfig(cfg){
-  await supaFetch('/rest/v1/config?id=eq.1', {
-    method:'PATCH',
-    prefer:'return=minimal',
-    body: JSON.stringify({
-      destino: cfg.destino,
-      hora: cfg.hora,
+  try {
+    localStorage.setItem(CONFIG_KEY, JSON.stringify({
+      destino: cfg.destino||'',
+      hora: cfg.hora||'',
       hora_chegada: cfg.hora_chegada||'',
-      obs: cfg.obs,
-      seats_viernes: cfg.seats_viernes,
-      seats_sabado: cfg.seats_sabado,
-      seats_domingo: cfg.seats_domingo,
+      obs: cfg.obs||'',
+      seats_viernes: cfg.seats_viernes||0,
+      seats_sabado: cfg.seats_sabado||0,
+      seats_domingo: cfg.seats_domingo||0,
       date_fri: cfg.date_fri||'',
       date_sat: cfg.date_sat||'',
       date_sun: cfg.date_sun||''
-    })
-  });
+    }));
+  } catch(e){ console.error('Error guardando config:', e); }
 }
 
 async function getPax(){
   try {
-    const data = await supaFetch('/rest/v1/pasajeros?select=*&order=ts.asc') || [];
-    console.log('✅ Datos de Supabase:', data);
-    return data;
+    const data = localStorage.getItem(PAX_KEY);
+    const pax = data ? JSON.parse(data) : [];
+    console.log('✅ Pasajeros desde localStorage:', pax.length);
+    return pax;
   } catch(e){
-    console.error('❌ Error Supabase:', e);
-    // Fallback: retornar array vacío para que no rompa
+    console.error('❌ Error localStorage:', e);
     return [];
   }
 }
 
 async function insertPax(p){
-  return await supaFetch('/rest/v1/pasajeros', {
-    method:'POST',
-    prefer:'return=representation',
-    body: JSON.stringify(p)
-  });
+  try {
+    const pax = await getPax();
+    p.id = 'pax_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    p.ts = new Date().toISOString();
+    pax.push(p);
+    localStorage.setItem(PAX_KEY, JSON.stringify(pax));
+    return p;
+  } catch(e){ console.error('Error insertando pasajero:', e); }
 }
 
 async function deletePax(id){
-  await supaFetch('/rest/v1/pasajeros?id=eq.'+id, { method:'DELETE' });
+  try {
+    let pax = await getPax();
+    pax = pax.filter(p => p.id !== id);
+    localStorage.setItem(PAX_KEY, JSON.stringify(pax));
+  } catch(e){ console.error('Error deletando pasajero:', e); }
 }
 
 async function deleteAllPax(){
-  await supaFetch('/rest/v1/pasajeros?id=gt.0', { method:'DELETE' });
+  try {
+    localStorage.setItem(PAX_KEY, JSON.stringify([]));
+  } catch(e){ console.error('Error deletando todo:', e); }
 }
 
-async function updatePaxDay(rg, dia){
-  await supaFetch('/rest/v1/pasajeros?rg=eq.'+encodeURIComponent(rg), {
-    method:'PATCH',
-    prefer:'return=minimal',
-    body: JSON.stringify({ dia })
-  });
+async function updatePaxDay(id, dia){
+  try {
+    let pax = await getPax();
+    const p = pax.find(x => x.id === id);
+    if(p) {
+      p.dia = dia;
+      localStorage.setItem(PAX_KEY, JSON.stringify(pax));
+    }
+  } catch(e){ console.error('Error actualizando día:', e); }
 }
 
 // ═══════════════════════════════════════
@@ -2424,9 +2461,17 @@ async function saveEditPax(){
   } catch(e){ showToast('Erro: '+e.message); }
 }
 
-const PRECO_DIA = 55;
+function getPrecioDia(){
+  try{
+    const cfg = loadPayConfig();
+    return parseFloat(cfg.valor) || 55;
+  }catch(e){
+    return 55;
+  }
+}
+
 function calcValor(p){
-  try{ const ds=JSON.parse(p.dias||'null'); return ds&&ds.length?ds.length*PRECO_DIA:PRECO_DIA; }catch(e){return PRECO_DIA;}
+  try{ const ds=JSON.parse(p.dias||'null'); return ds&&ds.length?ds.length*getPrecioDia():getPrecioDia(); }catch(e){return getPrecioDia();}
 }
 
 
@@ -2648,9 +2693,20 @@ function savePayConfig(){
     prazo: document.getElementById('pay-prazo').value,
     msg:   document.getElementById('pay-msg').value
   };
+  
+  const oldValor = loadPayConfig().valor;
+  const newValor = cfg.valor;
+  
   localStorage.setItem(PAY_CONFIG_KEY, JSON.stringify(cfg));
-  showToast('✅ Configuração de cobrança salva');
-  renderPayPage();
+  
+  // 🔄 Si el precio cambió, avisar y refrescar
+  if(oldValor !== newValor){
+    showToast(`✅ Preço atualizado de R$${oldValor} para R$${newValor}\n\n🔄 Todos os ${document.getElementById('pay-result-info')?.textContent || ''} recebem novo valor!`);
+  } else {
+    showToast('✅ Configuração de cobrança salva');
+  }
+  
+  renderPayPage(); // Esto recalcula todo automáticamente
 }
 
 let payFilterStatus='Todos';
