@@ -870,7 +870,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
     <button class="nav-btn" id="anav-pay" onclick="adminGoPage('pay')"><span class="nav-icon">💰</span>Pagamentos</button>
     <button class="nav-btn" id="anav-lembrete" onclick="adminGoPage('lembrete')"><span class="nav-icon">📲</span>Lembretes</button>
     <button class="nav-btn" id="anav-log" onclick="adminGoPage('log')"><span class="nav-icon">📋</span>Registro</button>
-    <button class="nav-btn" id="anav-config" onclick="adminGoPage('config')"><span class="nav-icon">⚙️</span>Config</button>
+    <button class="nav-btn" id="anav-config" onclick="adminGoPage('settings')"><span class="nav-icon">⚙️</span>Config</button>
   </nav>
 </div>
 
@@ -1321,10 +1321,12 @@ async function getPax(){
   try {
     const data = await supaFetch('/rest/v1/pasajeros?select=*&order=ts.asc') || [];
     console.log('✅ Datos de Supabase:', data);
+    if(data.length) localStorage.setItem('tr_pax_cache', JSON.stringify(data));
     return data;
   } catch(e){
     console.error('❌ Error Supabase:', e);
-    // Fallback: retornar array vacío para que no rompa
+    const cache = localStorage.getItem('tr_pax_cache');
+    if(cache){ console.log('📦 Usando cache local'); return JSON.parse(cache); }
     return [];
   }
 }
