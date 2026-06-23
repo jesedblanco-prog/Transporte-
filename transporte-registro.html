@@ -850,6 +850,12 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
       <div class="chip" onclick="payFilter('pago',this)">✅ Pago</div>
     </div>
 
+    <!-- Búsqueda por nombre -->
+    <div style="margin:10px 0;">
+      <input type="text" id="pay-search-input" placeholder="🔍 Buscar por nombre..." oninput="paySearch(this.value)"
+        style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:15px;outline:none;box-sizing:border-box;font-family:inherit;">
+    </div>
+
     <div class="result-info" id="pay-result-info"></div>
     <div id="pay-list"></div>
   </div>
@@ -1449,7 +1455,11 @@ async function renderAdminDashboard(adminName, cfg){
         totalValue += valor;
         const payKey = p.rg || p.cpf;
         const payment = (payments && payments[payKey]) || {};
-        totalPaid += parseFloat(payment.abono || 0);
+        if(payment.status === 'pago'){
+          totalPaid += valor; // Pago completo = valor total del pasajero
+        } else {
+          totalPaid += parseFloat(payment.abono || 0); // Solo abono parcial
+        }
         
         let dias = [];
         try { const da = JSON.parse(p.dias || 'null'); if(da&&Array.isArray(da)) dias=da; } catch(e){}
@@ -2663,6 +2673,7 @@ function savePayConfig(){
 }
 
 let payFilterStatus='Todos';
+let paySearchQuery='';
 
 async function renderPayPage(){
   const cfg = loadPayConfig();
@@ -2687,7 +2698,8 @@ async function renderPayPage(){
   </div>`;
 
   let filtered = pax;
-  if(payFilterStatus !== 'Todos') filtered = pax.filter(p=>getPayStatus(p.rg||p.cpf,pays)===payFilterStatus);
+  if(payFilterStatus !== 'Todos') filtered = filtered.filter(p=>getPayStatus(p.rg||p.cpf,pays)===payFilterStatus);
+  if(paySearchQuery) filtered = filtered.filter(p=>(p.nome||'').toLowerCase().includes(paySearchQuery.toLowerCase()));
 
   const info = document.getElementById('pay-result-info');
   info.textContent = `${filtered.length} passageiro${filtered.length!==1?'s':''}`;
@@ -2730,6 +2742,11 @@ function payFilter(f, el){
   payFilterStatus = f;
   document.querySelectorAll('#admin-page-pay .chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
+  renderPayPage();
+}
+
+function paySearch(q){
+  paySearchQuery = q;
   renderPayPage();
 }
 
