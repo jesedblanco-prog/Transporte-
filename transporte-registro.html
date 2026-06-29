@@ -2721,7 +2721,7 @@ async function renderPayPage(){
   document.getElementById('pay-msg').value = cfg.msg||'';
 
   const pax = await getPax();
-  const pays = await loadAllPaymentsSync();
+  const pays = loadAllPayments();
 
   const total = pax.length;
   const pagos = pax.filter(p=>getPayStatus(p.rg||p.cpf,pays)==='pago').length;
@@ -2840,13 +2840,13 @@ function savePayment(){
   const abono  = document.getElementById('pm-abono').value;
   const obs    = document.getElementById('pm-obs-pay').value.trim();
   const adminName = sessionStorage.getItem('tr_admin_name')||'Admin';
-  const payData = {
+  const pays   = loadAllPayments();
+  pays[currentPayRg] = {
     status, abono, obs,
     updatedAt: new Date().toLocaleString('pt-BR'),
     updatedBy: adminName
   };
-  // Guardar local Y en Supabase
-  savePaymentSync(currentPayRg, payData);
+  saveAllPayments(pays);
   closePayModal();
   showToast('✅ Pagamento registrado por ' + adminName + '!');
   logAction(adminName,'pagamento','Atualizou pagamento de '+document.getElementById('pm-nome').value+' → '+status);
