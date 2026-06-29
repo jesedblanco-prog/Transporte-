@@ -1098,7 +1098,7 @@ mark{background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:0 3px;}
 // SUPABASE CONFIG
 // ═══════════════════════════════════════
 const SUPA_URL = 'https://jjvmtrieudoxjjlkqsng.supabase.co';
-const SUPA_KEY = 'sb_publishable_rl5OtnLInXXuCsZ0dN8kLg_fJD6TrN0';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impqdm10cmlldWRveGpqbGtxc25nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3OTY4NTcsImV4cCI6MjA5NTM3Mjg1N30.aRuB4kgfMUvhmtAlaSVlyF07HDy_MDrJ9fQP3XbbdXc';
 
 async function supaFetch(path, options={}) {
   const res = await fetch(SUPA_URL + path, {
@@ -1297,27 +1297,38 @@ function toggleEye(id,btn){
 async function getConfig(){
   try {
     const data = await supaFetch('/rest/v1/config?id=eq.1&select=*');
-    return data && data[0] ? data[0] : null;
-  } catch(e){ return null; }
+    if(data && data[0]){
+      localStorage.setItem('tr_config_cache', JSON.stringify(data[0]));
+      return data[0];
+    }
+    return null;
+  } catch(e){
+    const cache = localStorage.getItem('tr_config_cache');
+    if(cache) return JSON.parse(cache);
+    return null;
+  }
 }
 
 async function setConfig(cfg){
-  await supaFetch('/rest/v1/config?id=eq.1', {
-    method:'PATCH',
-    prefer:'return=minimal',
-    body: JSON.stringify({
-      destino: cfg.destino,
-      hora: cfg.hora,
-      hora_chegada: cfg.hora_chegada||'',
-      obs: cfg.obs,
-      seats_viernes: cfg.seats_viernes,
-      seats_sabado: cfg.seats_sabado,
-      seats_domingo: cfg.seats_domingo,
-      date_fri: cfg.date_fri||'',
-      date_sat: cfg.date_sat||'',
-      date_sun: cfg.date_sun||''
-    })
-  });
+  localStorage.setItem('tr_config_cache', JSON.stringify(cfg));
+  try {
+    await supaFetch('/rest/v1/config?id=eq.1', {
+      method:'PATCH',
+      prefer:'return=minimal',
+      body: JSON.stringify({
+        destino: cfg.destino,
+        hora: cfg.hora,
+        hora_chegada: cfg.hora_chegada||'',
+        obs: cfg.obs,
+        seats_viernes: cfg.seats_viernes,
+        seats_sabado: cfg.seats_sabado,
+        seats_domingo: cfg.seats_domingo,
+        date_fri: cfg.date_fri||'',
+        date_sat: cfg.date_sat||'',
+        date_sun: cfg.date_sun||''
+      })
+    });
+  } catch(e){ console.warn('Config guardada localmente'); }
 }
 
 async function getPax(){
@@ -1332,6 +1343,37 @@ async function getPax(){
     if(cache){ console.log('📦 Usando cache local'); return JSON.parse(cache); }
     return [];
   }
+}
+
+// PAGOS EN SUPABASE (sincronizado entre dispositivos)
+async function loadAllPaymentsSync(){
+  try {
+    const data = await supaFetch('/rest/v1/pagos?select=*') || [];
+    const pays = {};
+    data.forEach(p => { pays[p.pax_key] = { status: p.status, abono: p.abono, obs: p.obs, updatedBy: p.updated_by, updatedAt: p.updated_at }; });
+    localStorage.setItem('tr_payments', JSON.stringify(pays));
+    return pays;
+  } catch(e){
+    return loadAllPayments();
+  }
+}
+
+async function savePaymentSync(paxKey, payData){
+  localStorage.setItem('tr_payments', JSON.stringify({...loadAllPayments(), [paxKey]: payData}));
+  try {
+    const existing = await supaFetch('/rest/v1/pagos?pax_key=eq.'+encodeURIComponent(paxKey)+'&select=id');
+    if(existing && existing.length){
+      await supaFetch('/rest/v1/pagos?pax_key=eq.'+encodeURIComponent(paxKey), {
+        method:'PATCH', prefer:'return=minimal',
+        body: JSON.stringify({ status: payData.status, abono: payData.abono||'', obs: payData.obs||'', updated_by: payData.updatedBy||'', updated_at: payData.updatedAt||'' })
+      });
+    } else {
+      await supaFetch('/rest/v1/pagos', {
+        method:'POST', prefer:'return=minimal',
+        body: JSON.stringify({ pax_key: paxKey, status: payData.status, abono: payData.abono||'', obs: payData.obs||'', updated_by: payData.updatedBy||'', updated_at: payData.updatedAt||'' })
+      });
+    }
+  } catch(e){ console.warn('Pago guardado localmente'); }
 }
 
 async function insertPax(p){
@@ -2679,7 +2721,7 @@ async function renderPayPage(){
   document.getElementById('pay-msg').value = cfg.msg||'';
 
   const pax = await getPax();
-  const pays = loadAllPayments();
+  const pays = await loadAllPaymentsSync();
 
   const total = pax.length;
   const pagos = pax.filter(p=>getPayStatus(p.rg||p.cpf,pays)==='pago').length;
@@ -2798,13 +2840,13 @@ function savePayment(){
   const abono  = document.getElementById('pm-abono').value;
   const obs    = document.getElementById('pm-obs-pay').value.trim();
   const adminName = sessionStorage.getItem('tr_admin_name')||'Admin';
-  const pays   = loadAllPayments();
-  pays[currentPayRg] = {
+  const payData = {
     status, abono, obs,
     updatedAt: new Date().toLocaleString('pt-BR'),
     updatedBy: adminName
   };
-  saveAllPayments(pays);
+  // Guardar local Y en Supabase
+  savePaymentSync(currentPayRg, payData);
   closePayModal();
   showToast('✅ Pagamento registrado por ' + adminName + '!');
   logAction(adminName,'pagamento','Atualizou pagamento de '+document.getElementById('pm-nome').value+' → '+status);
