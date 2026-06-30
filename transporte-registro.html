@@ -1647,18 +1647,30 @@ window.addEventListener('load', function() {
 /* ── EVENT DELEGATION ────────────────────────────── */
 document.addEventListener('click', function(e) {
   var btn = e.target;
-  if (!btn || !btn.getAttribute) return;
-  var action = btn.getAttribute('data-action');
-  var id = btn.getAttribute('data-id');
-  if (!action || !id) return;
-  e.preventDefault();
-  e.stopPropagation();
-  if (action === 'pay') {
-    openPayModal(id);
-  } else if (action === 'wa-cobrar') {
-    sendWA(id, 'cobrar');
-  } else if (action === 'wa-comprovante') {
-    sendWA(id, 'comprovante');
+  while (btn && btn !== document.body) {
+    var action = btn.getAttribute ? btn.getAttribute('data-action') : null;
+    var id = btn.getAttribute ? btn.getAttribute('data-id') : null;
+    if (action && id) {
+      e.preventDefault();
+      if (action === 'pay') {
+        var p = findPax(id);
+        if (!p) { showToast('Passageiro nao encontrado'); return; }
+        document.getElementById('pay-modal-id').value = id;
+        document.getElementById('pay-modal-nome').value = p.nome || '';
+        document.getElementById('pay-modal-status').value = normalizeStatus(p.payment_status);
+        document.getElementById('pay-modal-obs').value = p.payment_obs || '';
+        document.getElementById('pay-modal-parcial').value = p.valor_abonado || '';
+        document.getElementById('pay-modal-parcial-wrap').style.display = normalizeStatus(p.payment_status) === 'parcial' ? 'block' : 'none';
+        document.getElementById('pay-modal-sub').textContent = getDiasLabel(p);
+        document.getElementById('pay-modal').className = 'modal-overlay active';
+      } else if (action === 'wa-cobrar') {
+        sendWA(id, 'cobrar');
+      } else if (action === 'wa-comprovante') {
+        sendWA(id, 'comprovante');
+      }
+      return;
+    }
+    btn = btn.parentElement;
   }
 });
 
