@@ -940,8 +940,8 @@ function renderPaxList() {
       + (p.obs ? 'Obs: ' + p.obs : '')
       + '</div>'
       + '<div class="pax-actions">'
-      + '<button class="pax-action-btn btn-secondary" onclick="openPayModal(\'' + p.id + '\')">💳 Pagamento</button>'
-      + (p.tel ? '<button class="pax-action-btn btn-wa" onclick="sendWA(\'' + p.id + '\',\'cobrar\')" style="background:#25d366;color:#fff">📲 WhatsApp</button>' : '')
+      + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Pagamento</button>'
+      + (p.tel ? '<button class="pax-action-btn btn-wa" data-action="wa-cobrar" data-id="' + p.id + '" style="background:#25d366;color:#fff">📲 WhatsApp</button>' : '')
       + '</div>'
       + '</div>';
     shown++;
@@ -993,9 +993,9 @@ function renderPayList() {
       + (p.payment_obs ? '<br>Obs: ' + p.payment_obs : '')
       + '</div>'
       + '<div class="pax-actions">'
-      + '<button class="pax-action-btn btn-secondary" onclick="openPayModal(\'' + p.id + '\')">💳 Registrar pagamento</button>'
-      + (p.tel ? '<button class="pax-action-btn btn-secondary" onclick="sendWA(\'' + p.id + '\',\'cobrar\')" style="background:#fef3c7;color:#92400e">📲 Cobrar</button>' : '')
-      + (status === 'pago' && p.tel ? '<button class="pax-action-btn btn-wa" onclick="sendWA(\'' + p.id + '\',\'comprovante\')" style="background:#25d366;color:#fff">✅ Comprovante</button>' : '')
+      + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Registrar pagamento</button>'
+      + (p.tel ? '<button class="pax-action-btn btn-secondary" data-action="wa-cobrar" data-id="' + p.id + '" style="background:#fef3c7;color:#92400e">📲 Cobrar</button>' : '')
+      + (status === 'pago' && p.tel ? '<button class="pax-action-btn btn-wa" data-action="wa-comprovante" data-id="' + p.id + '" style="background:#25d366;color:#fff">✅ Comprovante</button>' : '')
       + '</div>'
       + '</div>';
     shown++;
@@ -1022,7 +1022,7 @@ function renderLemList() {
       var p = pagos[j];
       html += '<div class="pax-card pago" style="margin-bottom:8px">'
         + '<div class="pax-name" style="margin-bottom:8px">' + escHtml(p.nome || '—') + '</div>'
-        + (p.tel ? '<button class="btn-wa" onclick="sendWA(\'' + p.id + '\',\'comprovante\')" style="width:100%">📲 Enviar comprovante WhatsApp</button>' : '<p style="font-size:12px;color:#94a3b8">Sem telefone cadastrado</p>')
+        + (p.tel ? '<button class="btn-wa" data-action="wa-comprovante" data-id="' + p.id + '" style="width:100%">📲 Enviar comprovante WhatsApp</button>' : '<p style="font-size:12px;color:#94a3b8">Sem telefone cadastrado</p>')
         + '</div>';
     }
   }
@@ -1642,6 +1642,52 @@ window.addEventListener('load', function() {
     showPublic();
   }, 800);
 });
+
+
+/* ── EVENT DELEGATION ────────────────────────────── */
+document.addEventListener('click', function(e) {
+  var btn = e.target;
+  if (!btn || !btn.getAttribute) return;
+  var action = btn.getAttribute('data-action');
+  var id = btn.getAttribute('data-id');
+  if (!action || !id) return;
+  e.preventDefault();
+  e.stopPropagation();
+  if (action === 'pay') {
+    openPayModal(id);
+  } else if (action === 'wa-cobrar') {
+    sendWA(id, 'cobrar');
+  } else if (action === 'wa-comprovante') {
+    sendWA(id, 'comprovante');
+  }
+});
+
+/* ── WINDOW EXPORTS ──────────────────────────────── */
+window.openPayModal = openPayModal;
+window.sendWA = sendWA;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.savePay = savePay;
+window.toggleParcialField = toggleParcialField;
+window.showEditModal = showEditModal;
+window.loadEditPax = loadEditPax;
+window.saveEdit = saveEdit;
+window.showChangePwModal = showChangePwModal;
+window.savePw = savePw;
+window.setPaxFilter = setPaxFilter;
+window.setPayFilter = setPayFilter;
+window.exportCSV = exportCSV;
+window.exportRelatorio = exportRelatorio;
+window.confirmDeleteAll = confirmDeleteAll;
+window.showSection = showSection;
+window.showRegTab = showRegTab;
+window.setDocType = setDocType;
+window.toggleDay = toggleDay;
+window.hideInfo = hideInfo;
+window.saveLemConfig = saveLemConfig;
+window.savePayConfig = savePayConfig;
+window.renderPaxList = renderPaxList;
+window.renderPayList = renderPayList;
 </script>
 </body>
 </html>
