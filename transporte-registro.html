@@ -783,7 +783,7 @@ function loadAllData() {
         renderPaxList();
         renderPayList();
         renderLemList();
-        showToast('Dados atualizados (' + data.length + ' passageiros)');
+        // auto-refresh silencioso
       } else if (data && data.message) {
         throw new Error(data.message);
       }
@@ -1054,8 +1054,11 @@ function sendWA(id, tipo) {
       .replace('{nome}', p.nome || '');
   }
   var tel = p.tel.replace(/\D/g, '');
-  if (tel.length === 11) tel = '55' + tel;
-  window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(msg), '_blank');
+  if (tel.length === 8 || tel.length === 9) tel = '5519' + tel;
+  else if (tel.length === 10) tel = '55' + tel;
+  else if (tel.length === 11) tel = '55' + tel;
+  if (tel.length < 12) { showToast('Numero de telefone invalido'); return; }
+  window.open('https://api.whatsapp.com/send?phone=' + tel + '&text=' + encodeURIComponent(msg), '_blank');
 }
 
 /* ═══════════════════════════════════════════
