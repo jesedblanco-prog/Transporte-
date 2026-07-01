@@ -317,8 +317,8 @@ input,select,textarea{font-family:inherit;outline:none}
           <label id="doc-label">Número do RG</label>
           <input type="text" id="reg-doc" placeholder="Ex: 12.345.678-9">
         </div>
-        <div class="form-group">
-          <label>CPF (opcional)</label>
+        <div class="form-group" id="cpf-optional-group">
+          <label>CPF</label>
           <input type="text" id="reg-cpf" placeholder="000.000.000-00">
         </div>
         <div class="form-group">
@@ -341,6 +341,7 @@ input,select,textarea{font-family:inherit;outline:none}
             <option value="geral">👤 Geral</option>
             <option value="familiar">👨‍👩‍👧 Familiar</option>
             <option value="estudante">🎓 Estudante</option>
+            <option value="convidado">🎟 Convidado</option>
             <option value="trabalhador">💼 Trabalhador</option>
             <option value="idoso">🧓 Idoso</option>
             <option value="outro">📋 Outro</option>
@@ -632,7 +633,7 @@ input,select,textarea{font-family:inherit;outline:none}
     </div>
     <div class="form-group">
       <label>Status de pagamento</label>
-      <select id="pay-modal-status">
+      <select id="pay-modal-status" onchange="toggleParcialField()">
         <option value="nao-pago">❌ Não pago</option>
         <option value="parcial">⚡ Abono parcial</option>
         <option value="pago">✅ Pago</option>
@@ -643,8 +644,21 @@ input,select,textarea{font-family:inherit;outline:none}
       <input type="number" id="pay-modal-parcial" placeholder="0.00" min="0" step="0.01">
     </div>
     <div class="form-group">
+      <label>Pagamento familiar?</label>
+      <select id="pay-modal-familiar" onchange="toggleFamiliarField()">
+        <option value="nao">Não — pagamento individual</option>
+        <option value="sim">✅ Sim — inclui outros membros</option>
+      </select>
+    </div>
+    <div id="pay-modal-familiar-wrap" style="display:none">
+      <div class="form-group">
+        <label>Selecionar membros da família</label>
+        <div id="pay-modal-family-list" style="max-height:160px;overflow-y:auto;border:2px solid #e2e8f0;border-radius:10px;padding:8px"></div>
+      </div>
+    </div>
+    <div class="form-group">
       <label>Observação (opcional)</label>
-      <input type="text" id="pay-modal-obs" placeholder="">
+      <input type="text" id="pay-modal-obs" placeholder="Ex: pix 29/6">
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('pay-modal')">Cancelar</button>
@@ -891,6 +905,19 @@ function renderDashboard() {
 /* ═══════════════════════════════════════════
    PAX LIST
 ═══════════════════════════════════════════ */
+function getDocDisplay(p) {
+  var dtype = (p.doc_type || '').toLowerCase();
+  if (dtype === 'rnm' && p.rnm) return 'RNM: ' + p.rnm + '<br>';
+  if (dtype === 'cpf' && p.cpf) return 'CPF: ' + p.cpf + '<br>';
+  if (dtype === 'rg'  && p.rg)  return 'RG: '  + p.rg  + '<br>';
+  // Fallback: show whatever is available
+  var parts = [];
+  if (p.rg)  parts.push('RG: '  + p.rg);
+  if (p.rnm) parts.push('RNM: ' + p.rnm);
+  if (p.cpf) parts.push('CPF: ' + p.cpf);
+  return parts.length > 0 ? parts.join(' &nbsp;') + '<br>' : '';
+}
+
 function renderPaxList() {
   var search = (document.getElementById('pax-search').value || '').toLowerCase();
   var html = '';
@@ -933,8 +960,7 @@ function renderPaxList() {
       + '<span class="pax-badge ' + badgeClass + '">' + badgeLabel + '</span>'
       + '</div>'
       + '<div class="pax-info">'
-      + (p.rg ? 'RG: ' + p.rg + ' &nbsp;' : '')
-      + (p.cpf ? 'CPF: ' + p.cpf + '<br>' : '<br>')
+      + getDocDisplay(p)
       + 'Tel: ' + (p.tel || '—') + '<br>'
       + 'Dias: ' + getDiasLabel(p) + ' · Assentos: ' + (p.seats_needed || 1) + '<br>'
       + (p.obs ? 'Obs: ' + p.obs : '')
@@ -996,7 +1022,7 @@ function renderPayList() {
       + '<div class="pax-actions">'
       + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Registrar pagamento</button>'
       + (p.tel ? '<button class="pax-action-btn btn-secondary" data-action="wa-cobrar" data-id="' + p.id + '" style="background:#fef3c7;color:#92400e">📲 Cobrar</button>' : '')
-      + (status === 'pago' && p.tel ? '<button class="pax-action-btn btn-wa" data-action="wa-comprovante" data-id="' + p.id + '" style="background:#25d366;color:#fff">✅ Comprovante</button>' : '')
+      + (status === 'pago' && p.tel ? '<button class="pax-action-btn btn-wa" data-action="wa-comprovante" data-id="' + p.id + '" style="background:#25d366;color:#fff">✅ Comprovante WA</button>' : '')
       + '</div>'
       + '</div>';
     shown++;
@@ -1010,24 +1036,13 @@ function renderPayList() {
    LEMBRETES LIST
 ═══════════════════════════════════════════ */
 function renderLemList() {
-  var html = '';
   var cfg = getLemConfig();
-  var pagos = [];
-  for (var i = 0; i < allPax.length; i++) {
-    if (normalizeStatus(allPax[i].payment_status) === 'pago') pagos.push(allPax[i]);
-  }
-  if (pagos.length === 0) {
-    html = '<p style="color:#94a3b8;font-size:13px">Nenhum passageiro com pagamento confirmado.</p>';
-  } else {
-    for (var j = 0; j < pagos.length; j++) {
-      var p = pagos[j];
-      html += '<div class="pax-card pago" style="margin-bottom:8px">'
-        + '<div class="pax-name" style="margin-bottom:8px">' + escHtml(p.nome || '—') + '</div>'
-        + (p.tel ? '<button class="btn-wa" data-action="wa-comprovante" data-id="' + p.id + '" style="width:100%">📲 Enviar comprovante WhatsApp</button>' : '<p style="font-size:12px;color:#94a3b8">Sem telefone cadastrado</p>')
-        + '</div>';
-    }
-  }
-  document.getElementById('lem-pax-list').innerHTML = html;
+  document.getElementById('lem-horario').value = cfg.horario || '';
+  document.getElementById('lem-ponto').value = cfg.ponto || '';
+  document.getElementById('lem-msg').value = cfg.msg || 'Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Itatiba. Agradecemos a sua confianca e pontualidade. Ate breve! 🚌';
+  // Lembretes section only shows config now - comprovante is in Pagamentos
+  var el = document.getElementById('lem-pax-list');
+  if (el) el.innerHTML = '<p style="color:#64748b;font-size:13px">Os comprovantes de pagamento estao disponiveis na secao 💰 Pagamentos, no botao ✅ Comprovante de cada passageiro pago.</p>';
 }
 
 /* ═══════════════════════════════════════════
@@ -1073,15 +1088,36 @@ function openPayModal(id) {
   document.getElementById('pay-modal-status').value = normalizeStatus(p.payment_status);
   document.getElementById('pay-modal-obs').value = p.payment_obs || '';
   document.getElementById('pay-modal-parcial').value = p.valor_abonado || '';
+  document.getElementById('pay-modal-familiar').value = 'nao';
+  document.getElementById('pay-modal-familiar-wrap').style.display = 'none';
   toggleParcialField();
+  renderFamilyList(id);
   setText('pay-modal-sub', getDiasLabel(p));
   openModal('pay-modal');
 }
 
-document.getElementById('pay-modal-status').addEventListener('change', toggleParcialField);
 function toggleParcialField() {
   var s = document.getElementById('pay-modal-status').value;
   document.getElementById('pay-modal-parcial-wrap').style.display = s === 'parcial' ? 'block' : 'none';
+}
+
+function toggleFamiliarField() {
+  var f = document.getElementById('pay-modal-familiar').value;
+  document.getElementById('pay-modal-familiar-wrap').style.display = f === 'sim' ? 'block' : 'none';
+}
+
+function renderFamilyList(excludeId) {
+  var sorted = allPax.slice().sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||''); });
+  var html = '';
+  for (var i = 0; i < sorted.length; i++) {
+    var p = sorted[i];
+    if (String(p.id) === String(excludeId)) continue;
+    html += '<label style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:6px;cursor:pointer;font-size:13px">'
+      + '<input type="checkbox" value="' + p.id + '" style="width:16px;height:16px"> '
+      + escHtml(p.nome || '') + ' <span style="color:#94a3b8;font-size:11px">(' + getDiasTexto(p) + ')</span>'
+      + '</label>';
+  }
+  document.getElementById('pay-modal-family-list').innerHTML = html || '<p style="color:#94a3b8;font-size:12px">Nenhum outro passageiro.</p>';
 }
 
 function savePay() {
@@ -1089,17 +1125,42 @@ function savePay() {
   var status = document.getElementById('pay-modal-status').value;
   var obs = document.getElementById('pay-modal-obs').value;
   var parcial = document.getElementById('pay-modal-parcial').value;
+  var isFamiliar = document.getElementById('pay-modal-familiar').value === 'sim';
+
+  // Get selected family members
+  var familyIds = [];
+  if (isFamiliar) {
+    var checks = document.querySelectorAll('#pay-modal-family-list input[type=checkbox]:checked');
+    for (var i = 0; i < checks.length; i++) {
+      familyIds.push(checks[i].value);
+    }
+  }
 
   var data = { payment_status: status, payment_obs: obs };
   if (status === 'parcial') data.valor_abonado = parseFloat(parcial) || 0;
 
+  var mainPax = findPax(id);
+  var mainNome = mainPax ? mainPax.nome : id;
+
+  // Save main pax
   sbPatch('pasajeros', id, data)
-    .then(function(r) { return r.json(); })
+    .then(function() {
+      // Save family members with same status
+      var promises = [];
+      for (var i = 0; i < familyIds.length; i++) {
+        promises.push(
+          sbPatch('pasajeros', familyIds[i], { payment_status: status, payment_obs: obs + ' (familiar de ' + mainNome + ')' })
+        );
+      }
+      return Promise.all(promises);
+    })
     .then(function() {
       closeModal('pay-modal');
       loadAllData();
-      addLog('Pagamento atualizado: ' + (findPax(id) ? findPax(id).nome : id) + ' → ' + status);
-      showToast('Pagamento salvo!');
+      var logMsg = 'Pagamento: ' + mainNome + ' → ' + status;
+      if (familyIds.length > 0) logMsg += ' (+ ' + familyIds.length + ' familiar(es))';
+      addLog(logMsg);
+      showToast(familyIds.length > 0 ? 'Pagamento familiar salvo! (' + (familyIds.length + 1) + ' pessoas)' : 'Pagamento salvo!');
     })
     .catch(function() { showToast('Erro ao salvar pagamento'); });
 }
@@ -1206,7 +1267,13 @@ function toggleDay(key) {
 function setDocType(t) {
   docType = t;
   var labels = { rg: 'Número do RG', rnm: 'Número do RNM', cpf: 'Número do CPF' };
+  var placeholders = { rg: 'Ex: 12.345.678-9', rnm: 'Ex: V123456-W', cpf: 'Ex: 000.000.000-00' };
   setText('doc-label', labels[t] || 'Documento');
+  var inp = document.getElementById('reg-doc');
+  if (inp) inp.placeholder = placeholders[t] || '';
+  // Show/hide CPF optional field
+  var cpfGroup = document.getElementById('cpf-optional-group');
+  if (cpfGroup) cpfGroup.style.display = t === 'cpf' ? 'none' : 'block';
   var tabs = ['rg','rnm','cpf'];
   for (var i = 0; i < tabs.length; i++) {
     var el = document.getElementById('doc-' + tabs[i]);
@@ -1227,8 +1294,9 @@ function doRegister() {
 
   var data = {
     nome: nome,
-    rg: docType !== 'cpf' ? doc : '',
-    cpf: docType === 'cpf' ? doc : val('reg-cpf'),
+    rg:  docType === 'rg'  ? doc : '',
+    cpf: docType === 'cpf' ? doc : (docType !== 'cpf' ? val('reg-cpf') : ''),
+    rnm: docType === 'rnm' ? doc : '',
     tel: tel,
     obs: val('reg-obs'),
     dia: selectedDays[0],
@@ -1477,13 +1545,13 @@ function setPayFilter(f, btn) {
 function exportCSV() {
   var cfg = getPayConfig();
   var valorDia = cfg.valorDia || 55;
-  var rows = [['Nome','RG','CPF','Telefone','Dias','Assentos','Valor','Status','Obs']];
+  var rows = [['Nome','Tipo Doc','RG','RNM','CPF','Telefone','Dias','Assentos','Valor','Status','Obs']];
   for (var i = 0; i < allPax.length; i++) {
     var p = allPax[i];
     var dias = parseDias(p.dias || p.dia);
     var seats = parseInt(p.seats_needed) || 1;
     var valor = (dias.length || 1) * valorDia * seats;
-    rows.push([p.nome||'',p.rg||'',p.cpf||'',p.tel||'',getDiasLabel(p),seats,'R$'+valor.toFixed(2),normalizeStatus(p.payment_status),p.obs||'']);
+    rows.push([p.nome||'',p.doc_type||'',p.rg||'',p.rnm||'',p.cpf||'',p.tel||'',getDiasLabel(p),seats,'R$'+valor.toFixed(2),normalizeStatus(p.payment_status),p.obs||'']);
   }
   var csv = '\uFEFF';
   for (var r = 0; r < rows.length; r++) {
@@ -1512,12 +1580,18 @@ function exportRelatorio() {
     if (status === 'pago') totalRecebido += valor;
     else if (status === 'parcial') totalRecebido += parseFloat(p.valor_abonado) || 0;
     var color = status === 'pago' ? '#16a34a' : status === 'parcial' ? '#d97706' : '#dc2626';
-    rows += '<tr><td>'+(i+1)+'</td><td>'+escHtml(p.nome||'')+'</td><td>'+escHtml(p.rg||'')+'</td><td>'+escHtml(p.tel||'')+'</td><td>'+getDiasLabel(p)+'</td><td>'+seats+'</td><td>R$'+valor.toFixed(2)+'</td><td style="color:'+color+';font-weight:700">'+status+'</td></tr>';
+    var docSigla = '';
+    var docNum = '';
+    if ((p.doc_type||'').toLowerCase() === 'rnm') { docSigla='RNM'; docNum=p.rnm||''; }
+    else if ((p.doc_type||'').toLowerCase() === 'cpf') { docSigla='CPF'; docNum=p.cpf||''; }
+    else { docSigla='RG'; docNum=p.rg||''; }
+    var docStr = '<span style="font-size:9px;color:#94a3b8;font-weight:600;letter-spacing:0.5px">'+docSigla+'</span><br>'+escHtml(docNum);
+    rows += '<tr><td>'+(i+1)+'</td><td>'+escHtml(p.nome||'')+'</td><td>'+docStr+'</td><td>'+escHtml(p.tel||'')+'</td><td>'+getDiasLabel(p)+'</td><td>'+seats+'</td><td>R$'+valor.toFixed(2)+'</td><td style="color:'+color+';font-weight:700">'+status+'</td></tr>';
   }
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Transporte</title><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:13px}th{background:#1a56db;color:#fff}</style></head><body>'
     + '<h2>Transporte Jardim do Vale · Relatório</h2>'
     + '<p>Total: '+allPax.length+' passageiros · A receber: R$'+totalValor.toFixed(2)+' · Recebido: R$'+totalRecebido.toFixed(2)+'</p>'
-    + '<table><thead><tr><th>#</th><th>Nome</th><th>RG</th><th>Tel</th><th>Dias</th><th>Assentos</th><th>Valor</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    + '<table><thead><tr><th>#</th><th>Nome</th><th>Doc</th><th>Tel</th><th>Dias</th><th>Assentos</th><th>Valor</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>'
     + '<button onclick="window.print()" style="margin-top:16px;padding:10px 20px;background:#1a56db;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Imprimir</button>'
     + '</body></html>';
   var w = window.open('','_blank');
