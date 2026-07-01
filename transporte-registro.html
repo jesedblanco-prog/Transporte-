@@ -1104,6 +1104,10 @@ function toggleParcialField() {
 function toggleFamiliarField() {
   var f = document.getElementById('pay-modal-familiar').value;
   document.getElementById('pay-modal-familiar-wrap').style.display = f === 'sim' ? 'block' : 'none';
+  if (f === 'sim') {
+    var excludeId = document.getElementById('pay-modal-id').value;
+    renderFamilyList(excludeId);
+  }
 }
 
 function renderFamilyList(excludeId) {
