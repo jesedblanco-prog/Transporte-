@@ -942,6 +942,7 @@ function renderPaxList() {
       + '<div class="pax-actions">'
       + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Pagamento</button>'
       + (p.tel ? '<button class="pax-action-btn btn-wa" data-action="wa-cobrar" data-id="' + p.id + '" style="background:#25d366;color:#fff">📲 WhatsApp</button>' : '')
+      + '<button class="pax-action-btn" data-action="delete" data-id="' + p.id + '" data-nome="' + p.nome + '" style="background:#fee2e2;color:#dc2626;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer">🗑 Excluir</button>'
       + '</div>'
       + '</div>';
     shown++;
@@ -1558,7 +1559,7 @@ function hideInfo() {
 function val(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; }
 function setText(id, text) { var e = document.getElementById(id); if (e) e.textContent = text; }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function findPax(id) { for (var i = 0; i < allPax.length; i++) { if (allPax[i].id === id) return allPax[i]; } return null; }
+function findPax(id) { for (var i = 0; i < allPax.length; i++) { if (String(allPax[i].id) === String(id)) return allPax[i]; } return null; }
 
 function parseDias(v) {
   if (!v) return [];
@@ -1667,6 +1668,17 @@ document.addEventListener('click', function(e) {
         sendWA(id, 'cobrar');
       } else if (action === 'wa-comprovante') {
         sendWA(id, 'comprovante');
+      } else if (action === 'delete') {
+        var nome = btn.getAttribute('data-nome') || 'este passageiro';
+        if (!confirm('Tem certeza que deseja excluir ' + nome + '?')) return;
+        if (!confirm('Segunda confirmacao: excluir ' + nome + ' permanentemente?')) return;
+        sbDelete('pasajeros', 'id=eq.' + id)
+          .then(function() {
+            showToast(nome + ' excluido com sucesso');
+            addLog('Passageiro excluido: ' + nome + ' (id=' + id + ')');
+            loadAllData();
+          })
+          .catch(function() { showToast('Erro ao excluir passageiro'); });
       }
       return;
     }
