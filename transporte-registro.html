@@ -1110,6 +1110,24 @@ function toggleFamiliarField() {
   }
 }
 
+function getDiasTexto(p) {
+  var dias = parseDias(p.dias || p.dia);
+  if (dias.length === 0) return p.dia || '—';
+  var map = { sexta:'Sexta', sabado:'Sabado', domingo:'Domingo', 'sexta-feira':'Sexta', 'sabado':'Sabado', 'sábado':'Sabado' };
+  var labels = [];
+  for (var i = 0; i < dias.length; i++) {
+    labels.push(map[dias[i].toLowerCase()] || dias[i]);
+  }
+  return labels.join(', ');
+}
+
+function calcValorPax(p, valorDia) {
+  var dias = parseDias(p.dias || p.dia);
+  var nDias = dias.length || 1;
+  var seats = parseInt(p.seats_needed) || 1;
+  return nDias * (valorDia || 52) * seats;
+}
+
 function renderFamilyList(excludeId) {
   var sorted = allPax.slice().sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||''); });
   var html = '';
