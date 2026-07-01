@@ -1090,8 +1090,8 @@ function openPayModal(id) {
   document.getElementById('pay-modal-parcial').value = p.valor_abonado || '';
   document.getElementById('pay-modal-familiar').value = 'nao';
   document.getElementById('pay-modal-familiar-wrap').style.display = 'none';
+  document.getElementById('pay-modal-family-list').innerHTML = '';
   toggleParcialField();
-  renderFamilyList(id);
   setText('pay-modal-sub', getDiasLabel(p));
   openModal('pay-modal');
 }
