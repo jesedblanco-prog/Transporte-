@@ -766,12 +766,33 @@ function sbGet(table, query) {
   return sbFetch(table + '?' + (query || 'select=*&order=ts.asc'), 'GET');
 }
 
+function sbEdgeWrite(action, table, data, match) {
+  return fetch(SB_URL + '/functions/v1/transporte-write', {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ action: action, table: table, data: data, match: match })
+  }).then(function(r) {
+    return r.json().then(function(json) {
+      if (!r.ok || json.error) { throw new Error(json.error || ('HTTP ' + r.status)); }
+      return json;
+    });
+  });
+}
+
 function sbPost(table, data) {
-  return sbFetch(table, 'POST', data);
+  return sbEdgeWrite('insert', table, data, null).then(function(json) {
+    return { ok: true, json: function() { return Promise.resolve(json.data); } };
+  });
 }
 
 function sbPatch(table, id, data) {
-  return sbFetch(table + '?id=eq.' + id, 'PATCH', data);
+  return sbEdgeWrite('update', table, data, { id: id }).then(function(json) {
+    return { ok: true, json: function() { return Promise.resolve(json.data); } };
+  });
 }
 
 function sbDelete(table, query) {
@@ -1125,7 +1146,7 @@ function calcValorPax(p, valorDia) {
   var dias = parseDias(p.dias || p.dia);
   var nDias = dias.length || 1;
   var seats = parseInt(p.seats_needed) || 1;
-  return nDias * (valorDia || 52) * seats;
+  return nDias * (valorDia || 55) * seats;
 }
 
 function renderFamilyList(excludeId) {
@@ -1295,7 +1316,7 @@ function setDocType(t) {
   if (inp) inp.placeholder = placeholders[t] || '';
   // Show/hide CPF optional field
   var cpfGroup = document.getElementById('cpf-optional-group');
-  if (cpfGroup) cpfGroup.style.display = t === 'cpf' ? 'none' : 'block';
+  if (cpfGroup) cpfGroup.style.display = 'none';
   var tabs = ['rg','rnm','cpf'];
   for (var i = 0; i < tabs.length; i++) {
     var el = document.getElementById('doc-' + tabs[i]);
