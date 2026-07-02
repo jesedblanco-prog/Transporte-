@@ -1334,16 +1334,26 @@ function calcValorPax(p, valorDia) {
 
 function renderFamilyList(excludeId) {
   var sorted = allPax.slice().sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||''); });
-  var html = '';
+  var html = '<label style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:6px;cursor:pointer;font-size:13px;border-bottom:1px solid #e2e8f0;margin-bottom:4px">'
+    + '<input type="checkbox" id="fam-none-chk" style="width:16px;height:16px" onchange="toggleFamNone(this)"> '
+    + '<strong>Nenhum</strong> <span style="color:#94a3b8;font-size:11px">(não associar a ninguém)</span>'
+    + '</label>';
   for (var i = 0; i < sorted.length; i++) {
     var p = sorted[i];
     if (String(p.id) === String(excludeId)) continue;
     html += '<label style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:6px;cursor:pointer;font-size:13px">'
-      + '<input type="checkbox" value="' + p.id + '" style="width:16px;height:16px"> '
+      + '<input type="checkbox" value="' + p.id + '" class="fam-chk" style="width:16px;height:16px" onchange="if(this.checked){document.getElementById(\'fam-none-chk\').checked=false;}"> '
       + escHtml(p.nome || '') + ' <span style="color:#94a3b8;font-size:11px">(' + getDiasTexto(p) + ')</span>'
       + '</label>';
   }
-  document.getElementById('pay-modal-family-list').innerHTML = html || '<p style="color:#94a3b8;font-size:12px">Nenhum outro passageiro.</p>';
+  document.getElementById('pay-modal-family-list').innerHTML = html;
+}
+
+function toggleFamNone(el) {
+  if (el.checked) {
+    var checks = document.querySelectorAll('#pay-modal-family-list input.fam-chk:checked');
+    for (var i = 0; i < checks.length; i++) checks[i].checked = false;
+  }
 }
 
 function savePay() {
@@ -1353,10 +1363,10 @@ function savePay() {
   var parcial = document.getElementById('pay-modal-parcial').value;
   var isFamiliar = document.getElementById('pay-modal-familiar').value === 'sim';
 
-  // Get selected family members
+  // Get selected family members (só quando o admin abre a secao desta vez, para adicionar novos)
   var familyIds = [];
   if (isFamiliar) {
-    var checks = document.querySelectorAll('#pay-modal-family-list input[type=checkbox]:checked');
+    var checks = document.querySelectorAll('#pay-modal-family-list input.fam-chk:checked');
     for (var i = 0; i < checks.length; i++) {
       familyIds.push(checks[i].value);
     }
@@ -1368,15 +1378,43 @@ function savePay() {
   var mainPax = findPax(id);
   var mainNome = mainPax ? mainPax.nome : id;
 
+  // Familiares JA associados a este pagador (de pagamentos anteriores), que nao foram
+  // reselecionados agora — sempre verifica, independente do interruptor "Pagamento familiar?"
+  var dependentes = [];
+  for (var ri = 0; ri < allPax.length; ri++) {
+    var rp = allPax[ri];
+    if (String(rp.id) === String(id)) continue;
+    var eraFamiliar = (rp.payment_obs || '').indexOf('(familiar de ' + mainNome + ')') !== -1;
+    var selecionadoAgora = familyIds.indexOf(String(rp.id)) !== -1;
+    if (eraFamiliar && !selecionadoAgora) dependentes.push(rp);
+  }
+
+  var aplicarAosDependentes = false;
+  if (dependentes.length > 0) {
+    var nomesDep = dependentes.map(function(d) { return d.nome; }).join(', ');
+    aplicarAosDependentes = confirm(
+      mainNome + ' tem familiar(es) ja associado(s) a este pagamento: ' + nomesDep + '.\n\n' +
+      'Deseja aplicar o mesmo status (' + status + ') a eles tambem?\n\n' +
+      'OK = sim, atualizar os familiares  |  Cancelar = manter como esta'
+    );
+  }
+
   // Save main pax
   sbPatch('pasajeros', id, data)
     .then(function() {
-      // Save family members with same status
       var promises = [];
       for (var i = 0; i < familyIds.length; i++) {
         promises.push(
           sbPatch('pasajeros', familyIds[i], { payment_status: status, payment_obs: obs + ' (familiar de ' + mainNome + ')' })
         );
+      }
+      if (aplicarAosDependentes) {
+        for (var di = 0; di < dependentes.length; di++) {
+          promises.push(sbPatch('pasajeros', dependentes[di].id, {
+            payment_status: status,
+            payment_obs: 'Atualizado junto com o pagador (' + mainNome + ')'
+          }));
+        }
       }
       return Promise.all(promises);
     })
@@ -1385,8 +1423,9 @@ function savePay() {
       loadAllData();
       var logMsg = 'Pagamento: ' + mainNome + ' → ' + status;
       if (familyIds.length > 0) logMsg += ' (+ ' + familyIds.length + ' familiar(es))';
+      if (aplicarAosDependentes) logMsg += ' · ' + dependentes.length + ' familiar(es) atualizado(s) para ' + status;
       addLog(logMsg);
-      showToast(familyIds.length > 0 ? 'Pagamento familiar salvo! (' + (familyIds.length + 1) + ' pessoas)' : 'Pagamento salvo!');
+      showToast('Pagamento salvo!');
     })
     .catch(function() { showToast('Erro ao salvar pagamento'); });
 }
@@ -2085,10 +2124,42 @@ document.addEventListener('click', function(e) {
         var nome = btn.getAttribute('data-nome') || 'este passageiro';
         if (!confirm('Tem certeza que deseja excluir ' + nome + '?')) return;
         if (!confirm('Segunda confirmacao: excluir ' + nome + ' permanentemente?')) return;
+
+        var dependentes = [];
+        for (var di = 0; di < allPax.length; di++) {
+          var dp = allPax[di];
+          if (String(dp.id) === String(id)) continue;
+          if ((dp.payment_obs || '').indexOf('(familiar de ' + nome + ')') !== -1) {
+            dependentes.push(dp);
+          }
+        }
+
+        var reverterFamiliares = false;
+        if (dependentes.length > 0) {
+          var nomesDep = dependentes.map(function(d) { return d.nome; }).join(', ');
+          reverterFamiliares = confirm(
+            nome + ' tem ' + dependentes.length + ' familiar(es) marcado(s) como pago junto com ele/ela: ' + nomesDep + '.\n\n' +
+            'Como quem pagou vai ser excluido, deseja marcar esses familiares como NAO PAGO tambem?\n\n' +
+            'OK = sim, marcar como nao pago  |  Cancelar = manter como esta'
+          );
+        }
+
         sbDelete('pasajeros', 'id=eq.' + id)
           .then(function() {
-            showToast(nome + ' excluido com sucesso');
-            addLog('Passageiro excluido: ' + nome + ' (id=' + id + ')');
+            if (reverterFamiliares) {
+              var revPromises = [];
+              for (var dj = 0; dj < dependentes.length; dj++) {
+                revPromises.push(sbPatch('pasajeros', dependentes[dj].id, {
+                  payment_status: 'nao-pago',
+                  payment_obs: 'Revertido: pagador (' + nome + ') foi excluido'
+                }));
+              }
+              return Promise.all(revPromises);
+            }
+          })
+          .then(function() {
+            showToast(nome + ' excluido com sucesso' + (reverterFamiliares ? ' · familiares revertidos' : ''));
+            addLog('Passageiro excluido: ' + nome + ' (id=' + id + ')' + (reverterFamiliares ? ' · familiares revertidos para nao-pago' : ''));
             loadAllData();
           })
           .catch(function() { showToast('Erro ao excluir passageiro'); });
@@ -2129,6 +2200,7 @@ window.hideInfo = hideInfo;
 window.saveLemConfig = saveLemConfig;
 window.savePayConfig = savePayConfig;
 window.renderPaxList = renderPaxList;
+window.toggleFamNone = toggleFamNone;
 window.gerarComprovantePDF = gerarComprovantePDF;
 window.openEventModal = openEventModal;
 window.toggleEventTypeFields = toggleEventTypeFields;
