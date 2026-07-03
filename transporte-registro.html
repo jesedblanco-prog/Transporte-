@@ -546,6 +546,61 @@ input,select,textarea{font-family:inherit;outline:none}
       <div class="section-title">⚙️ Configurações</div>
       <div class="section-sub">Gerenciamento do sistema</div>
 
+      <!-- EVENT CONFIG CARD -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title">📅 Configuração do Evento</div>
+        <div class="form-group">
+          <label>Tipo de Evento</label>
+          <select id="cfg-tipo-evento" onchange="toggleEventoTipo()">
+            <option value="congresso">🏟 Congresso Regional (3 dias)</option>
+            <option value="asamblea">⛪ Assembleia de Circuito (1 dia)</option>
+          </select>
+        </div>
+        <div id="cfg-congresso-dates">
+          <div class="form-group">
+            <label>Nome do Evento</label>
+            <input type="text" id="cfg-nome-evento" placeholder="Ex: Congresso Itatiba SP">
+          </div>
+          <div class="form-group">
+            <label>Sexta-feira · Data</label>
+            <input type="text" id="cfg-date-sex" placeholder="Ex: 17/07/2026">
+          </div>
+          <div class="form-group">
+            <label>Sábado · Data</label>
+            <input type="text" id="cfg-date-sab" placeholder="Ex: 18/07/2026">
+          </div>
+          <div class="form-group">
+            <label>Domingo · Data</label>
+            <input type="text" id="cfg-date-dom" placeholder="Ex: 19/07/2026">
+          </div>
+        </div>
+        <div id="cfg-asamblea-dates" style="display:none">
+          <div class="form-group">
+            <label>Nome do Evento</label>
+            <input type="text" id="cfg-nome-asamblea" placeholder="Ex: Assembleia Campinas">
+          </div>
+          <div class="form-group">
+            <label>Dia da Assembleia</label>
+            <select id="cfg-dia-asamblea">
+              <option value="sabado">Sábado</option>
+              <option value="domingo">Domingo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Data</label>
+            <input type="text" id="cfg-date-asamblea" placeholder="Ex: 15/08/2026">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveEventoConfig()">💾 Salvar configuração do evento</button>
+      </div>
+
+      <!-- NOVO EVENTO CARD -->
+      <div class="card" style="margin-bottom:12px;border:2px solid #fee2e2">
+        <div class="card-title" style="color:#dc2626">🔄 Iniciar Novo Evento</div>
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Apaga todos os passageiros atuais e prepara o sistema para um novo evento. Esta ação não pode ser desfeita.</p>
+        <button class="btn-primary" style="background:#dc2626" onclick="iniciarNovoEvento()">🗑 Iniciar Novo Evento</button>
+      </div>
+
       <div class="config-item" onclick="showChangePwModal()">
         <div class="config-item-left">
           <div class="config-icon config-icon-blue">🔑</div>
@@ -731,6 +786,100 @@ var DAYS = [
   { key: 'sabado', label: 'Sábado',       date: '18/07/2026', full: 'Sábado · 18/07' },
   { key: 'domingo',label: 'Domingo',      date: '19/07/2026', full: 'Domingo · 19/07' }
 ];
+
+function getEventoConfig() {
+  try { return JSON.parse(localStorage.getItem('tr_evento_config')) || {}; } catch(e) { return {}; }
+}
+
+function saveEventoConfig() {
+  var tipo = document.getElementById('cfg-tipo-evento').value;
+  var cfg = { tipo: tipo };
+  if (tipo === 'congresso') {
+    cfg.nome = document.getElementById('cfg-nome-evento').value || 'Congresso Itatiba SP';
+    cfg.dateSex = document.getElementById('cfg-date-sex').value || '17/07/2026';
+    cfg.dateSab = document.getElementById('cfg-date-sab').value || '18/07/2026';
+    cfg.dateDom = document.getElementById('cfg-date-dom').value || '19/07/2026';
+  } else {
+    cfg.nome = document.getElementById('cfg-nome-asamblea').value || 'Assembleia de Circuito';
+    cfg.diaAsamblea = document.getElementById('cfg-dia-asamblea').value || 'sabado';
+    cfg.dateAsamblea = document.getElementById('cfg-date-asamblea').value || '';
+  }
+  localStorage.setItem('tr_evento_config', JSON.stringify(cfg));
+  applyEventoConfig();
+  showToast('✅ Configuração do evento salva!');
+  addLog('Evento configurado: ' + cfg.nome + ' (' + tipo + ') por ' + (currentAdmin || ''));
+}
+
+function applyEventoConfig() {
+  var cfg = getEventoConfig();
+  if (!cfg.tipo || cfg.tipo === 'congresso') {
+    DAYS = [
+      { key:'sexta',  label:'Sexta-feira', date: cfg.dateSex || '17/07/2026', full:'Sexta · ' + (cfg.dateSex || '17/07/2026').substring(0,5) },
+      { key:'sabado', label:'Sábado',      date: cfg.dateSab || '18/07/2026', full:'Sábado · ' + (cfg.dateSab || '18/07/2026').substring(0,5) },
+      { key:'domingo',label:'Domingo',     date: cfg.dateDom || '19/07/2026', full:'Domingo · ' + (cfg.dateDom || '19/07/2026').substring(0,5) }
+    ];
+  } else {
+    var diaKey = cfg.diaAsamblea || 'sabado';
+    var diaLabel = diaKey === 'sabado' ? 'Sábado' : 'Domingo';
+    DAYS = [
+      { key: diaKey, label: diaLabel, date: cfg.dateAsamblea || '', full: diaLabel + ' · ' + (cfg.dateAsamblea || '') }
+    ];
+  }
+  renderDayButtons();
+  var nomeEvento = cfg.nome || 'Congresso Itatiba SP';
+  var headerEl = document.querySelector('.pub-header p');
+  if (headerEl) headerEl.textContent = nomeEvento + ' · Reserve seu assento';
+  var adminEl = document.querySelector('.admin-topbar h1');
+  if (adminEl) adminEl.textContent = 'Painel Admin · ' + nomeEvento;
+}
+
+function loadEventoConfig() {
+  var cfg = getEventoConfig();
+  if (!cfg.tipo) return;
+  var tipoEl = document.getElementById('cfg-tipo-evento');
+  if (tipoEl) tipoEl.value = cfg.tipo;
+  toggleEventoTipo();
+  if (cfg.tipo === 'congresso') {
+    if (cfg.nome) document.getElementById('cfg-nome-evento').value = cfg.nome;
+    if (cfg.dateSex) document.getElementById('cfg-date-sex').value = cfg.dateSex;
+    if (cfg.dateSab) document.getElementById('cfg-date-sab').value = cfg.dateSab;
+    if (cfg.dateDom) document.getElementById('cfg-date-dom').value = cfg.dateDom;
+  } else {
+    if (cfg.nome) document.getElementById('cfg-nome-asamblea').value = cfg.nome;
+    if (cfg.diaAsamblea) document.getElementById('cfg-dia-asamblea').value = cfg.diaAsamblea;
+    if (cfg.dateAsamblea) document.getElementById('cfg-date-asamblea').value = cfg.dateAsamblea;
+  }
+}
+
+function toggleEventoTipo() {
+  var tipo = document.getElementById('cfg-tipo-evento').value;
+  document.getElementById('cfg-congresso-dates').style.display = tipo === 'congresso' ? 'block' : 'none';
+  document.getElementById('cfg-asamblea-dates').style.display = tipo === 'asamblea' ? 'block' : 'none';
+}
+
+function iniciarNovoEvento() {
+  if (!confirm('ATENÇÃO: Esta ação vai apagar TODOS os passageiros e preparar o sistema para um novo evento. Tem certeza?')) return;
+  if (!confirm('Segunda confirmação: todos os dados dos passageiros serão apagados permanentemente. Continuar?')) return;
+  var pw = prompt('Digite sua senha de administrador para confirmar:');
+  if (!pw || ADMINS[currentAdmin] !== pw) {
+    showToast('Senha incorreta. Operação cancelada.');
+    return;
+  }
+  sbDelete('pasajeros', 'id=neq.00000000-0000-0000-0000-000000000000')
+    .then(function() {
+      allPax = [];
+      localStorage.removeItem('tr_pay_config');
+      localStorage.removeItem('tr_lem_config');
+      localStorage.removeItem('tr_evento_config');
+      renderDashboard();
+      renderPaxList();
+      renderPayList();
+      addLog('NOVO EVENTO iniciado por ' + currentAdmin + ' — todos os passageiros apagados');
+      showToast('✅ Sistema pronto para novo evento!');
+      showSection('config');
+    })
+    .catch(function() { showToast('Erro ao apagar passageiros.'); });
+}
 
 /* ═══════════════════════════════════════════
    STATE
@@ -1214,6 +1363,48 @@ function calcValorPax(p, valorDia) {
   return nDias * (valorDia || 52) * seats;
 }
 
+function buildComprovante(mainPax, familyMembers, cfg) {
+  var valorDia = cfg.valorDia || 52;
+  var isFamiliar = familyMembers && familyMembers.length > 0;
+  if (isFamiliar) {
+    var totalValor = 0;
+    var linhas = '';
+    var vMain = calcValorPax(mainPax, valorDia);
+    totalValor += vMain;
+    linhas += '• ' + (mainPax.nome || '') + ' — ' + getDiasTexto(mainPax) + ' — R$' + vMain.toFixed(2).replace('.', ',') + '
+';
+    for (var i = 0; i < familyMembers.length; i++) {
+      var fm = familyMembers[i];
+      var vFm = calcValorPax(fm, valorDia);
+      totalValor += vFm;
+      linhas += '• ' + (fm.nome || '') + ' — ' + getDiasTexto(fm) + ' — R$' + vFm.toFixed(2).replace('.', ',') + '
+';
+    }
+    return 'Ola ' + (mainPax.nome ? mainPax.nome.split(' ')[0] : '') + '! ✅ Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Itatiba 2026.
+
+'
+      + '👥 Pagamento familiar:
+' + linhas
+      + '
+💰 Total recebido: R$' + totalValor.toFixed(2).replace('.', ',')
+      + '
+
+Agradecemos a sua confianca e pontualidade. Ate breve! 🚌';
+  } else {
+    var valor = calcValorPax(mainPax, valorDia);
+    return 'Ola ' + (mainPax.nome ? mainPax.nome.split(' ')[0] : '') + '! ✅ Confirmamos o recebimento do seu pagamento de R$' + valor.toFixed(2).replace('.', ',')
+      + ' referente ao transporte para o Congresso Itatiba 2026.'
+      + '
+
+📅 Dias: ' + getDiasTexto(mainPax)
+      + '
+🎫 Assentos: ' + (mainPax.seats_needed || 1)
+      + '
+
+Agradecemos a sua confianca e pontualidade. Ate breve! 🚌';
+  }
+}
+
 function renderFamilyList(excludeId) {
   var sorted = allPax.slice().sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||''); });
   var html = '';
@@ -1525,6 +1716,7 @@ setText('admin-user-badge', '👤 ' + displayName);
   loadAllData();
   loadPayConfig();
   loadLemConfig();
+  applyEventoConfig();
   if (refreshTimer) clearInterval(refreshTimer);
   refreshTimer = setInterval(loadAllData, 8000);
 }
@@ -1577,6 +1769,7 @@ function showSection(name) {
   if (name === 'passageiros') renderPaxList();
   if (name === 'pagamentos') { loadPayConfig(); renderPayList(); }
   if (name === 'lembretes') { loadLemConfig(); renderLemList(); }
+  if (name === 'config') { loadEventoConfig(); }
 }
 
 function showRegTab(tab) {
@@ -1715,6 +1908,11 @@ function exportRelatorio() {
 function confirmDeleteAll() {
   if (!confirm('ATENÇÃO: Isso vai apagar TODOS os passageiros permanentemente. Tem certeza?')) return;
   if (!confirm('Segunda confirmação: realmente deseja apagar TODOS?')) return;
+  var pw = prompt('Digite sua senha de administrador para confirmar:');
+  if (!pw || ADMINS[currentAdmin] !== pw) {
+    showToast('Senha incorreta. Operação cancelada.');
+    return;
+  }
   sbDelete('pasajeros', 'id=neq.00000000-0000-0000-0000-000000000000')
     .then(function() {
       allPax = [];
@@ -1876,6 +2074,8 @@ document.addEventListener('click', function(e) {
 });
 
 /* ── WINDOW EXPORTS ──────────────────────────────── */
+window.doLogin = doAdminLogin;
+window.showView = showSection;
 window.getDiasTexto = getDiasTexto;
 window.calcValorPax = calcValorPax;
 window.buildComprovante = buildComprovante;
@@ -1899,6 +2099,10 @@ window.setPayFilter = setPayFilter;
 window.exportCSV = exportCSV;
 window.exportRelatorio = exportRelatorio;
 window.confirmDeleteAll = confirmDeleteAll;
+window.saveEventoConfig = saveEventoConfig;
+window.toggleEventoTipo = toggleEventoTipo;
+window.iniciarNovoEvento = iniciarNovoEvento;
+window.loadEventoConfig = loadEventoConfig;
 window.showSection = showSection;
 window.showRegTab = showRegTab;
 window.setDocType = setDocType;
