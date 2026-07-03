@@ -1366,42 +1366,23 @@ function calcValorPax(p, valorDia) {
 function buildComprovante(mainPax, familyMembers, cfg) {
   var valorDia = cfg.valorDia || 52;
   var isFamiliar = familyMembers && familyMembers.length > 0;
+  var nome1 = mainPax.nome ? mainPax.nome.split(' ')[0] : '';
   if (isFamiliar) {
     var totalValor = 0;
     var linhas = '';
     var vMain = calcValorPax(mainPax, valorDia);
     totalValor += vMain;
-    linhas += '• ' + (mainPax.nome || '') + ' — ' + getDiasTexto(mainPax) + ' — R$' + vMain.toFixed(2).replace('.', ',') + '
-';
+    linhas += '* ' + (mainPax.nome || '') + ' - ' + getDiasTexto(mainPax) + ' - R$' + vMain.toFixed(2).replace('.', ',') + String.fromCharCode(10);
     for (var i = 0; i < familyMembers.length; i++) {
       var fm = familyMembers[i];
       var vFm = calcValorPax(fm, valorDia);
       totalValor += vFm;
-      linhas += '• ' + (fm.nome || '') + ' — ' + getDiasTexto(fm) + ' — R$' + vFm.toFixed(2).replace('.', ',') + '
-';
+      linhas += '* ' + (fm.nome || '') + ' - ' + getDiasTexto(fm) + ' - R$' + vFm.toFixed(2).replace('.', ',') + String.fromCharCode(10);
     }
-    return 'Ola ' + (mainPax.nome ? mainPax.nome.split(' ')[0] : '') + '! ✅ Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Itatiba 2026.
-
-'
-      + '👥 Pagamento familiar:
-' + linhas
-      + '
-💰 Total recebido: R$' + totalValor.toFixed(2).replace('.', ',')
-      + '
-
-Agradecemos a sua confianca e pontualidade. Ate breve! 🚌';
+    return 'Ola ' + nome1 + '! Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Itatiba 2026.' + String.fromCharCode(10) + String.fromCharCode(10) + 'Pagamento familiar:' + String.fromCharCode(10) + linhas + String.fromCharCode(10) + 'Total recebido: R$' + totalValor.toFixed(2).replace('.', ',') + String.fromCharCode(10) + String.fromCharCode(10) + 'Agradecemos a sua confianca e pontualidade. Ate breve!';
   } else {
     var valor = calcValorPax(mainPax, valorDia);
-    return 'Ola ' + (mainPax.nome ? mainPax.nome.split(' ')[0] : '') + '! ✅ Confirmamos o recebimento do seu pagamento de R$' + valor.toFixed(2).replace('.', ',')
-      + ' referente ao transporte para o Congresso Itatiba 2026.'
-      + '
-
-📅 Dias: ' + getDiasTexto(mainPax)
-      + '
-🎫 Assentos: ' + (mainPax.seats_needed || 1)
-      + '
-
-Agradecemos a sua confianca e pontualidade. Ate breve! 🚌';
+    return 'Ola ' + nome1 + '! Confirmamos o recebimento do seu pagamento de R$' + valor.toFixed(2).replace('.', ',') + ' referente ao transporte para o Congresso Itatiba 2026.' + String.fromCharCode(10) + String.fromCharCode(10) + 'Dias: ' + getDiasTexto(mainPax) + String.fromCharCode(10) + 'Assentos: ' + (mainPax.seats_needed || 1) + String.fromCharCode(10) + String.fromCharCode(10) + 'Agradecemos a sua confianca e pontualidade. Ate breve!';
   }
 }
 
