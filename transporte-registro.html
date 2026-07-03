@@ -451,12 +451,11 @@ input,select,textarea{font-family:inherit;outline:none}
         <button class="btn-secondary" style="font-size:12px;padding:7px 12px" onclick="exportCSV()">📊 Exportar CSV</button>
       </div>
       <input type="text" class="search-box" id="pax-search" placeholder="🔍 Buscar nome, RG ou CPF..." oninput="renderPaxList()">
-      <div class="pax-filter-bar">
+      <div class="pax-filter-bar" id="pax-day-filters">
         <button class="filter-btn active" onclick="setPaxFilter('todos',this)">Todos</button>
         <button class="filter-btn" onclick="setPaxFilter('sexta',this)">Sexta-feira</button>
         <button class="filter-btn" onclick="setPaxFilter('sabado',this)">Sábado</button>
         <button class="filter-btn" onclick="setPaxFilter('domingo',this)">Domingo</button>
-        <button class="filter-btn" onclick="setPaxFilter('config',this)">⚙️ Config</button>
       </div>
       <div id="pax-list"></div>
     </div>
@@ -563,15 +562,15 @@ input,select,textarea{font-family:inherit;outline:none}
           </div>
           <div class="form-group">
             <label>Sexta-feira · Data</label>
-            <input type="text" id="cfg-date-sex" placeholder="Ex: 17/07/2026">
+            <input type="date" id="cfg-date-sex">
           </div>
           <div class="form-group">
             <label>Sábado · Data</label>
-            <input type="text" id="cfg-date-sab" placeholder="Ex: 18/07/2026">
+            <input type="date" id="cfg-date-sab">
           </div>
           <div class="form-group">
             <label>Domingo · Data</label>
-            <input type="text" id="cfg-date-dom" placeholder="Ex: 19/07/2026">
+            <input type="date" id="cfg-date-dom">
           </div>
         </div>
         <div id="cfg-asamblea-dates" style="display:none">
@@ -588,7 +587,7 @@ input,select,textarea{font-family:inherit;outline:none}
           </div>
           <div class="form-group">
             <label>Data</label>
-            <input type="text" id="cfg-date-asamblea" placeholder="Ex: 15/08/2026">
+            <input type="date" id="cfg-date-asamblea">
           </div>
         </div>
         <button class="btn-primary" onclick="saveEventoConfig()">💾 Salvar configuração do evento</button>
@@ -801,6 +800,7 @@ function saveEventoConfig() {
     cfg.dateDom = document.getElementById('cfg-date-dom').value || '19/07/2026';
   } else {
     cfg.nome = document.getElementById('cfg-nome-asamblea').value || 'Assembleia de Circuito';
+    cfg.nomeAsamblea = cfg.nome;
     cfg.diaAsamblea = document.getElementById('cfg-dia-asamblea').value || 'sabado';
     cfg.dateAsamblea = document.getElementById('cfg-date-asamblea').value || '';
   }
@@ -810,23 +810,50 @@ function saveEventoConfig() {
   addLog('Evento configurado: ' + cfg.nome + ' (' + tipo + ') por ' + (currentAdmin || ''));
 }
 
+function fmtDate(val) {
+  if (!val) return '';
+  if (val.indexOf('-') !== -1) {
+    var p = val.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+  return val;
+}
+
+function updatePaxFilters() {
+  var bar = document.getElementById("pax-day-filters");
+  if (!bar) return;
+  var html = "";
+  html += "<button class=\"filter-btn active\" onclick=\"setPaxFilter('todos',this)\">Todos</button>";
+  for (var i = 0; i < DAYS.length; i++) {
+    var dk = DAYS[i].key;
+    var dl = DAYS[i].label;
+    html += "<button class=\"filter-btn\" onclick=\"setPaxFilter('"+dk+"',this)\">" + dl + "</button>";
+  }
+  bar.innerHTML = html;
+}
+
 function applyEventoConfig() {
   var cfg = getEventoConfig();
   if (!cfg.tipo || cfg.tipo === 'congresso') {
+    var dSex = fmtDate(cfg.dateSex) || '17/07/2026';
+    var dSab = fmtDate(cfg.dateSab) || '18/07/2026';
+    var dDom = fmtDate(cfg.dateDom) || '19/07/2026';
     DAYS = [
-      { key:'sexta',  label:'Sexta-feira', date: cfg.dateSex || '17/07/2026', full:'Sexta · ' + (cfg.dateSex || '17/07/2026').substring(0,5) },
-      { key:'sabado', label:'Sábado',      date: cfg.dateSab || '18/07/2026', full:'Sábado · ' + (cfg.dateSab || '18/07/2026').substring(0,5) },
-      { key:'domingo',label:'Domingo',     date: cfg.dateDom || '19/07/2026', full:'Domingo · ' + (cfg.dateDom || '19/07/2026').substring(0,5) }
+      { key:'sexta',  label:'Sexta-feira', date: dSex, full:'Sexta · ' + dSex.substring(0,5) },
+      { key:'sabado', label:'Sabado',      date: dSab, full:'Sabado · ' + dSab.substring(0,5) },
+      { key:'domingo',label:'Domingo',     date: dDom, full:'Domingo · ' + dDom.substring(0,5) }
     ];
   } else {
     var diaKey = cfg.diaAsamblea || 'sabado';
-    var diaLabel = diaKey === 'sabado' ? 'Sábado' : 'Domingo';
+    var diaLabel = diaKey === 'sabado' ? 'Sabado' : 'Domingo';
+    var dAsa = fmtDate(cfg.dateAsamblea) || '';
     DAYS = [
-      { key: diaKey, label: diaLabel, date: cfg.dateAsamblea || '', full: diaLabel + ' · ' + (cfg.dateAsamblea || '') }
+      { key: diaKey, label: diaLabel, date: dAsa, full: diaLabel + (dAsa ? ' · ' + dAsa : '') }
     ];
   }
   renderDayButtons();
-  var nomeEvento = cfg.nome || 'Congresso Itatiba SP';
+  updatePaxFilters();
+  var nomeEvento = cfg.nome || cfg.nomeAsamblea || 'Congresso Itatiba SP';
   var headerEl = document.querySelector('.pub-header p');
   if (headerEl) headerEl.textContent = nomeEvento + ' · Reserve seu assento';
   var adminEl = document.querySelector('.admin-topbar h1');
@@ -1525,14 +1552,24 @@ function savePw() {
 ═══════════════════════════════════════════ */
 function renderDayButtons() {
   var html = '';
+  var isAsamblea = DAYS.length === 1;
   for (var i = 0; i < DAYS.length; i++) {
     var d = DAYS[i];
     var sel = selectedDays.indexOf(d.key) !== -1;
-    html += '<button class="day-btn' + (sel ? ' selected' : '') + '" onclick="toggleDay(\'' + d.key + '\')">'
-      + '<div class="day-btn-title">' + d.label + '</div>'
-      + '<div class="day-btn-sub">' + d.date + '</div>'
-      + '<div class="day-btn-check">' + (sel ? '✓' : '') + '</div>'
-      + '</button>';
+    if (isAsamblea) {
+      // Asamblea: single day, no checkbox, auto-selected
+      if (selectedDays.indexOf(d.key) === -1) selectedDays.push(d.key);
+      html += '<div class="day-btn selected" style="pointer-events:none">'
+        + '<div class="day-btn-title">' + d.label + '</div>'
+        + '<div class="day-btn-sub">' + d.date + '</div>'
+        + '</div>';
+    } else {
+      html += '<button class="day-btn' + (sel ? ' selected' : '') + '" onclick="toggleDay(\'' + d.key + '\')">'
+        + '<div class="day-btn-title">' + d.label + '</div>'
+        + '<div class="day-btn-sub">' + d.date + '</div>'
+        + '<div class="day-btn-check">' + (sel ? '✓' : '') + '</div>'
+        + '</button>';
+    }
   }
   document.getElementById('day-buttons').innerHTML = html;
 }
@@ -2081,6 +2118,7 @@ window.exportCSV = exportCSV;
 window.exportRelatorio = exportRelatorio;
 window.confirmDeleteAll = confirmDeleteAll;
 window.saveEventoConfig = saveEventoConfig;
+window.updatePaxFilters = updatePaxFilters;
 window.toggleEventoTipo = toggleEventoTipo;
 window.iniciarNovoEvento = iniciarNovoEvento;
 window.loadEventoConfig = loadEventoConfig;
