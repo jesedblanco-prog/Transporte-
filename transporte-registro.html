@@ -217,7 +217,6 @@ input,select,textarea{font-family:inherit;outline:none}
 /* LEMBRETES */
 .lembrete-msg{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;font-size:13px;color:#166534;line-height:1.6;margin-bottom:12px}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -259,7 +258,7 @@ input,select,textarea{font-family:inherit;outline:none}
 <div id="public-screen">
   <div class="pub-header">
     <h1>🚌 Transporte Jardim do Vale</h1>
-    <p id="pub-event-title">Congresso Itatiba 2026 · Reserve seu assento</p>
+    <p>Congresso Itatiba 2026 · Reserve seu assento</p>
   </div>
   <div class="pub-body">
 
@@ -318,7 +317,7 @@ input,select,textarea{font-family:inherit;outline:none}
           <label id="doc-label">Número do RG</label>
           <input type="text" id="reg-doc" placeholder="Ex: 12.345.678-9">
         </div>
-        <div class="form-group" id="cpf-optional-group" style="display:none">
+        <div class="form-group" id="cpf-optional-group">
           <label>CPF</label>
           <input type="text" id="reg-cpf" placeholder="000.000.000-00">
         </div>
@@ -374,7 +373,7 @@ input,select,textarea{font-family:inherit;outline:none}
 <!-- ADMIN SCREEN -->
 <div id="admin-screen">
   <div class="admin-topbar">
-    <h1>Painel Admin · <span id="admin-event-title">Congresso Itatiba</span></h1>
+    <h1>Painel Admin · Congresso Itatiba</h1>
     <div class="admin-topbar-right">
       <span class="admin-user-badge" id="admin-user-badge">👤 —</span>
       <button class="btn-logout" onclick="doLogout()">Sair 🚪</button>
@@ -547,17 +546,6 @@ input,select,textarea{font-family:inherit;outline:none}
       <div class="section-title">⚙️ Configurações</div>
       <div class="section-sub">Gerenciamento do sistema</div>
 
-      <div class="config-item" onclick="openEventModal()">
-        <div class="config-item-left">
-          <div class="config-icon config-icon-blue">🗓️</div>
-          <div>
-            <div class="config-label">Configurar evento</div>
-            <div class="config-sub">Nome, tipo (Congresso/Assembleia) e datas</div>
-          </div>
-        </div>
-        <div class="config-arrow">›</div>
-      </div>
-
       <div class="config-item" onclick="showChangePwModal()">
         <div class="config-item-left">
           <div class="config-icon config-icon-blue">🔑</div>
@@ -596,7 +584,7 @@ input,select,textarea{font-family:inherit;outline:none}
           <div class="config-icon config-icon-red">🗑</div>
           <div>
             <div class="config-label" style="color:#dc2626">Apagar todos os passageiros</div>
-            <div class="config-sub">Não pode ser desfeito · pede senha</div>
+            <div class="config-sub">Não pode ser desfeito</div>
           </div>
         </div>
         <div class="config-arrow">›</div>
@@ -705,55 +693,6 @@ input,select,textarea{font-family:inherit;outline:none}
 </div>
 
 <!-- Change PW modal -->
-<div class="modal-overlay" id="event-modal">
-  <div class="modal-box">
-    <div class="modal-title">🗓️ Configurar evento</div>
-    <div class="modal-sub">Nome, tipo e datas do evento atual</div>
-    <div class="form-group">
-      <label>Nome / destino do evento</label>
-      <input type="text" id="event-destino">
-    </div>
-    <div class="form-group">
-      <label>Tipo de evento</label>
-      <select id="event-tipo" onchange="toggleEventTypeFields()">
-        <option value="congresso">Congresso (Sexta, Sábado e Domingo)</option>
-        <option value="assembleia">Assembleia de Circuito (1 dia)</option>
-      </select>
-    </div>
-    <div id="event-congresso-fields">
-      <div class="form-group">
-        <label>Data Sexta-feira</label>
-        <input type="date" id="event-date-fri">
-      </div>
-      <div class="form-group">
-        <label>Data Sábado</label>
-        <input type="date" id="event-date-sat">
-      </div>
-      <div class="form-group">
-        <label>Data Domingo</label>
-        <input type="date" id="event-date-sun">
-      </div>
-    </div>
-    <div id="event-assembleia-fields" style="display:none">
-      <div class="form-group">
-        <label>Dia da assembleia</label>
-        <select id="event-assembleia-dia">
-          <option value="sabado">Sábado</option>
-          <option value="domingo">Domingo</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Data da assembleia</label>
-        <input type="date" id="event-date-assembleia">
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeModal('event-modal')">Cancelar</button>
-      <button class="btn-primary" onclick="saveEventConfig()">Salvar</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="pw-modal">
   <div class="modal-box">
     <div class="modal-title">🔑 Alterar Senha</div>
@@ -827,44 +766,16 @@ function sbGet(table, query) {
   return sbFetch(table + '?' + (query || 'select=*&order=ts.asc'), 'GET');
 }
 
-function sbEdgeWrite(action, table, data, match) {
-  return fetch(SB_URL + '/functions/v1/transporte-write', {
-    method: 'POST',
-    headers: {
-      'apikey': SB_KEY,
-      'Authorization': 'Bearer ' + SB_KEY,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ action: action, table: table, data: data, match: match })
-  }).then(function(r) {
-    return r.json().then(function(json) {
-      if (!r.ok || json.error) { throw new Error(json.error || ('HTTP ' + r.status)); }
-      return json;
-    });
-  });
-}
-
 function sbPost(table, data) {
-  return sbEdgeWrite('insert', table, data, null).then(function(json) {
-    return { ok: true, json: function() { return Promise.resolve(json.data); } };
-  });
+  return sbFetch(table, 'POST', data);
 }
 
 function sbPatch(table, id, data) {
-  return sbEdgeWrite('update', table, data, { id: id }).then(function(json) {
-    return { ok: true, json: function() { return Promise.resolve(json.data); } };
-  });
+  return sbFetch(table + '?id=eq.' + id, 'PATCH', data);
 }
 
 function sbDelete(table, query) {
-  if (query.indexOf('neq.00000000-0000-0000-0000-000000000000') !== -1) {
-    return sbEdgeWrite('deleteAll', table, {}, null);
-  }
-  var m = query.match(/id=eq\.(.+)/);
-  if (m) {
-    return sbEdgeWrite('delete', table, {}, { id: m[1] });
-  }
-  return Promise.reject(new Error('Consulta de borrado no soportada'));
+  return sbFetch(table + '?' + query, 'DELETE');
 }
 
 /* ═══════════════════════════════════════════
@@ -909,8 +820,7 @@ function loadAllData() {
       showToast('Erro ao conectar ao Supabase');
     });
 
-  loadPayConfig();
-  loadLemConfig();
+  // Config loaded only on section change, not on auto-refresh
 }
 
 /* ═══════════════════════════════════════════
@@ -1166,121 +1076,6 @@ function sendWA(id, tipo) {
   window.open('https://api.whatsapp.com/send?phone=' + tel + '&text=' + encodeURIComponent(msg), '_blank');
 }
 
-function gerarComprovantePDF(id) {
-  var p = findPax(id);
-  if (!p) return;
-  if (!window.jspdf) { showToast('Erro ao carregar gerador de PDF'); return; }
-  var cfg = getPayConfig();
-  var valorDia = cfg.valorDia || 55;
-  var evento = (eventConfig && eventConfig.destino) ? eventConfig.destino : 'Congresso Itatiba 2026';
-
-  var familiares = [];
-  for (var i = 0; i < allPax.length; i++) {
-    var f = allPax[i];
-    if (String(f.id) === String(p.id)) continue;
-    if ((f.payment_obs || '').indexOf('(familiar de ' + p.nome + ')') !== -1) {
-      familiares.push(f);
-    }
-  }
-
-  var jsPDF = window.jspdf.jsPDF;
-  var doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  var azul = [26, 86, 219];
-  var cinza = [100, 116, 139];
-  var verde = [22, 163, 74];
-  var y = 20;
-
-  doc.setFontSize(18);
-  doc.setTextColor(azul[0], azul[1], azul[2]);
-  doc.text('Transporte Jardim do Vale', 20, y);
-  y += 7;
-  doc.setFontSize(11);
-  doc.setTextColor(cinza[0], cinza[1], cinza[2]);
-  doc.text(evento + ' \u00b7 Comprovante de Pagamento', 20, y);
-  y += 4;
-  doc.setDrawColor(226, 232, 240);
-  doc.line(20, y, 190, y);
-  y += 10;
-
-  doc.setFontSize(8);
-  doc.setTextColor(cinza[0], cinza[1], cinza[2]);
-  doc.text('PASSAGEIRO', 20, y);
-  doc.text('DIAS DE VIAGEM', 110, y);
-  y += 5;
-  doc.setFontSize(12);
-  doc.setTextColor(30, 41, 59);
-  doc.text(String(p.nome || '-'), 20, y);
-  doc.text(getDiasLabel(p), 110, y);
-  y += 9;
-
-  doc.setFontSize(8);
-  doc.setTextColor(cinza[0], cinza[1], cinza[2]);
-  doc.text('DOCUMENTO', 20, y);
-  doc.text('ASSENTOS', 110, y);
-  y += 5;
-  doc.setFontSize(12);
-  doc.setTextColor(30, 41, 59);
-  doc.text(String(p.rg || p.cpf || p.rnm || '-'), 20, y);
-  doc.text(String(p.seats_needed || 1) + ' assento(s)', 110, y);
-  y += 12;
-
-  var valorPax = calcValorPax(p, valorDia);
-  doc.setFillColor(240, 253, 244);
-  doc.setDrawColor(187, 247, 208);
-  doc.roundedRect(20, y, 170, 16, 2, 2, 'FD');
-  doc.setFontSize(10);
-  doc.setTextColor(verde[0], verde[1], verde[2]);
-  doc.text('VALOR PAGO', 25, y + 7);
-  doc.setFontSize(15);
-  doc.text('R$ ' + valorPax.toFixed(2).replace('.', ','), 25, y + 13);
-  y += 22;
-
-  doc.setFontSize(9);
-  doc.setTextColor(cinza[0], cinza[1], cinza[2]);
-  doc.text('Status: ' + normalizeStatus(p.payment_status) + ' \u00b7 Gerado em: ' + new Date().toLocaleDateString('pt-BR'), 20, y);
-  y += 14;
-
-  if (familiares.length > 0) {
-    doc.setFontSize(12);
-    doc.setTextColor(30, 41, 59);
-    doc.text('Familiares inclu\u00eddos neste pagamento', 20, y);
-    y += 6;
-    doc.setFillColor(azul[0], azul[1], azul[2]);
-    doc.rect(20, y, 170, 8, 'F');
-    doc.setFontSize(9);
-    doc.setTextColor(255, 255, 255);
-    doc.text('Nome', 23, y + 5.5);
-    doc.text('Dias', 110, y + 5.5);
-    doc.text('Valor', 160, y + 5.5);
-    y += 8;
-    var total = valorPax;
-    for (var j = 0; j < familiares.length; j++) {
-      var vf = calcValorPax(familiares[j], valorDia);
-      total += vf;
-      doc.setFillColor(j % 2 === 0 ? 255 : 241, j % 2 === 0 ? 255 : 245, j % 2 === 0 ? 255 : 249);
-      doc.rect(20, y, 170, 8, 'F');
-      doc.setFontSize(9);
-      doc.setTextColor(30, 41, 59);
-      doc.text(String(familiares[j].nome || '-'), 23, y + 5.5);
-      doc.text(getDiasLabel(familiares[j]), 110, y + 5.5);
-      doc.text('R$ ' + vf.toFixed(2).replace('.', ','), 160, y + 5.5);
-      y += 8;
-    }
-    y += 6;
-    doc.setFontSize(10);
-    doc.text('Valor total do grupo familiar: R$ ' + total.toFixed(2).replace('.', ','), 20, y);
-    y += 10;
-  }
-
-  doc.setDrawColor(226, 232, 240);
-  doc.line(20, 275, 190, 275);
-  doc.setFontSize(9);
-  doc.setTextColor(cinza[0], cinza[1], cinza[2]);
-  doc.text('Obrigado pela confian\u00e7a e pontualidade. At\u00e9 breve!', 105, 282, { align: 'center' });
-
-  doc.save('comprovante-' + String(p.nome || 'passageiro').replace(/[^a-zA-Z0-9]+/g, '-') + '.pdf');
-}
-
 /* ═══════════════════════════════════════════
    PAY MODAL
 ═══════════════════════════════════════════ */
@@ -1294,8 +1089,8 @@ function openPayModal(id) {
   document.getElementById('pay-modal-parcial').value = p.valor_abonado || '';
   document.getElementById('pay-modal-familiar').value = 'nao';
   document.getElementById('pay-modal-familiar-wrap').style.display = 'none';
-  document.getElementById('pay-modal-family-list').innerHTML = '';
   toggleParcialField();
+  renderFamilyList(id);
   setText('pay-modal-sub', getDiasLabel(p));
   openModal('pay-modal');
 }
@@ -1329,31 +1124,21 @@ function calcValorPax(p, valorDia) {
   var dias = parseDias(p.dias || p.dia);
   var nDias = dias.length || 1;
   var seats = parseInt(p.seats_needed) || 1;
-  return nDias * (valorDia || 55) * seats;
+  return nDias * (valorDia || 52) * seats;
 }
 
 function renderFamilyList(excludeId) {
   var sorted = allPax.slice().sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||''); });
-  var html = '<label style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:6px;cursor:pointer;font-size:13px;border-bottom:1px solid #e2e8f0;margin-bottom:4px">'
-    + '<input type="checkbox" id="fam-none-chk" style="width:16px;height:16px" onchange="toggleFamNone(this)"> '
-    + '<strong>Nenhum</strong> <span style="color:#94a3b8;font-size:11px">(não associar a ninguém)</span>'
-    + '</label>';
+  var html = '';
   for (var i = 0; i < sorted.length; i++) {
     var p = sorted[i];
     if (String(p.id) === String(excludeId)) continue;
     html += '<label style="display:flex;align-items:center;gap:8px;padding:6px;border-radius:6px;cursor:pointer;font-size:13px">'
-      + '<input type="checkbox" value="' + p.id + '" class="fam-chk" style="width:16px;height:16px" onchange="if(this.checked){document.getElementById(\'fam-none-chk\').checked=false;}"> '
+      + '<input type="checkbox" value="' + p.id + '" style="width:16px;height:16px"> '
       + escHtml(p.nome || '') + ' <span style="color:#94a3b8;font-size:11px">(' + getDiasTexto(p) + ')</span>'
       + '</label>';
   }
-  document.getElementById('pay-modal-family-list').innerHTML = html;
-}
-
-function toggleFamNone(el) {
-  if (el.checked) {
-    var checks = document.querySelectorAll('#pay-modal-family-list input.fam-chk:checked');
-    for (var i = 0; i < checks.length; i++) checks[i].checked = false;
-  }
+  document.getElementById('pay-modal-family-list').innerHTML = html || '<p style="color:#94a3b8;font-size:12px">Nenhum outro passageiro.</p>';
 }
 
 function savePay() {
@@ -1363,10 +1148,10 @@ function savePay() {
   var parcial = document.getElementById('pay-modal-parcial').value;
   var isFamiliar = document.getElementById('pay-modal-familiar').value === 'sim';
 
-  // Get selected family members (só quando o admin abre a secao desta vez, para adicionar novos)
+  // Get selected family members
   var familyIds = [];
   if (isFamiliar) {
-    var checks = document.querySelectorAll('#pay-modal-family-list input.fam-chk:checked');
+    var checks = document.querySelectorAll('#pay-modal-family-list input[type=checkbox]:checked');
     for (var i = 0; i < checks.length; i++) {
       familyIds.push(checks[i].value);
     }
@@ -1378,43 +1163,15 @@ function savePay() {
   var mainPax = findPax(id);
   var mainNome = mainPax ? mainPax.nome : id;
 
-  // Familiares JA associados a este pagador (de pagamentos anteriores), que nao foram
-  // reselecionados agora — sempre verifica, independente do interruptor "Pagamento familiar?"
-  var dependentes = [];
-  for (var ri = 0; ri < allPax.length; ri++) {
-    var rp = allPax[ri];
-    if (String(rp.id) === String(id)) continue;
-    var eraFamiliar = (rp.payment_obs || '').indexOf('(familiar de ' + mainNome + ')') !== -1;
-    var selecionadoAgora = familyIds.indexOf(String(rp.id)) !== -1;
-    if (eraFamiliar && !selecionadoAgora) dependentes.push(rp);
-  }
-
-  var aplicarAosDependentes = false;
-  if (dependentes.length > 0) {
-    var nomesDep = dependentes.map(function(d) { return d.nome; }).join(', ');
-    aplicarAosDependentes = confirm(
-      mainNome + ' tem familiar(es) ja associado(s) a este pagamento: ' + nomesDep + '.\n\n' +
-      'Deseja aplicar o mesmo status (' + status + ') a eles tambem?\n\n' +
-      'OK = sim, atualizar os familiares  |  Cancelar = manter como esta'
-    );
-  }
-
   // Save main pax
   sbPatch('pasajeros', id, data)
     .then(function() {
+      // Save family members with same status
       var promises = [];
       for (var i = 0; i < familyIds.length; i++) {
         promises.push(
           sbPatch('pasajeros', familyIds[i], { payment_status: status, payment_obs: obs + ' (familiar de ' + mainNome + ')' })
         );
-      }
-      if (aplicarAosDependentes) {
-        for (var di = 0; di < dependentes.length; di++) {
-          promises.push(sbPatch('pasajeros', dependentes[di].id, {
-            payment_status: status,
-            payment_obs: 'Atualizado junto com o pagador (' + mainNome + ')'
-          }));
-        }
       }
       return Promise.all(promises);
     })
@@ -1423,9 +1180,8 @@ function savePay() {
       loadAllData();
       var logMsg = 'Pagamento: ' + mainNome + ' → ' + status;
       if (familyIds.length > 0) logMsg += ' (+ ' + familyIds.length + ' familiar(es))';
-      if (aplicarAosDependentes) logMsg += ' · ' + dependentes.length + ' familiar(es) atualizado(s) para ' + status;
       addLog(logMsg);
-      showToast('Pagamento salvo!');
+      showToast(familyIds.length > 0 ? 'Pagamento familiar salvo! (' + (familyIds.length + 1) + ' pessoas)' : 'Pagamento salvo!');
     })
     .catch(function() { showToast('Erro ao salvar pagamento'); });
 }
@@ -1499,123 +1255,16 @@ function savePw() {
   if (atual !== ADMINS[currentAdmin]) { showToast('Senha atual incorreta'); return; }
   if (!nova || nova.length < 4) { showToast('Nova senha muito curta'); return; }
   if (nova !== confirm) { showToast('Senhas não conferem'); return; }
-  var field = currentAdmin === 'sergio2025' ? 'pw_sergio' : 'pw_jesus';
-  var data = {};
-  data[field] = nova;
-  sbPatch('config', 1, data)
-    .then(function() {
-      ADMINS[currentAdmin] = nova;
-      closeModal('pw-modal');
-      addLog('Senha alterada por ' + currentAdmin);
-      showToast('Senha alterada com sucesso!');
-    })
-    .catch(function() { showToast('Erro ao salvar. Tente novamente.'); });
+  ADMINS[currentAdmin] = nova;
+  closeModal('pw-modal');
+  addLog('Senha alterada por ' + currentAdmin);
+  showToast('Senha alterada com sucesso!');
 }
 
 /* ═══════════════════════════════════════════
    REGISTRATION
 ═══════════════════════════════════════════ */
-var eventConfig = null;
-
-function fmtDateBR(iso) {
-  if (!iso) return '';
-  var p = iso.split('-');
-  return p.length === 3 ? (p[2] + '/' + p[1] + '/' + p[0]) : iso;
-}
-
-function buildDaysFromConfig(c) {
-  if (c && c.tipo_evento === 'assembleia') {
-    var dia = c.assembleia_dia === 'domingo' ? 'domingo' : 'sabado';
-    var iso = dia === 'domingo' ? c.date_sun : c.date_sat;
-    var label = dia === 'domingo' ? 'Domingo' : 'Sábado';
-    var d = fmtDateBR(iso);
-    return [{ key: dia, label: label, date: d, full: label + ' · ' + d }];
-  }
-  var fri = fmtDateBR(c && c.date_fri) || '17/07/2026';
-  var sat = fmtDateBR(c && c.date_sat) || '18/07/2026';
-  var sun = fmtDateBR(c && c.date_sun) || '19/07/2026';
-  return [
-    { key: 'sexta',  label: 'Sexta-feira', date: fri, full: 'Sexta · ' + fri },
-    { key: 'sabado', label: 'Sábado',      date: sat, full: 'Sábado · ' + sat },
-    { key: 'domingo',label: 'Domingo',     date: sun, full: 'Domingo · ' + sun }
-  ];
-}
-
-function loadEventConfig() {
-  sbGet('config', 'select=*&limit=1')
-    .then(function(r) { return r.json(); })
-    .then(function(rows) {
-      var c = Array.isArray(rows) ? rows[0] : null;
-      eventConfig = c;
-      DAYS = buildDaysFromConfig(c);
-      renderDayButtons();
-      var destino = (c && c.destino) ? c.destino : 'Congresso Itatiba 2026';
-      setText('pub-event-title', destino + ' · Reserve seu assento');
-      setText('admin-event-title', (c && c.destino) ? c.destino : 'Congresso Itatiba');
-      if (c) {
-        if (c.pw_jesus) ADMINS.jesus2025 = c.pw_jesus;
-        if (c.pw_sergio) ADMINS.sergio2025 = c.pw_sergio;
-      }
-    })
-    .catch(function() { /* mantem os valores padrao atuais, nao quebra nada */ });
-}
-
-function toggleEventTypeFields() {
-  var t = document.getElementById('event-tipo').value;
-  document.getElementById('event-congresso-fields').style.display = t === 'congresso' ? 'block' : 'none';
-  document.getElementById('event-assembleia-fields').style.display = t === 'assembleia' ? 'block' : 'none';
-}
-
-function openEventModal() {
-  var c = eventConfig || {};
-  document.getElementById('event-destino').value = c.destino || '';
-  document.getElementById('event-tipo').value = c.tipo_evento || 'congresso';
-  document.getElementById('event-date-fri').value = c.date_fri || '';
-  document.getElementById('event-date-sat').value = c.date_sat || '';
-  document.getElementById('event-date-sun').value = c.date_sun || '';
-  document.getElementById('event-assembleia-dia').value = c.assembleia_dia || 'sabado';
-  var assDate = (c.assembleia_dia === 'domingo') ? c.date_sun : c.date_sat;
-  document.getElementById('event-date-assembleia').value = assDate || '';
-  toggleEventTypeFields();
-  openModal('event-modal');
-}
-
-function saveEventConfig() {
-  var tipo = document.getElementById('event-tipo').value;
-  var destino = document.getElementById('event-destino').value;
-  var data = { destino: destino, tipo_evento: tipo };
-  if (tipo === 'congresso') {
-    data.date_fri = document.getElementById('event-date-fri').value;
-    data.date_sat = document.getElementById('event-date-sat').value;
-    data.date_sun = document.getElementById('event-date-sun').value;
-  } else {
-    var dia = document.getElementById('event-assembleia-dia').value;
-    var d = document.getElementById('event-date-assembleia').value;
-    data.assembleia_dia = dia;
-    if (dia === 'domingo') { data.date_sun = d; } else { data.date_sat = d; }
-  }
-  sbPatch('config', 1, data)
-    .then(function() {
-      closeModal('event-modal');
-      loadEventConfig();
-      showToast('Evento configurado!');
-    })
-    .catch(function() { showToast('Erro ao salvar configuração do evento'); });
-}
-
 function renderDayButtons() {
-  if (DAYS.length === 1 && selectedDays.indexOf(DAYS[0].key) === -1) {
-    selectedDays.push(DAYS[0].key);
-  }
-  if (DAYS.length === 1) {
-    var d0 = DAYS[0];
-    document.getElementById('day-buttons').innerHTML =
-      '<div class="day-btn" style="pointer-events:none">'
-      + '<div class="day-btn-title">' + d0.label + '</div>'
-      + '<div class="day-btn-sub">' + d0.date + ' · Data fixa do evento</div>'
-      + '</div>';
-    return;
-  }
   var html = '';
   for (var i = 0; i < DAYS.length; i++) {
     var d = DAYS[i];
@@ -1630,7 +1279,6 @@ function renderDayButtons() {
 }
 
 function toggleDay(key) {
-  if (DAYS.length === 1) { return; }
   var idx = selectedDays.indexOf(key);
   if (idx !== -1) selectedDays.splice(idx, 1);
   else selectedDays.push(key);
@@ -1646,7 +1294,7 @@ function setDocType(t) {
   if (inp) inp.placeholder = placeholders[t] || '';
   // Show/hide CPF optional field
   var cpfGroup = document.getElementById('cpf-optional-group');
-  if (cpfGroup) cpfGroup.style.display = 'none';
+  if (cpfGroup) cpfGroup.style.display = t === 'cpf' ? 'none' : 'block';
   var tabs = ['rg','rnm','cpf'];
   for (var i = 0; i < tabs.length; i++) {
     var el = document.getElementById('doc-' + tabs[i]);
@@ -1785,7 +1433,8 @@ function doAdminLogin() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('public-screen').style.display = 'none';
-  setText('admin-user-badge', '👤 ' + found);
+  var displayName = found === 'jesus2025' ? 'Jesús' : found === 'sergio2025' ? 'Sergio' : found;
+setText('admin-user-badge', '👤 ' + displayName);
   loadAllData();
   if (refreshTimer) clearInterval(refreshTimer);
   refreshTimer = setInterval(loadAllData, 8000);
@@ -1856,20 +1505,20 @@ function getPayConfig() {
   try { return JSON.parse(localStorage.getItem('tr_pay_config')) || {}; } catch(e) { return {}; }
 }
 function savePayConfig() {
-  var cfg = {
-    valorDia: parseFloat(document.getElementById('pay-valor-dia').value) || 55,
-    prazo: document.getElementById('pay-prazo').value || '05/07/2026',
-    msg: document.getElementById('pay-msg').value
-  };
+  var valorDia = parseFloat(document.getElementById('pay-valor-dia').value) || 52;
+  var prazo = document.getElementById('pay-prazo').value || '05/07/2026';
+  var msg = document.getElementById('pay-msg').value;
+  var cfg = { valorDia: valorDia, prazo: prazo, msg: msg };
   localStorage.setItem('tr_pay_config', JSON.stringify(cfg));
-  showToast('Configuração salva!');
-  loadAllData();
+  addLog('Config de cobrança salva por ' + (currentAdmin || ''));
+  showToast('✅ Configuração salva!');
+  renderPayList();
 }
 function loadPayConfig() {
   var cfg = getPayConfig();
-  document.getElementById('pay-valor-dia').value = cfg.valorDia || 55;
+  document.getElementById('pay-valor-dia').value = cfg.valorDia || 52;
   document.getElementById('pay-prazo').value = cfg.prazo || '05/07/2026';
-  document.getElementById('pay-msg').value = cfg.msg || 'Olá {nome}, seu pagamento de R$ {valor} vence em {prazo}. Por favor regularize.';
+  document.getElementById('pay-msg').value = cfg.msg || 'Olá {nome}! 🙏 Que a paz de Deus esteja com você! Passamos para lembrá-lo(a) carinhosamente que o pagamento referente ao transporte para o Congresso de Itatiba vence em {prazo}. Valor: R$ {valor}. Os irmãos responsáveis pelo arreglo com a empresa de ônibus dependem da confirmação de cada um para garantir o serviço. Contamos com sua colaboração! 🚌💛 Obrigado e até breve!';
 }
 
 /* ═══════════════════════════════════════════
@@ -1885,13 +1534,14 @@ function saveLemConfig() {
     msg: document.getElementById('lem-msg').value
   };
   localStorage.setItem('tr_lem_config', JSON.stringify(cfg));
-  showToast('Configuração salva!');
+  addLog('Config de lembrete salva por ' + (currentAdmin || ''));
+  showToast('✅ Mensagem de comprovante salva!');
 }
 function loadLemConfig() {
   var cfg = getLemConfig();
   document.getElementById('lem-horario').value = cfg.horario || '';
   document.getElementById('lem-ponto').value = cfg.ponto || '';
-  document.getElementById('lem-msg').value = cfg.msg || 'Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Itatiba. Agradecemos a sua confiança e pontualidade. Até breve! 🚌';
+  document.getElementById('lem-msg').value = cfg.msg || 'Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Regional de Itatiba. Que Jeová abençoe sua participação! Agradecemos a sua confiança e pontualidade. Até breve no ônibus! 🚌💛';
 }
 
 /* ═══════════════════════════════════════════
@@ -1976,9 +1626,6 @@ function exportRelatorio() {
 function confirmDeleteAll() {
   if (!confirm('ATENÇÃO: Isso vai apagar TODOS os passageiros permanentemente. Tem certeza?')) return;
   if (!confirm('Segunda confirmação: realmente deseja apagar TODOS?')) return;
-  var pw = prompt('Digite sua senha de administrador para confirmar:');
-  if (pw === null) return;
-  if (pw !== ADMINS[currentAdmin]) { showToast('Senha incorreta. Operação cancelada.'); return; }
   sbDelete('pasajeros', 'id=neq.00000000-0000-0000-0000-000000000000')
     .then(function() {
       allPax = [];
@@ -2087,7 +1734,6 @@ document.getElementById('login-pw').addEventListener('keydown', function(e) {
 ═══════════════════════════════════════════ */
 window.addEventListener('load', function() {
   renderDayButtons();
-  loadEventConfig();
   hideInfo();
   setTimeout(function() {
     document.getElementById('loading-screen').style.display = 'none';
@@ -2119,47 +1765,14 @@ document.addEventListener('click', function(e) {
         sendWA(id, 'cobrar');
       } else if (action === 'wa-comprovante') {
         sendWA(id, 'comprovante');
-        gerarComprovantePDF(id);
       } else if (action === 'delete') {
         var nome = btn.getAttribute('data-nome') || 'este passageiro';
         if (!confirm('Tem certeza que deseja excluir ' + nome + '?')) return;
         if (!confirm('Segunda confirmacao: excluir ' + nome + ' permanentemente?')) return;
-
-        var dependentes = [];
-        for (var di = 0; di < allPax.length; di++) {
-          var dp = allPax[di];
-          if (String(dp.id) === String(id)) continue;
-          if ((dp.payment_obs || '').indexOf('(familiar de ' + nome + ')') !== -1) {
-            dependentes.push(dp);
-          }
-        }
-
-        var reverterFamiliares = false;
-        if (dependentes.length > 0) {
-          var nomesDep = dependentes.map(function(d) { return d.nome; }).join(', ');
-          reverterFamiliares = confirm(
-            nome + ' tem ' + dependentes.length + ' familiar(es) marcado(s) como pago junto com ele/ela: ' + nomesDep + '.\n\n' +
-            'Como quem pagou vai ser excluido, deseja marcar esses familiares como NAO PAGO tambem?\n\n' +
-            'OK = sim, marcar como nao pago  |  Cancelar = manter como esta'
-          );
-        }
-
         sbDelete('pasajeros', 'id=eq.' + id)
           .then(function() {
-            if (reverterFamiliares) {
-              var revPromises = [];
-              for (var dj = 0; dj < dependentes.length; dj++) {
-                revPromises.push(sbPatch('pasajeros', dependentes[dj].id, {
-                  payment_status: 'nao-pago',
-                  payment_obs: 'Revertido: pagador (' + nome + ') foi excluido'
-                }));
-              }
-              return Promise.all(revPromises);
-            }
-          })
-          .then(function() {
-            showToast(nome + ' excluido com sucesso' + (reverterFamiliares ? ' · familiares revertidos' : ''));
-            addLog('Passageiro excluido: ' + nome + ' (id=' + id + ')' + (reverterFamiliares ? ' · familiares revertidos para nao-pago' : ''));
+            showToast(nome + ' excluido com sucesso');
+            addLog('Passageiro excluido: ' + nome + ' (id=' + id + ')');
             loadAllData();
           })
           .catch(function() { showToast('Erro ao excluir passageiro'); });
@@ -2173,6 +1786,7 @@ document.addEventListener('click', function(e) {
 /* ── WINDOW EXPORTS ──────────────────────────────── */
 window.getDiasTexto = getDiasTexto;
 window.calcValorPax = calcValorPax;
+window.buildComprovante = buildComprovante;
 window.renderFamilyList = renderFamilyList;
 window.getDocDisplay = getDocDisplay;
 window.toggleFamiliarField = toggleFamiliarField;
@@ -2200,11 +1814,6 @@ window.hideInfo = hideInfo;
 window.saveLemConfig = saveLemConfig;
 window.savePayConfig = savePayConfig;
 window.renderPaxList = renderPaxList;
-window.toggleFamNone = toggleFamNone;
-window.gerarComprovantePDF = gerarComprovantePDF;
-window.openEventModal = openEventModal;
-window.toggleEventTypeFields = toggleEventTypeFields;
-window.saveEventConfig = saveEventConfig;
 window.renderPayList = renderPayList;
 </script>
 </body>
