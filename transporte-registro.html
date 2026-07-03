@@ -1021,7 +1021,7 @@ function renderPayList() {
       + '<div class="pax-actions">'
       + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Registrar pagamento</button>'
       + (p.tel ? '<button class="pax-action-btn btn-secondary" data-action="wa-cobrar" data-id="' + p.id + '" style="background:#fef3c7;color:#92400e">📲 Cobrar</button>' : '')
-      + (status === 'pago' && p.tel ? '<button class="pax-action-btn btn-wa" data-action="wa-comprovante" data-id="' + p.id + '" style="background:#25d366;color:#fff">✅ Comprovante WA</button>' : '')
+      + (status === 'pago' ? '<button class="pax-action-btn btn-wa" data-action="comprovante-full" data-id="' + p.id + '" style="background:#25d366;color:#fff">✅ Comprovante</button>' : '')
       + '</div>'
       + '</div>';
     shown++;
@@ -1047,6 +1047,93 @@ function renderLemList() {
 /* ═══════════════════════════════════════════
    WHATSAPP
 ═══════════════════════════════════════════ */
+function gerarComprovantePDF(id) {
+  var p = findPax(id);
+  if (!p) return;
+  var cfg = getPayConfig();
+  var valorDia = cfg.valorDia || 52;
+  var dias = parseDias(p.dias || p.dia);
+  var nDias = dias.length || 1;
+  var seats = parseInt(p.seats_needed) || 1;
+  var valor = nDias * valorDia * seats;
+  var diasLabel = getDiasTexto(p);
+  var docLabel = '';
+  var dtype = (p.doc_type || '').toLowerCase();
+  if (dtype === 'rnm') docLabel = 'RNM: ' + (p.rnm || '');
+  else if (dtype === 'cpf') docLabel = 'CPF: ' + (p.cpf || '');
+  else docLabel = 'RG: ' + (p.rg || p.cpf || '');
+
+  // Find family members (passengers with obs containing this person's name)
+  var familyRows = '';
+  var totalFamiliar = valor;
+  var hasFamiliar = false;
+  for (var i = 0; i < allPax.length; i++) {
+    var fm = allPax[i];
+    if (String(fm.id) === String(id)) continue;
+    if (fm.payment_obs && fm.payment_obs.indexOf('familiar de ' + p.nome) !== -1) {
+      hasFamiliar = true;
+      var fmDias = parseDias(fm.dias || fm.dia);
+      var fmValor = (fmDias.length || 1) * valorDia * (parseInt(fm.seats_needed) || 1);
+      totalFamiliar += fmValor;
+      familyRows += '<tr><td>' + (fm.nome || '') + '</td><td>' + getDiasTexto(fm) + '</td><td>R$ ' + fmValor.toFixed(2).replace('.', ',') + '</td></tr>';
+    }
+  }
+
+  var familySection = '';
+  if (hasFamiliar) {
+    familySection = '<div class="section-title">Familiares incluídos neste pagamento</div>'
+      + '<table><tr><th>Nome</th><th>Dias</th><th>Valor</th></tr>' + familyRows + '</table>'
+      + '<div class="total-familiar">Valor total do grupo familiar: R$ ' + totalFamiliar.toFixed(2).replace('.', ',') + '</div>';
+  }
+
+  var today = new Date();
+  var dateStr = today.toLocaleDateString('pt-BR');
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<title>Comprovante - ' + p.nome + '</title>'
+    + '<style>'
+    + 'body{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:30px;color:#1e293b}'
+    + '.header{text-align:center;margin-bottom:24px;border-bottom:3px solid #1a56db;padding-bottom:16px}'
+    + '.header h1{color:#1a56db;font-size:20px;margin-bottom:4px}'
+    + '.header p{color:#64748b;font-size:13px}'
+    + '.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}'
+    + '.field label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px}'
+    + '.field span{font-size:15px;font-weight:700;color:#1e293b}'
+    + '.valor-box{background:#f0f9ff;border:2px solid #1a56db;border-radius:10px;padding:16px;text-align:center;margin-bottom:20px}'
+    + '.valor-box .label{font-size:12px;color:#64748b;font-weight:600;text-transform:uppercase;margin-bottom:6px}'
+    + '.valor-box .amount{font-size:32px;font-weight:900;color:#1a56db}'
+    + '.valor-box .status{font-size:13px;color:#16a34a;font-weight:700;margin-top:4px}'
+    + '.section-title{font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;margin-top:20px}'
+    + 'table{width:100%;border-collapse:collapse;margin-bottom:12px}'
+    + 'th{background:#f1f5f9;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;padding:8px;text-align:left}'
+    + 'td{padding:8px;font-size:13px;border-bottom:1px solid #e2e8f0}'
+    + '.total-familiar{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;font-weight:700;color:#16a34a;font-size:14px;margin-top:8px}'
+    + '.footer{text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px}'
+    + '.print-btn{display:block;width:100%;padding:12px;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px}'
+    + '@media print{.print-btn{display:none}}'
+    + '</style></head><body>'
+    + '<div class="header"><h1>🚌 Transporte Jardim do Vale</h1><p>Congresso Itatiba SP · Comprovante de Pagamento</p></div>'
+    + '<div class="grid">'
+    + '<div class="field"><label>Passageiro</label><span>' + (p.nome || '') + '</span></div>'
+    + '<div class="field"><label>Dias de Viagem</label><span>' + diasLabel + '</span></div>'
+    + '<div class="field"><label>Documento</label><span>' + docLabel + '</span></div>'
+    + '<div class="field"><label>Assentos</label><span>' + seats + ' assento(s)</span></div>'
+    + '</div>'
+    + '<div class="valor-box">'
+    + '<div class="label">Valor Pago</div>'
+    + '<div class="amount">R$ ' + valor.toFixed(2).replace('.', ',') + '</div>'
+    + '<div class="status">✅ Status: pago · Gerado em: ' + dateStr + '</div>'
+    + '</div>'
+    + familySection
+    + '<div class="footer">Obrigado pela confiança e pontualidade. Até breve! 🙏</div>'
+    + '<button class="print-btn" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>'
+    + '</body></html>';
+
+  var w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
 function sendWA(id, tipo) {
   var p = findPax(id);
   if (!p || !p.tel) return;
@@ -1767,6 +1854,9 @@ document.addEventListener('click', function(e) {
         sendWA(id, 'cobrar');
       } else if (action === 'wa-comprovante') {
         sendWA(id, 'comprovante');
+      } else if (action === 'comprovante-full') {
+        gerarComprovantePDF(id);
+        setTimeout(function() { sendWA(id, 'comprovante'); }, 1500);
       } else if (action === 'delete') {
         var nome = btn.getAttribute('data-nome') || 'este passageiro';
         if (!confirm('Tem certeza que deseja excluir ' + nome + '?')) return;
@@ -1794,6 +1884,7 @@ window.getDocDisplay = getDocDisplay;
 window.toggleFamiliarField = toggleFamiliarField;
 window.openPayModal = openPayModal;
 window.sendWA = sendWA;
+window.gerarComprovantePDF = gerarComprovantePDF;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.savePay = savePay;
