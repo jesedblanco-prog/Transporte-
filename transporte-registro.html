@@ -1212,7 +1212,7 @@ function gerarComprovantePDF(id) {
   else if (dtype === 'cpf') docLabel = 'CPF: ' + (p.cpf || '');
   else docLabel = 'RG: ' + (p.rg || p.cpf || '');
 
-  // Find family members (passengers with obs containing this person's name)
+  // Find family members (passengers with obs containing this persons name)
   var familyRows = '';
   var totalFamiliar = valor;
   var hasFamiliar = false;
