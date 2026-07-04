@@ -1080,6 +1080,18 @@ function renderDashboard() {
 /* ═══════════════════════════════════════════
    PAX LIST
 ═══════════════════════════════════════════ */
+function getFamiliarIncluidos(nomeMain, mainId) {
+  var result = '';
+  for (var i = 0; i < allPax.length; i++) {
+    var fm = allPax[i];
+    if (String(fm.id) === String(mainId)) continue;
+    if (fm.payment_obs && fm.payment_obs.indexOf('familiar de ' + nomeMain) !== -1) {
+      result += 'Inclui a: ' + (fm.nome || '') + ' (' + getDiasLabel(fm) + ')<br>';
+    }
+  }
+  return result;
+}
+
 function getDocDisplay(p) {
   var dtype = (p.doc_type || '').toLowerCase();
   if (dtype === 'rnm' && p.rnm) return 'RNM: ' + p.rnm + '<br>';
@@ -1138,7 +1150,7 @@ function renderPaxList() {
       + getDocDisplay(p)
       + 'Tel: ' + (p.tel || '—') + '<br>'
       + 'Dias: ' + getDiasLabel(p) + ' · Assentos: ' + (p.seats_needed || 1) + '<br>'
-      + (p.obs ? 'Obs: ' + p.obs : '')
+      + getFamiliarIncluidos(p.nome, p.id)
       + '</div>'
       + '<div class="pax-actions">'
       + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Pagamento</button>'
@@ -1449,6 +1461,9 @@ function savePay() {
   var mainPax = findPax(id);
   var mainNome = mainPax ? mainPax.nome : id;
 
+  // Close modal immediately
+  closeModal('pay-modal');
+
   // Save main pax
   sbPatch('pasajeros', id, data)
     .then(function() {
@@ -1462,7 +1477,6 @@ function savePay() {
       return Promise.all(promises);
     })
     .then(function() {
-      closeModal('pay-modal');
       loadAllData();
       var logMsg = 'Pagamento: ' + mainNome + ' → ' + status;
       if (familyIds.length > 0) logMsg += ' (+ ' + familyIds.length + ' familiar(es))';
@@ -2099,6 +2113,7 @@ window.calcValorPax = calcValorPax;
 window.buildComprovante = buildComprovante;
 window.renderFamilyList = renderFamilyList;
 window.getDocDisplay = getDocDisplay;
+window.getFamiliarIncluidos = getFamiliarIncluidos;
 window.toggleFamiliarField = toggleFamiliarField;
 window.openPayModal = openPayModal;
 window.sendWA = sendWA;
