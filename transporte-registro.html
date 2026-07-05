@@ -216,6 +216,71 @@ input,select,textarea{font-family:inherit;outline:none}
 
 /* LEMBRETES */
 .lembrete-msg{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;font-size:13px;color:#166534;line-height:1.6;margin-bottom:12px}
+
+/* ═══════════════════════════════════════════
+   CHATBOT OPCIONAL — réplica visual do WhatsApp
+   (não altera nada do formulário manual)
+═══════════════════════════════════════════ */
+#cb-fab{position:fixed;right:18px;bottom:18px;width:58px;height:58px;border-radius:50%;background:#25d366;box-shadow:0 4px 16px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;z-index:500;transition:transform 0.15s}
+#cb-fab:active{transform:scale(0.92)}
+#cb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:600;align-items:flex-end;justify-content:center}
+#cb-overlay.active{display:flex}
+#cb-panel{width:100%;max-width:420px;height:88vh;max-height:720px;background:#ECE5DD;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 30px rgba(0,0,0,0.3);border-radius:12px 12px 0 0}
+
+/* HEADER estilo WhatsApp */
+#cb-header{background:#075E54;color:#fff;padding:10px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+#cb-back{background:none;color:#fff;font-size:20px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#cb-avatar{width:38px;height:38px;border-radius:50%;background:#128C7E;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+#cb-headtext{flex:1;min-width:0}
+#cb-headtext h3{font-size:15px;font-weight:600;margin:0;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cb-headtext p{font-size:12px;margin:1px 0 0;color:rgba(255,255,255,0.8)}
+#cb-hicons{display:flex;gap:20px;align-items:center;flex-shrink:0}
+
+/* WALLPAPER do chat */
+#cb-body{flex:1;overflow-y:auto;padding:10px 4% 14px;display:flex;flex-direction:column;gap:2px;
+  background-color:#ECE5DD;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(0,0,0,0.025) 0, rgba(0,0,0,0.025) 1px, transparent 1.5px),
+    radial-gradient(circle at 65% 65%, rgba(0,0,0,0.025) 0, rgba(0,0,0,0.025) 1px, transparent 1.5px),
+    radial-gradient(circle at 85% 15%, rgba(0,0,0,0.02) 0, rgba(0,0,0,0.02) 1px, transparent 1.5px),
+    radial-gradient(circle at 35% 85%, rgba(0,0,0,0.02) 0, rgba(0,0,0,0.02) 1px, transparent 1.5px);
+  background-size:90px 90px;
+}
+.cb-day-chip{align-self:center;background:#E1F2FB;color:#54656F;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:8px;margin:8px 0;box-shadow:0 1px 1px rgba(0,0,0,0.08)}
+
+.cb-msg-wrap{display:flex;flex-direction:column;max-width:78%;margin:2px 0}
+.cb-msg-wrap.bot{align-self:flex-start}
+.cb-msg-wrap.user{align-self:flex-end}
+.cb-msg{position:relative;padding:6px 8px 8px 9px;border-radius:8px;font-size:14px;line-height:1.35;white-space:pre-line;box-shadow:0 1px 0.5px rgba(0,0,0,0.13);word-wrap:break-word}
+.cb-msg-bot{background:#fff;border-top-left-radius:0;color:#111b21}
+.cb-msg-user{background:#D9FDD3;border-top-right-radius:0;color:#111b21}
+.cb-msg-bot::before{content:'';position:absolute;top:0;left:-8px;width:0;height:0;border-style:solid;border-width:0 9px 9px 0;border-color:transparent #fff transparent transparent}
+.cb-msg-user::before{content:'';position:absolute;top:0;right:-8px;width:0;height:0;border-style:solid;border-width:0 0 9px 9px;border-color:transparent transparent #D9FDD3 transparent}
+.cb-meta{display:flex;justify-content:flex-end;align-items:center;gap:3px;margin-top:2px;font-size:10.5px;color:#667781;float:right;margin-left:8px;position:relative;top:2px}
+.cb-check{display:inline-flex;vertical-align:-1px;margin-left:2px}
+.cb-check svg{display:block}
+
+/* Typing indicator estilo WhatsApp */
+.cb-msg-wrap.typing{align-self:flex-start;max-width:60px}
+.cb-typing{position:relative;background:#fff;border-radius:8px;border-top-left-radius:0;padding:9px 12px;display:flex;gap:4px;align-items:center;box-shadow:0 1px 0.5px rgba(0,0,0,0.13)}
+.cb-typing::before{content:'';position:absolute;top:0;left:-8px;width:0;height:0;border-style:solid;border-width:0 9px 9px 0;border-color:transparent #fff transparent transparent}
+.cb-typing span{width:6.5px;height:6.5px;border-radius:50%;background:#93999e;display:inline-block;animation:cbBlink 1.3s infinite}
+.cb-typing span:nth-child(2){animation-delay:0.2s}
+.cb-typing span:nth-child(3){animation-delay:0.4s}
+@keyframes cbBlink{0%,60%,100%{opacity:0.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+/* Botões de resposta rápida (estilo WhatsApp Business quick replies) */
+#cb-quickreplies{display:flex;flex-direction:column;background:transparent;padding:2px 4% 8px;gap:6px;flex-shrink:0}
+.cb-qr-btn{background:#fff;border:none;border-radius:8px;padding:11px 14px;font-size:14px;font-weight:600;color:#00A5F4;text-align:center;box-shadow:0 1px 0.5px rgba(0,0,0,0.13)}
+.cb-qr-btn:active{background:#f5f5f5}
+.cb-qr-btn.cb-selected{color:#075E54;background:#E7F9F1}
+
+/* Barra inferior estilo input do WhatsApp */
+#cb-inputbar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#F0F0F0;flex-shrink:0}
+#cb-inputbar input{flex:1;border:none;border-radius:22px;padding:11px 16px;font-size:14.5px;background:#fff;box-shadow:0 1px 0.5px rgba(0,0,0,0.13)}
+#cb-inputbar input:focus{outline:none}
+#cb-send{width:42px;height:42px;border-radius:50%;background:#075E54;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#cb-send:disabled{opacity:0.5}
 </style>
 </head>
 <body>
@@ -317,7 +382,7 @@ input,select,textarea{font-family:inherit;outline:none}
           <label id="doc-label">Número do RG</label>
           <input type="text" id="reg-doc" placeholder="Ex: 12.345.678-9">
         </div>
-        <div class="form-group" id="cpf-optional-group">
+        <div class="form-group" id="cpf-optional-group" style="display:none">
           <label>CPF</label>
           <input type="text" id="reg-cpf" placeholder="000.000.000-00">
         </div>
@@ -366,6 +431,31 @@ input,select,textarea{font-family:inherit;outline:none}
         <button class="btn-primary" style="margin-top:16px;max-width:200px;margin-left:auto;margin-right:auto;display:block" onclick="showRegTab('cadastro')">Fazer cadastro</button>
       </div>
       <div id="ticket-found" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- CHATBOT OPCIONAL -->
+  <button id="cb-fab" onclick="cbOpen()" title="Fazer cadastro conversando">💬</button>
+  <div id="cb-overlay" onclick="if(event.target===this) cbClose()">
+    <div id="cb-panel">
+      <div id="cb-header">
+        <button id="cb-back" onclick="cbClose()">←</button>
+        <div id="cb-avatar">🚌</div>
+        <div id="cb-headtext">
+          <h3>Jardim do Vale</h3>
+          <p id="cb-status">online</p>
+        </div>
+        <div id="cb-hicons">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="#fff"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="#fff"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.57 3.58a1 1 0 0 1-.25 1.01l-2.2 2.2z"/></svg>
+        </div>
+      </div>
+      <div id="cb-body"></div>
+      <div id="cb-quickreplies"></div>
+      <div id="cb-inputbar" style="display:none">
+        <input type="text" id="cb-text-input" placeholder="Mensagem">
+        <button id="cb-send" onclick="cbSendTyped()">➤</button>
+      </div>
     </div>
   </div>
 </div>
@@ -551,8 +641,8 @@ input,select,textarea{font-family:inherit;outline:none}
         <div class="form-group">
           <label>Tipo de Evento</label>
           <select id="cfg-tipo-evento" onchange="toggleEventoTipo()">
-            <option value="congresso">Congresso Regional (3 dias)</option>
-            <option value="asamblea">Assembleia de Circuito (1 dia)</option>
+            <option value="congresso">🏟 Congresso Regional (3 dias)</option>
+            <option value="asamblea">⛪ Assembleia de Circuito (1 dia)</option>
           </select>
         </div>
         <div id="cfg-congresso-dates">
@@ -1080,18 +1170,6 @@ function renderDashboard() {
 /* ═══════════════════════════════════════════
    PAX LIST
 ═══════════════════════════════════════════ */
-function getFamiliarIncluidos(nomeMain, mainId) {
-  var result = '';
-  for (var i = 0; i < allPax.length; i++) {
-    var fm = allPax[i];
-    if (String(fm.id) === String(mainId)) continue;
-    if (fm.payment_obs && fm.payment_obs.indexOf('familiar de ' + nomeMain) !== -1) {
-      result += 'Inclui a: ' + (fm.nome || '') + ' (' + getDiasLabel(fm) + ')<br>';
-    }
-  }
-  return result;
-}
-
 function getDocDisplay(p) {
   var dtype = (p.doc_type || '').toLowerCase();
   if (dtype === 'rnm' && p.rnm) return 'RNM: ' + p.rnm + '<br>';
@@ -1150,7 +1228,7 @@ function renderPaxList() {
       + getDocDisplay(p)
       + 'Tel: ' + (p.tel || '—') + '<br>'
       + 'Dias: ' + getDiasLabel(p) + ' · Assentos: ' + (p.seats_needed || 1) + '<br>'
-      + getFamiliarIncluidos(p.nome, p.id)
+      + (p.obs ? 'Obs: ' + p.obs : '')
       + '</div>'
       + '<div class="pax-actions">'
       + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Pagamento</button>'
@@ -1461,9 +1539,6 @@ function savePay() {
   var mainPax = findPax(id);
   var mainNome = mainPax ? mainPax.nome : id;
 
-  // Close modal immediately
-  closeModal('pay-modal');
-
   // Save main pax
   sbPatch('pasajeros', id, data)
     .then(function() {
@@ -1477,6 +1552,7 @@ function savePay() {
       return Promise.all(promises);
     })
     .then(function() {
+      closeModal('pay-modal');
       loadAllData();
       var logMsg = 'Pagamento: ' + mainNome + ' → ' + status;
       if (familyIds.length > 0) logMsg += ' (+ ' + familyIds.length + ' familiar(es))';
@@ -1604,7 +1680,7 @@ function setDocType(t) {
   if (inp) inp.placeholder = placeholders[t] || '';
   // Show/hide CPF optional field
   var cpfGroup = document.getElementById('cpf-optional-group');
-  if (cpfGroup) cpfGroup.style.display = t === 'cpf' ? 'none' : 'block';
+  if (cpfGroup) cpfGroup.style.display = 'none';
   var tabs = ['rg','rnm','cpf'];
   for (var i = 0; i < tabs.length; i++) {
     var el = document.getElementById('doc-' + tabs[i]);
@@ -1626,7 +1702,7 @@ function doRegister() {
   var data = {
     nome: nome,
     rg:  docType === 'rg'  ? doc : '',
-    cpf: docType === 'cpf' ? doc : (docType !== 'cpf' ? val('reg-cpf') : ''),
+    cpf: docType === 'cpf' ? doc : null,
     rnm: docType === 'rnm' ? doc : '',
     tel: tel,
     obs: val('reg-obs'),
@@ -1832,7 +1908,7 @@ function loadPayConfig() {
   var cfg = getPayConfig();
   document.getElementById('pay-valor-dia').value = cfg.valorDia || 52;
   document.getElementById('pay-prazo').value = cfg.prazo || '05/07/2026';
-  document.getElementById('pay-msg').value = cfg.msg || 'Olá {nome}! 🙏 Que a paz de Deus esteja com você! Passamos para lembrá-lo(a) carinhosamente que o pagamento referente ao transporte para o Congresso de Itatiba vence em {prazo}. Valor: R$ {valor}. Os irmãos responsáveis pelo arreglo com a empresa de ônibus dependem da confirmação de cada um para garantir o serviço. Contamos com sua colaboração! 🚌💛 Obrigado e até breve!';
+  document.getElementById('pay-msg').value = cfg.msg || 'Olá {nome}! 👋 Passamos para lembrá-lo(a) que o pagamento referente ao transporte para o Congresso de Itatiba vence em {prazo}. Valor: R$ {valor}. Contamos com sua colaboração para garantir o serviço com a empresa de ônibus. Obrigado e até breve! 🚌';
 }
 
 /* ═══════════════════════════════════════════
@@ -2113,7 +2189,6 @@ window.calcValorPax = calcValorPax;
 window.buildComprovante = buildComprovante;
 window.renderFamilyList = renderFamilyList;
 window.getDocDisplay = getDocDisplay;
-window.getFamiliarIncluidos = getFamiliarIncluidos;
 window.toggleFamiliarField = toggleFamiliarField;
 window.openPayModal = openPayModal;
 window.sendWA = sendWA;
@@ -2146,6 +2221,389 @@ window.saveLemConfig = saveLemConfig;
 window.savePayConfig = savePayConfig;
 window.renderPaxList = renderPaxList;
 window.renderPayList = renderPayList;
+
+/* ═══════════════════════════════════════════
+   CHATBOT OPCIONAL — réplica visual do WhatsApp
+   Usa sbPost('pasajeros', ...) e DAYS, os mesmos
+   que o formulário manual já usa. Não toca em
+   nenhuma função nem elemento existente.
+═══════════════════════════════════════════ */
+var cb = { data: {}, dias: [], isFirst: true, totalCadastrados: 0, pendingTextHandler: null };
+
+function cbOpen() {
+  cb = { data: {}, dias: [], isFirst: true, totalCadastrados: 0, pendingTextHandler: null };
+  document.getElementById('cb-body').innerHTML = '';
+  document.getElementById('cb-quickreplies').innerHTML = '';
+  document.getElementById('cb-inputbar').style.display = 'none';
+  document.getElementById('cb-overlay').className = 'active';
+  cbStepInicio();
+}
+
+function cbClose() {
+  document.getElementById('cb-overlay').className = '';
+}
+
+function cbNow() {
+  var d = new Date();
+  var h = d.getHours(); var m = d.getMinutes();
+  return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+}
+
+function cbScrollDown() {
+  var body = document.getElementById('cb-body');
+  body.scrollTop = body.scrollHeight;
+}
+
+function cbMsgBot(text) {
+  var body = document.getElementById('cb-body');
+  var wrap = document.createElement('div');
+  wrap.className = 'cb-msg-wrap bot';
+  wrap.innerHTML = '<div class="cb-msg cb-msg-bot">' + cbEsc(text) +
+    '<span class="cb-meta">' + cbNow() + '</span></div>';
+  body.appendChild(wrap);
+  cbScrollDown();
+}
+
+function cbMsgUser(text) {
+  var body = document.getElementById('cb-body');
+  var wrap = document.createElement('div');
+  wrap.className = 'cb-msg-wrap user';
+  wrap.innerHTML = '<div class="cb-msg cb-msg-user">' + cbEsc(text) +
+    '<span class="cb-meta">' + cbNow() + ' <span class="cb-check"><svg viewBox="0 0 16 15" width="16" height="15"><path fill="#53bdeb" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path></svg></span></span></div>';
+  body.appendChild(wrap);
+  cbScrollDown();
+}
+
+function cbEsc(text) {
+  var d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+/* Coloca o nome com a primeira letra de cada palavra em maiúscula,
+   mantendo em minúscula os conectores comuns em nomes (da, de, do,
+   dos, das, e), a menos que sejam a primeira palavra do nome. */
+function cbTitleCase(nome) {
+  var conectores = ['da', 'de', 'do', 'das', 'dos', 'e'];
+  var palavras = nome.trim().toLowerCase().split(/\s+/);
+  for (var i = 0; i < palavras.length; i++) {
+    var p = palavras[i];
+    if (!p) continue;
+    if (i > 0 && conectores.indexOf(p) !== -1) continue;
+    palavras[i] = p.charAt(0).toUpperCase() + p.slice(1);
+  }
+  return palavras.join(' ');
+}
+
+function cbShowTyping() {
+  var body = document.getElementById('cb-body');
+  var wrap = document.createElement('div');
+  wrap.className = 'cb-msg-wrap typing';
+  wrap.id = 'cb-typing-wrap';
+  wrap.innerHTML = '<div class="cb-typing"><span></span><span></span><span></span></div>';
+  body.appendChild(wrap);
+  document.getElementById('cb-status').textContent = 'digitando...';
+  cbScrollDown();
+}
+
+function cbHideTyping() {
+  var t = document.getElementById('cb-typing-wrap');
+  if (t) t.remove();
+  document.getElementById('cb-status').textContent = 'online';
+}
+
+/* Simula o agente "pensando e digitando" antes de responder */
+function cbBotSay(text, next) {
+  cbShowTyping();
+  var delay = 550 + Math.random() * 500 + Math.min(text.length * 12, 900);
+  setTimeout(function() {
+    cbHideTyping();
+    cbMsgBot(text);
+    if (next) next();
+  }, delay);
+}
+
+/* Botões de resposta rápida — estilo WhatsApp Business */
+function cbOptions(list) {
+  var box = document.getElementById('cb-quickreplies');
+  box.innerHTML = '';
+  document.getElementById('cb-inputbar').style.display = 'none';
+  for (var i = 0; i < list.length; i++) {
+    (function(item) {
+      var btn = document.createElement('button');
+      btn.className = 'cb-qr-btn';
+      btn.textContent = item.label;
+      btn.onclick = function() {
+        cbMsgUser(item.label);
+        box.innerHTML = '';
+        item.action();
+      };
+      box.appendChild(btn);
+    })(list[i]);
+  }
+}
+
+/* Campo de texto — barra inferior real do WhatsApp */
+function cbInputStep(placeholder, onNext) {
+  var box = document.getElementById('cb-quickreplies');
+  box.innerHTML = '';
+  var bar = document.getElementById('cb-inputbar');
+  var inp = document.getElementById('cb-text-input');
+  bar.style.display = 'flex';
+  inp.value = '';
+  inp.placeholder = placeholder;
+  cb.pendingTextHandler = onNext;
+  setTimeout(function() { inp.focus(); }, 250);
+}
+
+function cbSendTyped() {
+  var inp = document.getElementById('cb-text-input');
+  var v = inp.value.trim();
+  if (!v || !cb.pendingTextHandler) return;
+  cbMsgUser(v);
+  document.getElementById('cb-inputbar').style.display = 'none';
+  var handler = cb.pendingTextHandler;
+  cb.pendingTextHandler = null;
+  handler(v);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var inp = document.getElementById('cb-text-input');
+  if (inp) inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') cbSendTyped(); });
+});
+var __cbInp = document.getElementById('cb-text-input');
+if (__cbInp) __cbInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') cbSendTyped(); });
+
+function cbStepInicio() {
+  cbBotSay('Olá! 👋 Sou o assistente virtual do Transporte Jardim do Vale.', function() {
+    cbBotSay('Você deseja fazer seu cadastro ou precisa de alguma informação?', function() {
+      cbOptions([
+        { label: '📋 Fazer meu cadastro', action: cbStepNome },
+        { label: 'ℹ️ Preciso de informação', action: cbStepInfoMenu }
+      ]);
+    });
+  });
+}
+
+function cbStepInfoMenu() {
+  cbBotSay('Claro! O que você gostaria de saber?', function() {
+    cbOptions([
+      { label: '💰 Valor por dia', action: function() {
+          cbBotSay('O valor é de R$ 52,00 por dia. O prazo para pagamento é até 05/07/2026. 😊', function() {
+            setTimeout(cbStepDepoisInfo, 900);
+          });
+        } },
+      { label: '💳 Formas de pagamento', action: function() {
+          cbBotSay('Aceitamos Pix.\nChave: jardimdovale@yahoo.com\nTitular: Getulio Bento de Oliveira', function() {
+            setTimeout(cbStepDepoisInfo, 900);
+          });
+        } },
+      { label: '👶 Regras para crianças', action: function() {
+          cbBotSay('Menores de 16 anos não acompanhados precisam de autorização por escrito com firma reconhecida. 1 criança de colo (menos de 6 anos) viaja sem assento. Maiores de 6 anos pagam passagem.', function() {
+            setTimeout(cbStepDepoisInfo, 1300);
+          });
+        } },
+      { label: '📞 Falar com responsável', action: function() {
+          cbBotSay('Você pode chamar:\nJesús Blanco — (19) 9 9106-6011\nSergio Simonato — (11) 9 5910-6468', function() {
+            setTimeout(cbStepDepoisInfo, 900);
+          });
+        } },
+      { label: '⬅️ Voltar', action: cbStepInicio }
+    ]);
+  });
+}
+
+/* Depois de responder uma dúvida, não repete a saudação inicial —
+   pergunta direto se quer mais alguma informação ou já quer
+   fazer o cadastro. */
+function cbStepDepoisInfo() {
+  cbBotSay('Posso te ajudar com mais alguma coisa?', function() {
+    cbOptions([
+      { label: 'ℹ️ Outra informação', action: cbStepInfoMenu },
+      { label: '📋 Fazer meu cadastro', action: cbStepNome },
+      { label: '✅ Não, obrigado', action: function() {
+          cbBotSay('Tudo bem! Se precisar de algo, é só chamar. 😊', function() {
+            cbOptions([{ label: 'Fechar', action: cbClose }]);
+          });
+        } }
+    ]);
+  });
+}
+
+function cbStepNome() {
+  cbBotSay('Perfeito! Vamos começar seu cadastro. 😊 Qual é o seu nome completo?', function() {
+    cbInputStep('Digite seu nome completo', function(v) {
+      cb.data.nome = cbTitleCase(v);
+      cbStepDocTipo();
+    });
+  });
+}
+
+function cbStepDocTipo() {
+  cbBotSay('Prazer, ' + cb.data.nome.split(' ')[0] + '! Qual tipo de documento você vai usar?', function() {
+    cbOptions([
+      { label: '🪪 RG', action: function() { cb.data.doc_type = 'rg'; cbStepDocNumero(); } },
+      { label: '🌎 RNM', action: function() { cb.data.doc_type = 'rnm'; cbStepDocNumero(); } },
+      { label: '🔢 CPF', action: function() { cb.data.doc_type = 'cpf'; cbStepDocNumero(); } }
+    ]);
+  });
+}
+
+function cbStepDocNumero() {
+  var labels = { rg: 'número do RG', rnm: 'número do RNM', cpf: 'número do CPF' };
+  cbBotSay('Qual é o ' + labels[cb.data.doc_type] + '?', function() {
+    cbInputStep('Digite aqui', function(v) {
+      cb.data.doc_numero = v;
+      cbStepTelefone();
+    });
+  });
+}
+
+function cbStepTelefone() {
+  cbBotSay('Certo! E qual é o seu telefone / WhatsApp?', function() {
+    cbInputStep('(19) 99999-9999', function(v) {
+      cb.data.tel = v;
+      cbStepDias();
+    });
+  });
+}
+
+function cbStepDias() {
+  if (DAYS.length === 1) {
+    cb.dias = [DAYS[0].key];
+    cb.data.seats = 1;
+    cb.data.category = 'geral';
+    cbStepResumo();
+    return;
+  }
+  cbBotSay('Quais dias você vai viajar? Pode escolher mais de um. Quando terminar, toque em "Confirmar dias".', function() {
+    var box = document.getElementById('cb-quickreplies');
+    box.innerHTML = '';
+    for (var i = 0; i < DAYS.length; i++) {
+      (function(d) {
+        var btn = document.createElement('button');
+        btn.className = 'cb-qr-btn';
+        btn.textContent = d.full || (d.label + (d.date ? ' · ' + d.date : ''));
+        btn.onclick = function() {
+          var idx = cb.dias.indexOf(d.key);
+          if (idx === -1) { cb.dias.push(d.key); btn.className = 'cb-qr-btn cb-selected'; }
+          else { cb.dias.splice(idx, 1); btn.className = 'cb-qr-btn'; }
+        };
+        box.appendChild(btn);
+      })(DAYS[i]);
+    }
+    var confirmBtn = document.createElement('button');
+    confirmBtn.className = 'cb-qr-btn';
+    confirmBtn.style.fontWeight = '800';
+    confirmBtn.textContent = 'Confirmar dias →';
+    confirmBtn.onclick = function() {
+      if (cb.dias.length === 0) return;
+      var lbls = [];
+      for (var j = 0; j < DAYS.length; j++) { if (cb.dias.indexOf(DAYS[j].key) !== -1) lbls.push(DAYS[j].label); }
+      cbMsgUser(lbls.join(', '));
+      box.innerHTML = '';
+      cb.data.seats = 1;
+      cb.data.category = 'geral';
+      cbStepResumo();
+    };
+    box.appendChild(confirmBtn);
+  });
+}
+
+function cbStepResumo() {
+  var labels = [];
+  for (var j = 0; j < DAYS.length; j++) { if (cb.dias.indexOf(DAYS[j].key) !== -1) labels.push(DAYS[j].label); }
+  var valorDia = 52;
+  var total = labels.length * valorDia;
+  cbBotSay('Perfeito! Confira os dados antes de enviar:\n\nNome: ' + cb.data.nome +
+    '\nDocumento (' + cb.data.doc_type.toUpperCase() + '): ' + cb.data.doc_numero +
+    '\nTelefone: ' + cb.data.tel +
+    '\nDias: ' + labels.join(', ') +
+    '\nTotal estimado: R$ ' + total + ',00', function() {
+      cbOptions([
+        { label: '✅ Confirmar e enviar', action: cbEnviar },
+        { label: '✏️ Corrigir do início', action: cbStepNome }
+      ]);
+    });
+}
+
+/* Cada cadastro (titular ou acompanhante) é enviado como um
+   registro 100% independente, com todos os mesmos campos que
+   um cadastro normal — nada é compartilhado ou resumido. */
+function cbEnviar() {
+  cbShowTyping();
+  var payload = {
+    nome: cb.data.nome,
+    rg: cb.data.doc_type === 'rg' ? cb.data.doc_numero : '',
+    rnm: cb.data.doc_type === 'rnm' ? cb.data.doc_numero : '',
+    cpf: cb.data.doc_type === 'cpf' ? cb.data.doc_numero : null,
+    tel: cb.data.tel,
+    obs: 'Cadastro via chatbot',
+    dia: cb.dias[0],
+    dias: JSON.stringify(cb.dias),
+    seats_needed: cb.data.seats || 1,
+    category: cb.data.category || 'geral',
+    doc_type: cb.data.doc_type,
+    embarque: false,
+    payment_status: 'nao-pago',
+    ts: new Date().toISOString()
+  };
+  sbPost('pasajeros', payload)
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      var saved = Array.isArray(res) ? res[0] : res;
+      /* Só guarda no localStorage a passagem da 1ª pessoa (quem está
+         com o celular), para não sobrescrever com a de um acompanhante */
+      if (cb.isFirst && saved && saved.id) {
+        localStorage.setItem('tr_my_id', saved.id);
+        localStorage.setItem('tr_my_nome', cb.data.nome);
+      }
+      cb.totalCadastrados++;
+      cb.isFirst = false;
+      cbHideTyping();
+      cbMsgBot('✅ ' + cb.data.nome.split(' ')[0] + ', seu cadastro foi enviado com sucesso!');
+      cbStepMaisAlguem();
+    })
+    .catch(function(e) {
+      console.error(e);
+      cbHideTyping();
+      cbMsgBot('❌ Ocorreu um erro ao enviar. Por favor, tente novamente.');
+      cbOptions([{ label: '🔄 Tentar novamente', action: cbEnviar }]);
+    });
+}
+
+/* Pergunta se quer cadastrar outra pessoa, e se sim, repete
+   exatamente o mesmo fluxo completo, do zero, como se fosse a
+   primeira vez — cada pessoa fica registrada de forma
+   independente no banco de dados. */
+function cbStepMaisAlguem() {
+  cbBotSay('Deseja cadastrar também outra pessoa que vai te acompanhar?', function() {
+    cbOptions([
+      { label: '➕ Sim, cadastrar outra pessoa', action: function() {
+          cb.data = {};
+          cb.dias = [];
+          cbStepNome();
+        } },
+      { label: '✅ Não, terminar', action: cbStepFinal }
+    ]);
+  });
+}
+
+function cbStepFinal() {
+  var msg = cb.totalCadastrados > 1
+    ? 'Prontinho! Foram registradas ' + cb.totalCadastrados + ' pessoas com sucesso. Você já pode consultar sua reserva na aba "Minha Passagem". Foi um prazer ajudar! 🚌'
+    : 'Você já pode consultar sua reserva na aba "Minha Passagem". Foi um prazer ajudar! 🚌';
+  cbBotSay(msg, function() {
+    cbOptions([
+      { label: '🎫 Ver minha passagem', action: function() { cbClose(); showRegTab('passagem'); } },
+      { label: 'Fechar', action: cbClose }
+    ]);
+  });
+}
+
+window.cbOpen = cbOpen;
+window.cbClose = cbClose;
+window.cbSendTyped = cbSendTyped;
 </script>
 </body>
 </html>
