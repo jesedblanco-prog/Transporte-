@@ -828,6 +828,7 @@ input,select,textarea{font-family:inherit;outline:none}
       <div class="form-group"><label>RG</label><input type="text" id="edit-rg"></div>
       <div class="form-group"><label>CPF</label><input type="text" id="edit-cpf"></div>
       <div class="form-group"><label>Telefone</label><input type="text" id="edit-tel"></div>
+      <div class="form-group"><label>Observação</label><textarea id="edit-obs" rows="3"></textarea></div>
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('edit-modal')">Cancelar</button>
@@ -1233,6 +1234,7 @@ function renderPaxList() {
       + '<div class="pax-actions">'
       + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Pagamento</button>'
       + (p.tel ? '<button class="pax-action-btn btn-wa" data-action="wa-cobrar" data-id="' + p.id + '" style="background:#25d366;color:#fff">📲 WhatsApp</button>' : '')
+      + '<button class="pax-action-btn" data-action="edit" data-id="' + p.id + '" style="background:#dbeafe;color:#1d4ed8;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer">✏️ Editar</button>'
       + '<button class="pax-action-btn" data-action="delete" data-id="' + p.id + '" data-nome="' + p.nome + '" style="background:#fee2e2;color:#dc2626;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer">🗑 Excluir</button>'
       + '</div>'
       + '</div>';
@@ -1591,6 +1593,7 @@ function loadEditPax() {
   document.getElementById('edit-rg').value = p.rg || '';
   document.getElementById('edit-cpf').value = p.cpf || '';
   document.getElementById('edit-tel').value = p.tel || '';
+  document.getElementById('edit-obs').value = p.obs || '';
   document.getElementById('edit-fields').style.display = 'block';
 }
 
@@ -1601,7 +1604,8 @@ function saveEdit() {
     nome: document.getElementById('edit-nome').value,
     rg:   document.getElementById('edit-rg').value,
     cpf:  document.getElementById('edit-cpf').value,
-    tel:  document.getElementById('edit-tel').value
+    tel:  document.getElementById('edit-tel').value,
+    obs:  document.getElementById('edit-obs').value
   };
   sbPatch('pasajeros', id, data)
     .then(function() {
@@ -2188,6 +2192,10 @@ document.addEventListener('click', function(e) {
       } else if (action === 'comprovante-full') {
         gerarComprovantePDF(id);
         setTimeout(function() { sendWA(id, 'comprovante'); }, 1500);
+      } else if (action === 'edit') {
+        showEditModal();
+        document.getElementById('edit-select').value = id;
+        loadEditPax();
       } else if (action === 'delete') {
         var nome = btn.getAttribute('data-nome') || 'este passageiro';
         if (!confirm('Tem certeza que deseja excluir ' + nome + '?')) return;
