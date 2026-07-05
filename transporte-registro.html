@@ -1688,6 +1688,11 @@ function setDocType(t) {
   }
 }
 
+/* Controla o cadastro em grupo (quando "Quantidade de assentos" > 1):
+   cada asiento vira uma pessoa registrada de forma independente,
+   e os acompanhantes ficam automaticamente vinculados ao titular. */
+var multiReg = { total: null, atual: 1, primeiroNome: '' };
+
 function doRegister() {
   var nome = val('reg-nome');
   var doc = val('reg-doc');
@@ -1699,6 +1704,12 @@ function doRegister() {
   btn.disabled = true;
   btn.textContent = 'Registrando...';
 
+  if (multiReg.total === null) {
+    multiReg.total = parseInt(val('reg-seats')) || 1;
+    multiReg.atual = 1;
+  }
+  var ehTitular = multiReg.atual === 1;
+
   var data = {
     nome: nome,
     rg:  docType === 'rg'  ? doc : '',
@@ -1708,11 +1719,12 @@ function doRegister() {
     obs: val('reg-obs'),
     dia: selectedDays[0],
     dias: JSON.stringify(selectedDays),
-    seats_needed: parseInt(val('reg-seats')) || 1,
+    seats_needed: 1,
     category: val('reg-cat'),
     doc_type: docType,
     embarque: false,
     payment_status: 'nao-pago',
+    payment_obs: ehTitular ? '' : ('familiar de ' + multiReg.primeiroNome),
     ts: new Date().toISOString()
   };
 
@@ -1720,14 +1732,26 @@ function doRegister() {
     .then(function(r) { return r.json(); })
     .then(function(res) {
       var saved = Array.isArray(res) ? res[0] : res;
-      localStorage.setItem('tr_my_id', saved.id);
-      localStorage.setItem('tr_my_nome', nome);
-      showToast('Reserva confirmada! 🎉');
-      showRegTab('passagem');
-      loadMyTicket();
+      if (ehTitular) {
+        multiReg.primeiroNome = nome;
+        localStorage.setItem('tr_my_id', saved.id);
+        localStorage.setItem('tr_my_nome', nome);
+      }
       btn.disabled = false;
       btn.textContent = 'Reservar meu assento →';
-      clearRegForm();
+
+      if (multiReg.atual < multiReg.total) {
+        var faltam = multiReg.total - multiReg.atual;
+        multiReg.atual++;
+        showToast('Registro salvo! Falta cadastrar ' + faltam + ' pessoa(s) 👤');
+        clearRegForm();
+      } else {
+        showToast('Reserva confirmada! 🎉');
+        showRegTab('passagem');
+        loadMyTicket();
+        multiReg = { total: null, atual: 1, primeiroNome: '' };
+        clearRegForm();
+      }
     })
     .catch(function(e) {
       console.error(e);
@@ -1743,6 +1767,7 @@ function clearRegForm() {
   document.getElementById('reg-cpf').value = '';
   document.getElementById('reg-tel').value = '';
   document.getElementById('reg-obs').value = '';
+  document.getElementById('reg-seats').value = '1';
   selectedDays = [];
   renderDayButtons();
 }
@@ -2228,10 +2253,10 @@ window.renderPayList = renderPayList;
    que o formulário manual já usa. Não toca em
    nenhuma função nem elemento existente.
 ═══════════════════════════════════════════ */
-var cb = { data: {}, dias: [], isFirst: true, totalCadastrados: 0, pendingTextHandler: null };
+var cb = { data: {}, dias: [], isFirst: true, primeiroNome: '', totalCadastrados: 0, pendingTextHandler: null };
 
 function cbOpen() {
-  cb = { data: {}, dias: [], isFirst: true, totalCadastrados: 0, pendingTextHandler: null };
+  cb = { data: {}, dias: [], isFirst: true, primeiroNome: '', totalCadastrados: 0, pendingTextHandler: null };
   document.getElementById('cb-body').innerHTML = '';
   document.getElementById('cb-quickreplies').innerHTML = '';
   document.getElementById('cb-inputbar').style.display = 'none';
@@ -2546,6 +2571,7 @@ function cbEnviar() {
     doc_type: cb.data.doc_type,
     embarque: false,
     payment_status: 'nao-pago',
+    payment_obs: cb.isFirst ? '' : ('familiar de ' + cb.primeiroNome),
     ts: new Date().toISOString()
   };
   sbPost('pasajeros', payload)
@@ -2558,6 +2584,7 @@ function cbEnviar() {
         localStorage.setItem('tr_my_id', saved.id);
         localStorage.setItem('tr_my_nome', cb.data.nome);
       }
+      if (cb.isFirst) cb.primeiroNome = cb.data.nome;
       cb.totalCadastrados++;
       cb.isFirst = false;
       cbHideTyping();
