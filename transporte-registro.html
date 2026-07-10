@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1a56db">
+<meta name="theme-color" content="#1e3a5f">
 <title>Transporte Jardim do Vale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4ff;color:#1e293b;min-height:100vh}
@@ -14,7 +16,7 @@ button{cursor:pointer;font-family:inherit;border:none;outline:none}
 input,select,textarea{font-family:inherit;outline:none}
 
 /* LOADING */
-#loading-screen{position:fixed;inset:0;background:#1a56db;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:#fff}
+#loading-screen{position:fixed;inset:0;background:#1e3a5f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:#fff}
 #loading-screen h2{font-size:22px;font-weight:700;margin-top:16px}
 #loading-screen p{font-size:14px;opacity:0.7;margin-top:6px}
 .spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
@@ -27,19 +29,51 @@ input,select,textarea{font-family:inherit;outline:none}
 #lockout-countdown{font-size:48px;font-weight:900;color:#ef4444}
 
 /* LOGIN */
-#login-screen{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#1a56db 0%,#1e40af 100%);z-index:8000;align-items:center;justify-content:center;padding:16px}
+#public-login-screen{display:none;position:fixed;inset:0;background:linear-gradient(160deg,#1e3a5f 0%,#142c47 100%);z-index:8000;align-items:center;justify-content:center;padding:16px}
+@keyframes accordionIn{0%{opacity:0;transform:translateY(-14px) scaleY(0.94);transform-origin:top}100%{opacity:1;transform:translateY(0) scaleY(1)}}
+.accordion-in{animation:accordionIn 0.45s cubic-bezier(.16,1,.3,1)}
+.access-tabs{display:flex;background:#f1f5f9;border-radius:12px;padding:4px;margin-bottom:20px}
+.access-tab{flex:1;text-align:center;padding:9px 4px;border-radius:9px;font-size:12.5px;font-weight:700;color:#64748b;background:none;transition:all 0.2s}
+.access-tab.active{background:#fff;color:#8a6d1f;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
+
+/* ENCARREGADO */
+.capitao-row{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.capitao-row-name{font-size:14px;font-weight:700;color:#1e293b}
+.capitao-row-seats{font-size:11px;color:#64748b;margin-top:2px}
+.capitao-row-actions{display:flex;gap:8px}
+.capitao-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none;flex-shrink:0}
+.capitao-btn.call{background:#eef2f7;color:#1e3a5f}
+.capitao-btn.wa{background:#25d366;color:#fff}
+
+/* PONTOS DE ENCONTRO */
+.ponto-row{display:flex;gap:8px;margin-bottom:10px;align-items:flex-start}
+.ponto-row .ponto-num{width:44px;flex-shrink:0;padding:11px 4px;border:2px solid #e2e8f0;border-radius:9px;text-align:center;font-weight:700;font-size:14px;background:#f8fafc;color:#475569}
+.ponto-row .ponto-end{flex:1;padding:11px 12px;border:2px solid #e2e8f0;border-radius:9px;font-size:13px}
+.ponto-row .ponto-rm{width:38px;flex-shrink:0;border-radius:9px;background:#fef2f2;color:#dc2626;font-size:16px}
+.pax-ponto-row{display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:8px}
+.pax-ponto-row label{font-size:11.5px;color:#64748b;font-weight:600;flex-shrink:0}
+.pax-ponto-select{flex:1;padding:7px 8px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12.5px;background:#f8fafc;color:#1e293b}
+
+/* ACCORDION (Config) */
+.accordion-item{background:#fff;border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.accordion-header{display:flex;align-items:center;justify-content:space-between;padding:15px 16px;cursor:pointer;font-weight:700;font-size:14px;color:#1e293b}
+.accordion-caret{transition:transform 0.3s cubic-bezier(.4,0,.2,1);color:#94a3b8;font-size:13px;flex-shrink:0;margin-left:8px}
+.accordion-item.open .accordion-caret{transform:rotate(180deg)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height 0.4s cubic-bezier(.4,0,.2,1)}
+.accordion-item.open .accordion-body{max-height:2200px}
+.accordion-body-inner{padding:0 16px 16px}
 .login-card{background:#fff;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
 .login-card h2{font-size:20px;font-weight:800;color:#1e293b;margin-bottom:4px}
 .login-card p{font-size:13px;color:#64748b;margin-bottom:24px}
 .login-field{margin-bottom:16px}
 .login-field label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
 .login-field input{width:100%;padding:12px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:15px;transition:border-color 0.2s}
-.login-field input:focus{border-color:#1a56db}
+.login-field input:focus{border-color:#1e3a5f}
 .login-field-pw{position:relative}
 .login-field-pw input{padding-right:44px}
 .toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;color:#94a3b8;font-size:18px;padding:4px}
-.btn-login{width:100%;padding:14px;background:#1a56db;color:#fff;border-radius:10px;font-size:15px;font-weight:700;margin-top:8px;transition:background 0.2s}
-.btn-login:hover{background:#1e40af}
+.btn-login{width:100%;padding:14px;background:linear-gradient(135deg,#c9a227,#b8860b);color:#1e1a0a;border-radius:10px;font-size:15px;font-weight:700;margin-top:8px;transition:filter 0.2s}
+.btn-login:hover{filter:brightness(1.05)}
 .login-error{color:#ef4444;font-size:13px;text-align:center;margin-top:10px;display:none}
 .btn-back{display:block;text-align:center;margin-top:14px;color:#64748b;font-size:13px;background:none;width:100%;padding:8px}
 
@@ -49,14 +83,14 @@ input,select,textarea{font-family:inherit;outline:none}
 
 /* PUBLIC REGISTRATION */
 #public-screen{display:none;min-height:100vh;background:#f0f4ff}
-.pub-header{background:linear-gradient(135deg,#1a56db,#1e40af);color:#fff;padding:24px 16px;text-align:center}
+.pub-header{background:linear-gradient(135deg,#1e3a5f,#142c47);color:#fff;padding:24px 16px;text-align:center}
 .pub-header h1{font-size:20px;font-weight:800;margin-bottom:4px}
 .pub-header p{font-size:13px;opacity:0.85}
 .pub-body{padding:16px;max-width:500px;margin:0 auto}
 
 /* MY TICKET */
 #myticket-screen{display:none;min-height:100vh;background:#f0f4ff}
-.ticket-header{background:linear-gradient(135deg,#1a56db,#1e40af);color:#fff;padding:20px 16px;text-align:center}
+.ticket-header{background:linear-gradient(135deg,#1e3a5f,#142c47);color:#fff;padding:20px 16px;text-align:center}
 .ticket-card{background:#fff;margin:16px;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
 .ticket-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9}
 .ticket-row:last-child{border-bottom:none}
@@ -64,29 +98,29 @@ input,select,textarea{font-family:inherit;outline:none}
 .ticket-value{font-size:14px;font-weight:700;color:#1e293b;text-align:right;max-width:60%}
 .ticket-status-ok{color:#16a34a}
 .ticket-status-pending{color:#d97706}
-.btn-download{width:100%;padding:13px;background:#1a56db;color:#fff;border-radius:10px;font-size:14px;font-weight:700;margin-top:12px}
+.btn-download{width:100%;padding:13px;background:#1e3a5f;color:#fff;border-radius:10px;font-size:14px;font-weight:700;margin-top:12px;border:2px solid #c9a227}
 .btn-edit-data{width:100%;padding:11px;background:#f1f5f9;color:#475569;border-radius:10px;font-size:14px;font-weight:600;margin-top:8px}
 
 /* DOC TYPE SELECTOR */
 .doc-tabs{display:flex;gap:6px;margin-bottom:16px}
 .doc-tab{flex:1;padding:10px 6px;border:2px solid #e2e8f0;border-radius:10px;font-size:12px;font-weight:600;color:#64748b;background:#fff;text-align:center;transition:all 0.2s}
-.doc-tab.active{border-color:#1a56db;color:#1a56db;background:#eff6ff}
+.doc-tab.active{border-color:#1e3a5f;color:#1e3a5f;background:#eff6ff}
 
 /* DAY BUTTONS */
 .day-buttons{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 .day-btn{padding:14px 16px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;text-align:left;transition:all 0.2s;position:relative}
-.day-btn.selected{border-color:#1a56db;background:#eff6ff}
+.day-btn.selected{border-color:#1e3a5f;background:#eff6ff}
 .day-btn.disabled-day{opacity:0.4;pointer-events:none}
 .day-btn-title{font-size:14px;font-weight:700;color:#1e293b}
 .day-btn-sub{font-size:12px;color:#64748b;margin-top:2px}
 .day-btn-check{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;transition:all 0.2s}
-.day-btn.selected .day-btn-check{background:#1a56db;border-color:#1a56db}
+.day-btn.selected .day-btn-check{background:#1e3a5f;border-color:#1e3a5f}
 
 /* FORM */
 .form-group{margin-bottom:14px}
 .form-group label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;transition:border-color 0.2s;background:#fff;color:#1e293b}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#1a56db}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#1e3a5f}
 .form-group textarea{resize:vertical;min-height:70px}
 
 /* CARDS */
@@ -94,9 +128,9 @@ input,select,textarea{font-family:inherit;outline:none}
 .card-title{font-size:13px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
 
 /* BUTTONS */
-.btn-primary{background:#1a56db;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:700;transition:background 0.2s;width:100%}
-.btn-primary:hover{background:#1e40af}
-.btn-primary:disabled{background:#94a3b8;cursor:not-allowed}
+.btn-primary{background:#1e3a5f;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:700;transition:background 0.2s;width:100%;border:2px solid #c9a227}
+.btn-primary:hover{background:#142c47}
+.btn-primary:disabled{background:#94a3b8;cursor:not-allowed;border-color:#cbd5e1}
 .btn-secondary{background:#f1f5f9;color:#475569;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;transition:background 0.2s}
 .btn-secondary:hover{background:#e2e8f0}
 .btn-danger{background:#fee2e2;color:#dc2626;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600}
@@ -105,16 +139,18 @@ input,select,textarea{font-family:inherit;outline:none}
 
 /* ADMIN LAYOUT */
 #admin-screen{display:none;min-height:100vh;background:#f0f4ff;padding-bottom:80px}
-.admin-topbar{background:#1a56db;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.admin-topbar{background:#1e3a5f;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.admin-topbar-left{display:flex;align-items:center;gap:8px}
 .admin-topbar h1{font-size:16px;font-weight:800}
+.admin-bus-icon{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:linear-gradient(135deg,#c9a227,#b8860b);flex-shrink:0}
 .admin-topbar-right{display:flex;align-items:center;gap:10px}
 .admin-user-badge{background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
 .btn-logout{background:rgba(255,255,255,0.15);color:#fff;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;display:flex;z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,0.08)}
-.nav-tab{flex:1;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#94a3b8;font-size:10px;font-weight:600;background:none;transition:color 0.2s;border-top:2px solid transparent}
-.nav-tab.active{color:#1a56db;border-top-color:#1a56db}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;display:flex;z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,0.08);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav-tab{flex:1 1 64px;min-width:64px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#94a3b8;font-size:10px;font-weight:600;background:none;transition:color 0.2s;border-top:2px solid transparent}
+.nav-tab.active{color:#1e3a5f;border-top-color:#c9a227}
 .nav-tab-icon{font-size:20px;line-height:1}
 
 /* ADMIN SECTIONS */
@@ -130,14 +166,14 @@ input,select,textarea{font-family:inherit;outline:none}
 .kpi-value{font-size:24px;font-weight:900;color:#1e293b;line-height:1}
 .kpi-sub{font-size:11px;color:#94a3b8;margin-top:4px}
 .kpi-green .kpi-value{color:#16a34a}
-.kpi-blue .kpi-value{color:#1a56db}
+.kpi-blue .kpi-value{color:#1e3a5f}
 .kpi-orange .kpi-value{color:#d97706}
 .kpi-red .kpi-value{color:#dc2626}
 
 /* DAY SUMMARY CARDS */
 .day-summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
 .day-sum-card{background:#fff;border-radius:10px;padding:12px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
-.day-sum-day{font-size:11px;font-weight:700;color:#1a56db;margin-bottom:2px}
+.day-sum-day{font-size:11px;font-weight:700;color:#1e3a5f;margin-bottom:2px}
 .day-sum-date{font-size:10px;color:#94a3b8;margin-bottom:8px}
 .day-sum-num{font-size:22px;font-weight:900;color:#1e293b}
 .day-sum-sub{font-size:10px;color:#64748b}
@@ -146,9 +182,9 @@ input,select,textarea{font-family:inherit;outline:none}
 .pax-filter-bar{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
 .pax-filter-bar::-webkit-scrollbar{display:none}
 .filter-btn{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;background:#fff;border:2px solid #e2e8f0;color:#475569;white-space:nowrap;flex-shrink:0;transition:all 0.2s}
-.filter-btn.active{background:#1a56db;border-color:#1a56db;color:#fff}
+.filter-btn.active{background:#1e3a5f;border-color:#1e3a5f;color:#fff}
 .search-box{width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;margin-bottom:12px;background:#fff}
-.search-box:focus{border-color:#1a56db;outline:none}
+.search-box:focus{border-color:#1e3a5f;outline:none}
 .pax-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid #e2e8f0}
 .pax-card.pago{border-left-color:#16a34a}
 .pax-card.parcial{border-left-color:#d97706}
@@ -197,7 +233,7 @@ input,select,textarea{font-family:inherit;outline:none}
 
 /* ALERT */
 .alert{padding:12px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px}
-.alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#142c47}
 .alert-warn{background:#fef3c7;border:1px solid #fde68a;color:#92400e}
 .alert-err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b}
 .alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
@@ -212,7 +248,7 @@ input,select,textarea{font-family:inherit;outline:none}
 /* TABS (registration) */
 .reg-tabs{display:flex;background:#fff;border-radius:12px;padding:4px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
 .reg-tab{flex:1;padding:10px;text-align:center;border-radius:8px;font-size:13px;font-weight:600;color:#64748b;background:none;transition:all 0.2s}
-.reg-tab.active{background:#1a56db;color:#fff}
+.reg-tab.active{background:#1e3a5f;color:#fff}
 
 /* LEMBRETES */
 .lembrete-msg{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;font-size:13px;color:#166534;line-height:1.6;margin-bottom:12px}
@@ -223,9 +259,11 @@ input,select,textarea{font-family:inherit;outline:none}
 ═══════════════════════════════════════════ */
 #cb-fab{position:fixed;right:18px;bottom:18px;width:58px;height:58px;border-radius:50%;background:#25d366;box-shadow:0 4px 16px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;z-index:500;transition:transform 0.15s}
 #cb-fab:active{transform:scale(0.92)}
-#cb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:600;align-items:flex-end;justify-content:center}
-#cb-overlay.active{display:flex}
-#cb-panel{width:100%;max-width:420px;height:88vh;max-height:720px;background:#ECE5DD;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 30px rgba(0,0,0,0.3);border-radius:12px 12px 0 0}
+#cb-overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:600;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease,background .25s ease}
+#cb-overlay.active{opacity:1;pointer-events:auto;background:rgba(0,0,0,0.55)}
+#cb-panel{width:100%;max-width:420px;height:88vh;max-height:720px;background:#ECE5DD;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 30px rgba(0,0,0,0.3);border-radius:12px 12px 0 0;transform:translateY(40px) scaleY(0.94);transform-origin:bottom;opacity:0;transition:transform .32s cubic-bezier(.16,1,.3,1),opacity .28s ease}
+#cb-overlay.active #cb-panel{transform:translateY(0) scaleY(1);opacity:1}
+#cb-panel,#cb-panel *{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 
 /* HEADER estilo WhatsApp */
 #cb-header{background:#075E54;color:#fff;padding:10px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0}
@@ -237,7 +275,7 @@ input,select,textarea{font-family:inherit;outline:none}
 #cb-hicons{display:flex;gap:20px;align-items:center;flex-shrink:0}
 
 /* WALLPAPER do chat */
-#cb-body{flex:1;overflow-y:auto;padding:10px 4% 14px;display:flex;flex-direction:column;gap:2px;
+#cb-body{flex:1;overflow-y:auto;padding:10px 4% 22px;display:flex;flex-direction:column;gap:2px;
   background-color:#ECE5DD;
   background-image:
     radial-gradient(circle at 15% 20%, rgba(0,0,0,0.025) 0, rgba(0,0,0,0.025) 1px, transparent 1.5px),
@@ -251,7 +289,7 @@ input,select,textarea{font-family:inherit;outline:none}
 .cb-msg-wrap{display:flex;flex-direction:column;max-width:78%;margin:2px 0}
 .cb-msg-wrap.bot{align-self:flex-start}
 .cb-msg-wrap.user{align-self:flex-end}
-.cb-msg{position:relative;padding:6px 8px 8px 9px;border-radius:8px;font-size:14px;line-height:1.35;white-space:pre-line;box-shadow:0 1px 0.5px rgba(0,0,0,0.13);word-wrap:break-word}
+.cb-msg{position:relative;padding:7px 9px 9px 10px;border-radius:8px;font-size:16px;line-height:1.45;white-space:pre-line;box-shadow:0 1px 0.5px rgba(0,0,0,0.13);word-wrap:break-word}
 .cb-msg-bot{background:#fff;border-top-left-radius:0;color:#111b21}
 .cb-msg-user{background:#D9FDD3;border-top-right-radius:0;color:#111b21}
 .cb-msg-bot::before{content:'';position:absolute;top:0;left:-8px;width:0;height:0;border-style:solid;border-width:0 9px 9px 0;border-color:transparent #fff transparent transparent}
@@ -271,13 +309,13 @@ input,select,textarea{font-family:inherit;outline:none}
 
 /* Botões de resposta rápida (estilo WhatsApp Business quick replies) */
 #cb-quickreplies{display:flex;flex-direction:column;background:transparent;padding:2px 4% 8px;gap:6px;flex-shrink:0}
-.cb-qr-btn{background:#fff;border:none;border-radius:8px;padding:11px 14px;font-size:14px;font-weight:600;color:#00A5F4;text-align:center;box-shadow:0 1px 0.5px rgba(0,0,0,0.13)}
+.cb-qr-btn{background:#fff;border:none;border-radius:8px;padding:12px 14px;font-size:15.5px;font-weight:600;color:#00A5F4;text-align:center;box-shadow:0 1px 0.5px rgba(0,0,0,0.13)}
 .cb-qr-btn:active{background:#f5f5f5}
 .cb-qr-btn.cb-selected{color:#075E54;background:#E7F9F1}
 
 /* Barra inferior estilo input do WhatsApp */
 #cb-inputbar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#F0F0F0;flex-shrink:0}
-#cb-inputbar input{flex:1;border:none;border-radius:22px;padding:11px 16px;font-size:14.5px;background:#fff;box-shadow:0 1px 0.5px rgba(0,0,0,0.13)}
+#cb-inputbar input{flex:1;border:none;border-radius:22px;padding:11px 16px;font-size:16px;background:#fff;box-shadow:0 1px 0.5px rgba(0,0,0,0.13)}
 #cb-inputbar input:focus{outline:none}
 #cb-send{width:42px;height:42px;border-radius:50%;background:#075E54;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 #cb-send:disabled{opacity:0.5}
@@ -301,23 +339,84 @@ input,select,textarea{font-family:inherit;outline:none}
   <p style="color:#94a3b8;font-size:13px">segundos restantes</p>
 </div>
 
-<!-- LOGIN -->
-<div id="login-screen" style="display:none;flex-direction:column">
+<!-- ENCARREGADO GATE -->
+<div id="capitao-login-screen" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#1e3a5f 0%,#142c47 100%);z-index:8500;align-items:center;justify-content:center;padding:16px">
   <div class="login-card">
-    <h2>🔐 Acesso Administrativo</h2>
-    <p>Digite sua senha para continuar</p>
+    <div style="font-size:34px;text-align:center;margin-bottom:6px">🎙️</div>
+    <h2 style="text-align:center">Painel do Encarregado</h2>
+    <p style="text-align:center">Digite a senha para ver os contatos dos passageiros</p>
     <div class="login-field">
       <label>Senha</label>
       <div class="login-field-pw">
-        <input type="password" id="login-pw" placeholder="••••••••••">
-        <button class="toggle-pw" onclick="togglePw()">👁</button>
+        <input type="password" id="capitao-pw" placeholder="••••••••">
+        <button class="toggle-pw" onclick="toggleCapitaoPw()">👁</button>
       </div>
     </div>
-    <div id="login-err" class="login-error">Senha incorreta. Tente novamente.</div>
-    <button class="btn-login" onclick="doAdminLogin()">Entrar →</button>
-    <button class="btn-back" onclick="showPublic()">← Voltar</button>
+    <div id="capitao-login-err" class="login-error">Senha incorreta. Tente novamente.</div>
+    <button class="btn-login" onclick="doCapitaoLogin()">Entrar →</button>
   </div>
 </div>
+
+<!-- ENCARREGADO SCREEN -->
+<div id="capitao-screen" style="display:none">
+  <div class="admin-topbar">
+    <div class="admin-topbar-left">
+      <div class="admin-bus-icon">🎙️</div>
+      <h1>Painel do Encarregado</h1>
+    </div>
+    <div class="admin-topbar-right">
+      <button class="btn-logout" onclick="doCapitaoLogout()">Sair 🚪</button>
+    </div>
+  </div>
+  <div style="padding:16px">
+    <div class="access-tabs" id="capitao-day-tabs"></div>
+    <div id="capitao-list"></div>
+  </div>
+</div>
+
+<!-- ACESSO (Passageiro / Administrador) -->
+<div id="public-login-screen" style="display:none;flex-direction:column">
+  <div class="login-card">
+    <div style="font-size:34px;text-align:center;margin-bottom:6px">🚌</div>
+    <h2 style="text-align:center">Transporte Jardim do Vale</h2>
+    <p style="text-align:center">Escolha como deseja entrar</p>
+
+    <div class="access-tabs">
+      <button type="button" class="access-tab active" id="tab-pax" onclick="showAccessTab('pax')">🚌 Passageiro</button>
+      <button type="button" class="access-tab" id="tab-admin" onclick="showAccessTab('admin')">🔒 Administrador</button>
+    </div>
+
+    <div id="access-panel-pax">
+      <div class="login-field">
+        <label>Usuário</label>
+        <input type="text" id="pub-login-user" placeholder="Usuário" autocapitalize="none">
+      </div>
+      <div class="login-field">
+        <label>Senha</label>
+        <div class="login-field-pw">
+          <input type="password" id="pub-login-pw" placeholder="••••">
+          <button class="toggle-pw" onclick="togglePubPw()">👁</button>
+        </div>
+      </div>
+      <div id="pub-login-err" class="login-error">Usuário ou senha incorretos.</div>
+      <button class="btn-login" onclick="doPublicLogin()">Entrar →</button>
+    </div>
+
+    <div id="access-panel-admin" style="display:none">
+      <div class="login-field">
+        <label>Senha de administrador</label>
+        <div class="login-field-pw">
+          <input type="password" id="login-pw" placeholder="••••••••••">
+          <button class="toggle-pw" onclick="togglePw()">👁</button>
+        </div>
+      </div>
+      <div id="login-err" class="login-error">Senha incorreta. Tente novamente.</div>
+      <button class="btn-login" onclick="doAdminLogin()">Entrar →</button>
+      <button class="btn-back" onclick="backFromAdmin()">← Voltar</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- PUBLIC REGISTRATION -->
 <div id="public-screen">
@@ -418,7 +517,7 @@ input,select,textarea{font-family:inherit;outline:none}
         </div>
         <button class="btn-primary" id="btn-register" onclick="doRegister()">Reservar meu assento →</button>
         <div style="text-align:center;margin-top:16px">
-          <button style="background:none;border:none;color:#1a56db;font-size:13px;font-weight:600;cursor:pointer" onclick="showLogin()">🔒 Acesso Administrativo</button>
+          <button style="background:none;border:none;color:#1e3a5f;font-size:13px;font-weight:600;cursor:pointer" onclick="showLogin()">🔒 Acesso Administrativo</button>
         </div>
       </div>
     </div>
@@ -463,7 +562,10 @@ input,select,textarea{font-family:inherit;outline:none}
 <!-- ADMIN SCREEN -->
 <div id="admin-screen">
   <div class="admin-topbar">
-    <h1>Painel Admin · Congresso Itatiba</h1>
+    <div class="admin-topbar-left">
+      <div class="admin-bus-icon">🚌</div>
+      <h1>Painel Admin · Congresso Itatiba</h1>
+    </div>
     <div class="admin-topbar-right">
       <span class="admin-user-badge" id="admin-user-badge">👤 —</span>
       <button class="btn-logout" onclick="doLogout()">Sair 🚪</button>
@@ -599,10 +701,6 @@ input,select,textarea{font-family:inherit;outline:none}
           <input type="text" id="lem-horario" placeholder="06:00">
         </div>
         <div class="form-group">
-          <label>Ponto de encontro</label>
-          <input type="text" id="lem-ponto" placeholder="Ex: Salão do Reino, Rua X">
-        </div>
-        <div class="form-group">
           <label>Mensagem comprovante (editável)</label>
           <textarea id="lem-msg" rows="3"></textarea>
         </div>
@@ -635,9 +733,13 @@ input,select,textarea{font-family:inherit;outline:none}
       <div class="section-title">⚙️ Configurações</div>
       <div class="section-sub">Gerenciamento do sistema</div>
 
-      <!-- EVENT CONFIG CARD -->
-      <div class="card" style="margin-bottom:12px">
-        <div class="card-title">📅 Configuração do Evento</div>
+      <!-- EVENT CONFIG ACCORDION -->
+      <div class="accordion-item" id="acc-evento">
+        <div class="accordion-header" onclick="toggleAccordion('acc-evento')">
+          <span>📅 Configuração do Evento</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
         <div class="form-group">
           <label>Tipo de Evento</label>
           <select id="cfg-tipo-evento" onchange="toggleEventoTipo()">
@@ -681,13 +783,46 @@ input,select,textarea{font-family:inherit;outline:none}
           </div>
         </div>
         <button class="btn-primary" onclick="saveEventoConfig()">💾 Salvar configuração do evento</button>
+        </div></div>
       </div>
 
-      <!-- NOVO EVENTO CARD -->
-      <div class="card" style="margin-bottom:12px;border:2px solid #fee2e2">
-        <div class="card-title" style="color:#dc2626">🔄 Iniciar Novo Evento</div>
+      <!-- CHATBOT TEXTS ACCORDION -->
+      <div class="accordion-item" id="acc-chatbot">
+        <div class="accordion-header" onclick="toggleAccordion('acc-chatbot')">
+          <span>💬 Chatbot — Textos das respostas</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
+        <div class="form-group">
+          <label>Valor por dia</label>
+          <textarea id="cb-cfg-valor" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Formas de pagamento (Pix)</label>
+          <textarea id="cb-cfg-pix" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Regras para crianças</label>
+          <textarea id="cb-cfg-regras" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Contatos dos responsáveis</label>
+          <textarea id="cb-cfg-contatos" rows="3"></textarea>
+        </div>
+        <button class="btn-primary" onclick="saveCbConfig()">💾 Salvar textos do chatbot</button>
+        </div></div>
+      </div>
+
+      <!-- NOVO EVENTO ACCORDION -->
+      <div class="accordion-item" id="acc-novoevento" style="border:2px solid #fee2e2">
+        <div class="accordion-header" onclick="toggleAccordion('acc-novoevento')">
+          <span style="color:#dc2626">🔄 Iniciar Novo Evento</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
         <p style="font-size:13px;color:#64748b;margin-bottom:12px">Apaga todos os passageiros atuais e prepara o sistema para um novo evento. Esta ação não pode ser desfeita.</p>
         <button class="btn-primary" style="background:#dc2626" onclick="iniciarNovoEvento()">🗑 Iniciar Novo Evento</button>
+        </div></div>
       </div>
 
       <div class="config-item" onclick="showChangePwModal()">
@@ -741,6 +876,71 @@ input,select,textarea{font-family:inherit;outline:none}
     </div>
   </div>
 
+  <!-- ENCARREGADO SECTION (admin) -->
+  <div class="admin-section" id="sec-encarregado">
+    <div style="padding:16px">
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title">🎙️ Acesso do Encarregado</div>
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Compartilhe este acesso com o encarregado do ônibus para que ele veja os contatos dos passageiros por dia, com botão de ligar e WhatsApp.</p>
+        <div class="form-group">
+          <label>Nome do Encarregado</label>
+          <input type="text" id="capitao-cfg-nome" placeholder="Ex: Sergio Simonato">
+        </div>
+        <div class="form-group">
+          <label>Senha do encarregado</label>
+          <input type="text" id="capitao-cfg-pw" placeholder="Ex: capitao2026">
+        </div>
+        <button class="btn-primary" style="margin-bottom:8px" onclick="saveCapitaoConfig()">💾 Salvar</button>
+        <button class="btn-primary" style="background:#25d366" onclick="copyCapitaoLink()">📋 Copiar link para o encarregado</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONIBUS SECTION (independente) -->
+  <div class="admin-section" id="sec-onibus">
+    <div style="padding:16px">
+      <div class="section-title">🚌 Dados do Ônibus</div>
+      <div class="section-sub">Usados no relatório de passageiros por dia</div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="form-group">
+          <label>Empresa de Ônibus</label>
+          <input type="text" id="onibus-empresa" placeholder="Ex: Viação Exemplo">
+        </div>
+        <div class="form-group">
+          <label>Número do Ônibus</label>
+          <input type="text" id="onibus-numero" placeholder="Ex: 07">
+        </div>
+        <div class="form-group">
+          <label>Instruções do Capitão</label>
+          <textarea id="onibus-instrucoes" rows="3" placeholder="Instruções para o capitão do ônibus..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="saveOnibusConfig()">💾 Salvar dados do ônibus</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📍 Pontos de Encontro</div>
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Cadastre os pontos onde o ônibus vai parar. Edite por dia — se um ponto muda de lugar num dia específico, ajuste só naquele dia.</p>
+        <div class="access-tabs" id="pontos-day-tabs" style="margin-bottom:12px"></div>
+        <div id="pontos-list"></div>
+        <button class="btn-secondary" style="margin-bottom:10px;width:100%" onclick="addPontoRow()">➕ Adicionar ponto</button>
+        <button class="btn-primary" onclick="savePontosConfig()">💾 Salvar pontos de encontro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATORIOS SECTION (independente) -->
+  <div class="admin-section" id="sec-relatorios">
+    <div style="padding:16px">
+      <div class="section-title">📊 Relatório de Passageiros por Dia</div>
+      <div class="section-sub">Agrupa automaticamente por dia de viagem</div>
+      <div class="card">
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Agrupa automaticamente os passageiros por dia de viagem, com totais e dados do ônibus.</p>
+        <button class="btn-primary" style="margin-bottom:8px" onclick="generateRelatorioPDF()">📄 Gerar Relatório PDF</button>
+        <button class="btn-primary" style="background:#16a34a" onclick="generateRelatorioExcel()">📊 Gerar Relatório Excel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <button class="nav-tab active" id="nav-dashboard" onclick="showSection('dashboard')">
@@ -754,6 +954,15 @@ input,select,textarea{font-family:inherit;outline:none}
     </button>
     <button class="nav-tab" id="nav-lembretes" onclick="showSection('lembretes')">
       <span class="nav-tab-icon">📲</span>Lembretes
+    </button>
+    <button class="nav-tab" id="nav-encarregado" onclick="showSection('encarregado')">
+      <span class="nav-tab-icon">🎙️</span>Encarregado
+    </button>
+    <button class="nav-tab" id="nav-onibus" onclick="showSection('onibus')">
+      <span class="nav-tab-icon">🚌</span>Ônibus
+    </button>
+    <button class="nav-tab" id="nav-relatorios" onclick="showSection('relatorios')">
+      <span class="nav-tab-icon">📊</span>Relatórios
     </button>
     <button class="nav-tab" id="nav-registro" onclick="showSection('registro')">
       <span class="nav-tab-icon">📋</span>Registro
@@ -828,6 +1037,12 @@ input,select,textarea{font-family:inherit;outline:none}
       <div class="form-group"><label>RG</label><input type="text" id="edit-rg"></div>
       <div class="form-group"><label>CPF</label><input type="text" id="edit-cpf"></div>
       <div class="form-group"><label>Telefone</label><input type="text" id="edit-tel"></div>
+      <div class="form-group">
+        <label>Ponto de encontro</label>
+        <select id="edit-ponto">
+          <option value="">— Não definido —</option>
+        </select>
+      </div>
       <div class="form-group"><label>Observação</label><textarea id="edit-obs" rows="3"></textarea></div>
     </div>
     <div class="modal-actions">
@@ -862,6 +1077,11 @@ input,select,textarea{font-family:inherit;outline:none}
 </div>
 
 <div id="toast">—</div>
+
+<!-- LIBS: Relatório PDF/Excel profissional -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 
 <script>
 /* ═══════════════════════════════════════════
@@ -1184,6 +1404,28 @@ function getDocDisplay(p) {
   return parts.length > 0 ? parts.join(' &nbsp;') + '<br>' : '';
 }
 
+function buildPontoOptionsHtml(current) {
+  var pontos = getPontosConfig();
+  var html = '<option value="">— Sem ponto —</option>';
+  for (var i = 0; i < pontos.length; i++) {
+    var sel = (current != null && String(current) === String(pontos[i].numero)) ? ' selected' : '';
+    html += '<option value="' + escHtml(String(pontos[i].numero)) + '"' + sel + '>' + escHtml(pontos[i].numero + ' — ' + (pontos[i].endereco || 'sem endereço')) + '</option>';
+  }
+  return html;
+}
+
+function quickSetPonto(id, value) {
+  sbPatch('pasajeros', id, { ponto: value || null })
+    .then(function(r) {
+      if (!r.ok) { showToast('⚠️ Rode o SQL da coluna "ponto" no Supabase (veja instruções)'); return; }
+      var p = findPax(id);
+      if (p) p.ponto = value || null;
+      addLog('Ponto de encontro atualizado: ' + (p ? p.nome : id));
+      showToast('✅ Ponto atualizado!');
+    })
+    .catch(function() { showToast('Erro ao salvar ponto'); });
+}
+
 function renderPaxList() {
   var search = (document.getElementById('pax-search').value || '').toLowerCase();
   var html = '';
@@ -1229,7 +1471,13 @@ function renderPaxList() {
       + getDocDisplay(p)
       + 'Tel: ' + (p.tel || '—') + '<br>'
       + 'Dias: ' + getDiasLabel(p) + ' · Assentos: ' + (p.seats_needed || 1) + '<br>'
-      + (p.obs ? 'Obs: ' + p.obs : '')
+      + (p.obs ? 'Obs: ' + p.obs + '<br>' : '')
+      + '</div>'
+      + '<div class="pax-ponto-row">'
+      + '<label>📍 Ponto de encontro</label>'
+      + '<select class="pax-ponto-select" onchange="quickSetPonto(\'' + p.id + '\', this.value)">'
+      + buildPontoOptionsHtml(p.ponto)
+      + '</select>'
       + '</div>'
       + '<div class="pax-actions">'
       + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Pagamento</button>'
@@ -1289,7 +1537,8 @@ function renderPayList() {
       + '<div class="pax-actions">'
       + '<button class="pax-action-btn btn-secondary" data-action="pay" data-id="' + p.id + '">💳 Registrar pagamento</button>'
       + (p.tel ? '<button class="pax-action-btn btn-secondary" data-action="wa-cobrar" data-id="' + p.id + '" style="background:#fef3c7;color:#92400e">📲 Cobrar</button>' : '')
-      + (status === 'pago' ? '<button class="pax-action-btn btn-wa" data-action="comprovante-full" data-id="' + p.id + '" style="background:#25d366;color:#fff">✅ Comprovante</button>' : '')
+      + (status === 'pago' ? '<button class="pax-action-btn btn-wa" data-action="comprovante-pdf" data-id="' + p.id + '" style="background:#1e3a5f;color:#fff">📄 PDF</button>' : '')
+      + (status === 'pago' && p.tel ? '<button class="pax-action-btn btn-wa" data-action="comprovante-wa" data-id="' + p.id + '" style="background:#25d366;color:#fff">📲 WhatsApp</button>' : '')
       + '</div>'
       + '</div>';
     shown++;
@@ -1305,7 +1554,6 @@ function renderPayList() {
 function renderLemList() {
   var cfg = getLemConfig();
   document.getElementById('lem-horario').value = cfg.horario || '';
-  document.getElementById('lem-ponto').value = cfg.ponto || '';
   document.getElementById('lem-msg').value = cfg.msg || 'Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Itatiba. Agradecemos a sua confianca e pontualidade. Ate breve! 🚌';
   // Lembretes section only shows config now - comprovante is in Pagamentos
   var el = document.getElementById('lem-pax-list');
@@ -1361,15 +1609,15 @@ function gerarComprovantePDF(id) {
     + '<title>Comprovante - ' + p.nome + '</title>'
     + '<style>'
     + 'body{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:30px;color:#1e293b}'
-    + '.header{text-align:center;margin-bottom:24px;border-bottom:3px solid #1a56db;padding-bottom:16px}'
-    + '.header h1{color:#1a56db;font-size:20px;margin-bottom:4px}'
+    + '.header{text-align:center;margin-bottom:24px;border-bottom:3px solid #1e3a5f;padding-bottom:16px}'
+    + '.header h1{color:#1e3a5f;font-size:20px;margin-bottom:4px}'
     + '.header p{color:#64748b;font-size:13px}'
     + '.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}'
     + '.field label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px}'
     + '.field span{font-size:15px;font-weight:700;color:#1e293b}'
-    + '.valor-box{background:#f0f9ff;border:2px solid #1a56db;border-radius:10px;padding:16px;text-align:center;margin-bottom:20px}'
+    + '.valor-box{background:#f0f9ff;border:2px solid #1e3a5f;border-radius:10px;padding:16px;text-align:center;margin-bottom:20px}'
     + '.valor-box .label{font-size:12px;color:#64748b;font-weight:600;text-transform:uppercase;margin-bottom:6px}'
-    + '.valor-box .amount{font-size:32px;font-weight:900;color:#1a56db}'
+    + '.valor-box .amount{font-size:32px;font-weight:900;color:#1e3a5f}'
     + '.valor-box .status{font-size:13px;color:#16a34a;font-weight:700;margin-top:4px}'
     + '.section-title{font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;margin-top:20px}'
     + 'table{width:100%;border-collapse:collapse;margin-bottom:12px}'
@@ -1377,7 +1625,7 @@ function gerarComprovantePDF(id) {
     + 'td{padding:8px;font-size:13px;border-bottom:1px solid #e2e8f0}'
     + '.total-familiar{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;font-weight:700;color:#16a34a;font-size:14px;margin-top:8px}'
     + '.footer{text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px}'
-    + '.print-btn{display:block;width:100%;padding:12px;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px}'
+    + '.print-btn{display:block;width:100%;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px}'
     + '@media print{.print-btn{display:none}}'
     + '</style></head><body>'
     + '<div class="header"><h1>🚌 Transporte Jardim do Vale</h1><p>Congresso Itatiba SP · Comprovante de Pagamento</p></div>'
@@ -1579,6 +1827,15 @@ function showEditModal() {
     opt.textContent = sorted[i].nome;
     sel.appendChild(opt);
   }
+  var pontoSel = document.getElementById('edit-ponto');
+  var pontos = getPontosConfig();
+  pontoSel.innerHTML = '<option value="">— Não definido —</option>';
+  for (var j = 0; j < pontos.length; j++) {
+    var o = document.createElement('option');
+    o.value = pontos[j].numero;
+    o.textContent = pontos[j].numero + ' — ' + (pontos[j].endereco || 'sem endereço');
+    pontoSel.appendChild(o);
+  }
   document.getElementById('edit-fields').style.display = 'none';
   openModal('edit-modal');
 }
@@ -1593,6 +1850,7 @@ function loadEditPax() {
   document.getElementById('edit-rg').value = p.rg || '';
   document.getElementById('edit-cpf').value = p.cpf || '';
   document.getElementById('edit-tel').value = p.tel || '';
+  document.getElementById('edit-ponto').value = p.ponto != null ? String(p.ponto) : '';
   document.getElementById('edit-obs').value = p.obs || '';
   document.getElementById('edit-fields').style.display = 'block';
 }
@@ -1605,9 +1863,21 @@ function saveEdit() {
     rg:   document.getElementById('edit-rg').value,
     cpf:  document.getElementById('edit-cpf').value,
     tel:  document.getElementById('edit-tel').value,
+    ponto: document.getElementById('edit-ponto').value || null,
     obs:  document.getElementById('edit-obs').value
   };
   sbPatch('pasajeros', id, data)
+    .then(function(r) {
+      if (!r.ok) {
+        // Coluna "ponto" ainda não existe no Supabase — tenta salvar sem ela para não travar a edição
+        var dataSemPonto = { nome: data.nome, rg: data.rg, cpf: data.cpf, tel: data.tel, obs: data.obs };
+        return sbPatch('pasajeros', id, dataSemPonto).then(function(r2) {
+          if (r2.ok) { showToast('⚠️ Salvo, mas "Ponto" precisa da coluna nova no Supabase (rode o SQL)'); }
+          return r2;
+        });
+      }
+      return r;
+    })
     .then(function() {
       closeModal('edit-modal');
       loadAllData();
@@ -1636,9 +1906,52 @@ function savePw() {
   if (!nova || nova.length < 4) { showToast('Nova senha muito curta'); return; }
   if (nova !== confirm) { showToast('Senhas não conferem'); return; }
   ADMINS[currentAdmin] = nova;
+  sbConfigUpsert('pw_' + currentAdmin, nova).catch(function(){});
   closeModal('pw-modal');
   addLog('Senha alterada por ' + currentAdmin);
   showToast('Senha alterada com sucesso!');
+}
+
+/* ═══════════════════════════════════════════
+   CONFIG TABLE (Supabase) — senhas persistentes
+═══════════════════════════════════════════ */
+function sbConfigUpsert(key, value) {
+  return fetch(SB_URL + '/rest/v1/config', {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    },
+    body: JSON.stringify([{ key: key, value: value }])
+  });
+}
+
+function loadAdminPasswords() {
+  sbFetch('config?select=key,value&key=in.(pw_jesus2025,pw_sergio2025,pw_capitao,capitao_nome)', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i].key === 'pw_capitao') {
+          if (rows[i].value) {
+            var c = getCapitaoConfig();
+            c.pw = rows[i].value;
+            localStorage.setItem('tr_capitao_config', JSON.stringify(c));
+          }
+          continue;
+        }
+        if (rows[i].key === 'capitao_nome') {
+          var c2 = getCapitaoConfig();
+          c2.nome = rows[i].value || '';
+          localStorage.setItem('tr_capitao_config', JSON.stringify(c2));
+          continue;
+        }
+        var k = rows[i].key.replace('pw_', '');
+        if (ADMINS.hasOwnProperty(k) && rows[i].value) ADMINS[k] = rows[i].value;
+      }
+    })
+    .catch(function() {});
 }
 
 /* ═══════════════════════════════════════════
@@ -1819,10 +2132,23 @@ function loadMyTicket() {
 /* ═══════════════════════════════════════════
    AUTH
 ═══════════════════════════════════════════ */
+function showAccessTab(which) {
+  document.getElementById('tab-pax').className = 'access-tab' + (which === 'pax' ? ' active' : '');
+  document.getElementById('tab-admin').className = 'access-tab' + (which === 'admin' ? ' active' : '');
+  document.getElementById('access-panel-pax').style.display = which === 'pax' ? 'block' : 'none';
+  document.getElementById('access-panel-admin').style.display = which === 'admin' ? 'block' : 'none';
+}
+
+function backFromAdmin() {
+  if (localStorage.getItem('tr_pub_auth') === '1') { showPublic(); }
+  else { showAccessTab('pax'); }
+}
+
 function showLogin() {
   if (isLocked) { showLockout(); return; }
   document.getElementById('public-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('public-login-screen').style.display = 'flex';
+  showAccessTab('admin');
   document.getElementById('login-pw').value = '';
   document.getElementById('login-err').style.display = 'none';
   setTimeout(function() { document.getElementById('login-pw').focus(); }, 100);
@@ -1845,7 +2171,7 @@ function doAdminLogin() {
   loginAttempts = 0;
   currentAdmin = found;
   addLog('Login: ' + found);
-  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('public-login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('public-screen').style.display = 'none';
   var displayName = found === 'jesus2025' ? 'Jesús' : found === 'sergio2025' ? 'Sergio' : found;
@@ -1867,7 +2193,7 @@ function doLogout() {
 }
 
 function showLockout() {
-  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('public-login-screen').style.display = 'none';
   document.getElementById('public-screen').style.display = 'none';
   var ls = document.getElementById('lockout-screen');
   ls.style.display = 'flex';
@@ -1888,15 +2214,29 @@ function showLockout() {
 
 function showPublic() {
   document.getElementById('public-screen').style.display = 'block';
-  document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'none';
+  var pl = document.getElementById('public-login-screen');
+  if (pl) pl.style.display = 'none';
+  var pb = document.querySelector('#public-screen .pub-body');
+  if (pb) { pb.classList.remove('accordion-in'); void pb.offsetWidth; pb.classList.add('accordion-in'); }
 }
 
 /* ═══════════════════════════════════════════
    NAVIGATION
 ═══════════════════════════════════════════ */
+function toggleAccordion(id) {
+  var items = document.querySelectorAll('#sec-config .accordion-item');
+  var target = document.getElementById(id);
+  if (!target) return;
+  var wasOpen = target.className.indexOf('open') !== -1;
+  for (var i = 0; i < items.length; i++) {
+    items[i].className = items[i].className.replace(' open', '');
+  }
+  if (!wasOpen) target.className += ' open';
+}
+
 function showSection(name) {
-  var sections = ['dashboard','passageiros','pagamentos','lembretes','registro','config'];
+  var sections = ['dashboard','passageiros','pagamentos','lembretes','registro','config','encarregado','onibus','relatorios'];
   for (var i = 0; i < sections.length; i++) {
     var s = document.getElementById('sec-' + sections[i]);
     var n = document.getElementById('nav-' + sections[i]);
@@ -1906,7 +2246,9 @@ function showSection(name) {
   if (name === 'passageiros') renderPaxList();
   if (name === 'pagamentos') { loadPayConfig(); renderPayList(); }
   if (name === 'lembretes') { loadLemConfig(); renderLemList(); }
-  if (name === 'config') { loadEventoConfig(); }
+  if (name === 'config') { loadEventoConfig(); loadCbConfig(); }
+  if (name === 'encarregado') { loadCapitaoConfigPanel(); }
+  if (name === 'onibus') { loadOnibusConfig(); loadPontosConfigPanel(); }
 }
 
 function showRegTab(tab) {
@@ -1941,6 +2283,622 @@ function loadPayConfig() {
 }
 
 /* ═══════════════════════════════════════════
+   CONFIG: CHATBOT
+═══════════════════════════════════════════ */
+function getCbConfig() {
+  try { return JSON.parse(localStorage.getItem('tr_cb_config')) || {}; } catch(e) { return {}; }
+}
+function saveCbConfig() {
+  var cfg = {
+    valor: document.getElementById('cb-cfg-valor').value,
+    pix: document.getElementById('cb-cfg-pix').value,
+    regras: document.getElementById('cb-cfg-regras').value,
+    contatos: document.getElementById('cb-cfg-contatos').value
+  };
+  localStorage.setItem('tr_cb_config', JSON.stringify(cfg));
+  addLog('Textos do chatbot salvos por ' + (currentAdmin || ''));
+  showToast('✅ Textos do chatbot salvos!');
+}
+function loadCbConfig() {
+  var cfg = getCbConfig();
+  document.getElementById('cb-cfg-valor').value = cfg.valor || 'O valor é de R$ 52,00 por dia. O prazo para pagamento é até 05/07/2026. 😊';
+  document.getElementById('cb-cfg-pix').value = cfg.pix || 'Aceitamos Pix.\nChave: jardimdovale@yahoo.com\nTitular: Getulio Bento de Oliveira';
+  document.getElementById('cb-cfg-regras').value = cfg.regras || 'Menores de 16 anos não acompanhados precisam de autorização por escrito com firma reconhecida. 1 criança de colo (menos de 6 anos) viaja sem assento. Maiores de 6 anos pagam passagem.';
+  document.getElementById('cb-cfg-contatos').value = cfg.contatos || 'Você pode chamar:\nJesús Blanco — (19) 9 9106-6011\nSergio Simonato — (11) 9 5910-6468';
+}
+
+/* ═══════════════════════════════════════════
+   CONFIG: ONIBUS (dados do relatório)
+═══════════════════════════════════════════ */
+function getOnibusConfig() {
+  try { return JSON.parse(localStorage.getItem('tr_onibus_config')) || {}; } catch(e) { return {}; }
+}
+function saveOnibusConfig() {
+  var cfg = {
+    empresa: document.getElementById('onibus-empresa').value,
+    numero: document.getElementById('onibus-numero').value,
+    instrucoes: document.getElementById('onibus-instrucoes').value
+  };
+  localStorage.setItem('tr_onibus_config', JSON.stringify(cfg));
+  addLog('Dados do ônibus salvos por ' + (currentAdmin || ''));
+  showToast('✅ Dados do ônibus salvos!');
+}
+function loadOnibusConfig() {
+  var cfg = getOnibusConfig();
+  document.getElementById('onibus-empresa').value = cfg.empresa || '';
+  document.getElementById('onibus-numero').value = cfg.numero || '';
+  document.getElementById('onibus-instrucoes').value = cfg.instrucoes || '';
+}
+
+/* ═══════════════════════════════════════════
+   ENCARREGADO (Capitão) — acesso somente leitura
+═══════════════════════════════════════════ */
+var capitaoDayActive = null;
+var capitaoRefreshTimer = null;
+var capitaoPax = [];
+
+function normalizeTelBR(tel) {
+  var t = (tel || '').replace(/\D/g, '');
+  if (!t) return '';
+  if (t.length === 8 || t.length === 9) t = '5519' + t;
+  else if (t.length === 10 || t.length === 11) t = '55' + t;
+  return t;
+}
+
+function toggleCapitaoPw() {
+  var inp = document.getElementById('capitao-pw');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function getCapitaoConfig() {
+  try { return JSON.parse(localStorage.getItem('tr_capitao_config')) || {}; } catch(e) { return {}; }
+}
+
+function saveCapitaoConfig() {
+  var pw = document.getElementById('capitao-cfg-pw').value;
+  var nome = document.getElementById('capitao-cfg-nome').value;
+  if (!pw || pw.length < 4) { showToast('Senha muito curta (mínimo 4 caracteres)'); return; }
+  localStorage.setItem('tr_capitao_config', JSON.stringify({ pw: pw, nome: nome }));
+  sbConfigUpsert('pw_capitao', pw).catch(function() {});
+  sbConfigUpsert('capitao_nome', nome || '').catch(function() {});
+  addLog('Dados do encarregado atualizados por ' + (currentAdmin || ''));
+  showToast('✅ Salvo!');
+}
+
+function loadCapitaoConfigPanel() {
+  var cfg = getCapitaoConfig();
+  document.getElementById('capitao-cfg-pw').value = cfg.pw || '';
+  document.getElementById('capitao-cfg-nome').value = cfg.nome || '';
+}
+
+function copyCapitaoLink() {
+  var url = window.location.origin + window.location.pathname + '?capitao=1';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function() { showToast('✅ Link copiado! Envie por WhatsApp ao encarregado.'); })
+      .catch(function() { showToast(url); });
+  } else {
+    showToast(url);
+  }
+}
+
+function doCapitaoLogin() {
+  var pw = document.getElementById('capitao-pw').value;
+  var cfg = getCapitaoConfig();
+  var validPw = cfg.pw || 'capitao2026';
+  if (pw !== validPw) {
+    document.getElementById('capitao-login-err').style.display = 'block';
+    return;
+  }
+  document.getElementById('capitao-login-err').style.display = 'none';
+  localStorage.setItem('tr_capitao_auth', '1');
+  showCapitaoScreen();
+}
+
+function doCapitaoLogout() {
+  localStorage.removeItem('tr_capitao_auth');
+  if (capitaoRefreshTimer) clearInterval(capitaoRefreshTimer);
+  document.getElementById('capitao-screen').style.display = 'none';
+  showCapitaoGate();
+}
+
+function showCapitaoGate() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('public-login-screen').style.display = 'none';
+  document.getElementById('public-screen').style.display = 'none';
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('capitao-screen').style.display = 'none';
+  document.getElementById('capitao-login-screen').style.display = 'flex';
+  document.getElementById('capitao-pw').value = '';
+  document.getElementById('capitao-login-err').style.display = 'none';
+}
+
+function showCapitaoScreen() {
+  document.getElementById('capitao-login-screen').style.display = 'none';
+  document.getElementById('capitao-screen').style.display = 'block';
+  loadCapitaoData();
+  if (capitaoRefreshTimer) clearInterval(capitaoRefreshTimer);
+  capitaoRefreshTimer = setInterval(loadCapitaoData, 10000);
+}
+
+function loadCapitaoData() {
+  sbGet('pasajeros', 'select=nome,tel,dias,dia,seats_needed,ponto&order=nome.asc')
+    .then(function(r) {
+      if (!r.ok) {
+        // Coluna "ponto" pode não existir ainda no Supabase — tenta sem ela
+        return sbGet('pasajeros', 'select=nome,tel,dias,dia,seats_needed&order=nome.asc').then(function(r2) { return r2.ok ? r2.json() : []; });
+      }
+      return r.json();
+    })
+    .then(function(data) {
+      capitaoPax = Array.isArray(data) ? data : [];
+      renderCapitaoDayTabs();
+      renderCapitaoList();
+    })
+    .catch(function() {});
+}
+
+function renderCapitaoDayTabs() {
+  var box = document.getElementById('capitao-day-tabs');
+  if (!box) return;
+  if (!capitaoDayActive && DAYS.length) capitaoDayActive = DAYS[0].key;
+  var html = '';
+  for (var i = 0; i < DAYS.length; i++) {
+    var d = DAYS[i];
+    html += '<button type="button" class="access-tab' + (d.key === capitaoDayActive ? ' active' : '') + '" onclick="setCapitaoDay(\'' + d.key + '\')">' + escHtml(d.label) + '</button>';
+  }
+  box.innerHTML = html;
+}
+
+function setCapitaoDay(key) {
+  capitaoDayActive = key;
+  renderCapitaoDayTabs();
+  renderCapitaoList();
+}
+
+/* ═══════════════════════════════════════════
+   PONTOS DE ENCONTRO (editável por dia)
+═══════════════════════════════════════════ */
+var pontosEditState = null;
+var pontosActiveDay = 'sexta';
+
+function getPontosConfigAll() {
+  try {
+    var raw = JSON.parse(localStorage.getItem('tr_pontos_config'));
+    if (Array.isArray(raw)) {
+      // formato antigo (lista única compartilhada) — usa como padrão para os 3 dias
+      return { sexta: raw.slice(), sabado: raw.slice(), domingo: raw.slice() };
+    }
+    return raw || {};
+  } catch (e) { return {}; }
+}
+
+function getPontosForDay(dayKey) {
+  var all = getPontosConfigAll();
+  if (all[dayKey] && all[dayKey].length) return all[dayKey];
+  var keys = ['sexta', 'sabado', 'domingo'];
+  for (var i = 0; i < keys.length; i++) {
+    if (all[keys[i]] && all[keys[i]].length) return all[keys[i]];
+  }
+  return [];
+}
+
+// Mantido por compatibilidade: usado no seletor de ponto do passageiro (números/labels)
+function getPontosConfig() {
+  return getPontosForDay('sexta').length ? getPontosForDay('sexta') : getPontosForDay(pontosActiveDay || 'sexta');
+}
+
+function renderPontosRows(list) {
+  var box = document.getElementById('pontos-list');
+  if (!box) return;
+  var html = '';
+  for (var i = 0; i < list.length; i++) {
+    html += '<div class="ponto-row">'
+      + '<input class="ponto-num" type="text" value="' + escHtml(String(list[i].numero != null ? list[i].numero : (i + 1))) + '" placeholder="Nº">'
+      + '<input class="ponto-end" type="text" value="' + escHtml(list[i].endereco || '') + '" placeholder="Endereço / local do ponto">'
+      + '<button type="button" class="ponto-rm" onclick="removePontoRow(this)">✕</button>'
+      + '</div>';
+  }
+  box.innerHTML = html;
+}
+
+function renderPontosDayTabs() {
+  var box = document.getElementById('pontos-day-tabs');
+  if (!box) return;
+  var days = [{ k: 'sexta', l: 'Sexta' }, { k: 'sabado', l: 'Sábado' }, { k: 'domingo', l: 'Domingo' }];
+  var html = '';
+  for (var i = 0; i < days.length; i++) {
+    html += '<button type="button" class="access-tab' + (days[i].k === pontosActiveDay ? ' active' : '') + '" onclick="switchPontosDay(\'' + days[i].k + '\')">' + days[i].l + '</button>';
+  }
+  box.innerHTML = html;
+}
+
+function syncPontosDomToState() {
+  if (!pontosEditState) return;
+  var rows = document.querySelectorAll('#pontos-list .ponto-row');
+  var list = [];
+  for (var i = 0; i < rows.length; i++) {
+    var num = rows[i].querySelector('.ponto-num').value.trim();
+    var end = rows[i].querySelector('.ponto-end').value.trim();
+    if (num) list.push({ numero: num, endereco: end });
+  }
+  pontosEditState[pontosActiveDay] = list;
+}
+
+function switchPontosDay(day) {
+  syncPontosDomToState();
+  pontosActiveDay = day;
+  var list = pontosEditState[day];
+  if (!list || !list.length) {
+    var keys = ['sexta', 'sabado', 'domingo'];
+    for (var i = 0; i < keys.length; i++) {
+      if (pontosEditState[keys[i]] && pontosEditState[keys[i]].length) {
+        list = pontosEditState[keys[i]].map(function(p) { return { numero: p.numero, endereco: p.endereco }; });
+        break;
+      }
+    }
+    list = list && list.length ? list : [{ numero: 1, endereco: '' }];
+    pontosEditState[day] = list;
+  }
+  renderPontosDayTabs();
+  renderPontosRows(list);
+}
+
+function addPontoRow() {
+  var box = document.getElementById('pontos-list');
+  var n = box.querySelectorAll('.ponto-row').length + 1;
+  var div = document.createElement('div');
+  div.className = 'ponto-row';
+  div.innerHTML = '<input class="ponto-num" type="text" value="' + n + '" placeholder="Nº">'
+    + '<input class="ponto-end" type="text" value="" placeholder="Endereço / local do ponto">'
+    + '<button type="button" class="ponto-rm" onclick="removePontoRow(this)">✕</button>';
+  box.appendChild(div);
+}
+
+function removePontoRow(btn) {
+  btn.parentElement.remove();
+}
+
+function loadPontosConfigPanel() {
+  pontosEditState = getPontosConfigAll();
+  var keys = ['sexta', 'sabado', 'domingo'];
+  for (var i = 0; i < keys.length; i++) { if (!pontosEditState[keys[i]]) pontosEditState[keys[i]] = []; }
+  pontosActiveDay = 'sexta';
+  renderPontosDayTabs();
+  renderPontosRows(pontosEditState.sexta.length ? pontosEditState.sexta : [{ numero: 1, endereco: '' }]);
+}
+
+function savePontosConfig() {
+  syncPontosDomToState();
+  localStorage.setItem('tr_pontos_config', JSON.stringify(pontosEditState));
+  sbConfigUpsert('pontos_encontro', JSON.stringify(pontosEditState)).catch(function() {});
+  addLog('Pontos de encontro salvos por ' + (currentAdmin || ''));
+  showToast('✅ Pontos de encontro salvos!');
+}
+
+function loadPontosConfigFromServer() {
+  sbFetch('config?select=value&key=eq.pontos_encontro', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].value) {
+        try {
+          var parsed = JSON.parse(rows[0].value);
+          if (parsed && (Array.isArray(parsed) || typeof parsed === 'object')) {
+            localStorage.setItem('tr_pontos_config', JSON.stringify(parsed));
+          }
+        } catch (e) {}
+      }
+    })
+    .catch(function() {});
+}
+
+function renderCapitaoList() {
+  var list = document.getElementById('capitao-list');
+  if (!list) return;
+  var pax = [];
+  for (var i = 0; i < capitaoPax.length; i++) {
+    var p = capitaoPax[i];
+    var dias = parseDias(p.dias || p.dia);
+    for (var j = 0; j < dias.length; j++) {
+      if (normalizeDayKey(dias[j]) === capitaoDayActive) { pax.push(p); break; }
+    }
+  }
+  pax.sort(function(a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+
+  if (!pax.length) {
+    list.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:20px">Nenhum passageiro neste dia.</p>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < pax.length; i++) {
+    var p = pax[i];
+    var seats = parseInt(p.seats_needed) || 1;
+    var tel = normalizeTelBR(p.tel);
+    html += '<div class="capitao-row">'
+      + '<div><div class="capitao-row-name">' + escHtml(p.nome || '') + '</div><div class="capitao-row-seats">' + seats + ' assento(s)' + (p.ponto != null && p.ponto !== '' ? ' · Ponto ' + escHtml(String(p.ponto)) : '') + '</div></div>'
+      + '<div class="capitao-row-actions">'
+      + (tel ? '<a class="capitao-btn call" href="tel:+' + tel + '">📞</a>' : '')
+      + (tel ? '<a class="capitao-btn wa" href="https://wa.me/' + tel + '" target="_blank" rel="noopener">💬</a>' : '')
+      + '</div></div>';
+  }
+  list.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════
+   RELATORIO POR DIA — dados agrupados
+═══════════════════════════════════════════ */
+function getDocPlain(p) {
+  var dtype = (p.doc_type || '').toLowerCase();
+  if (dtype === 'rnm' && p.rnm) return 'RNM ' + p.rnm;
+  if (dtype === 'cpf' && p.cpf) return 'CPF ' + p.cpf;
+  if (dtype === 'rg'  && p.rg)  return 'RG '  + p.rg;
+  if (p.rg)  return 'RG '  + p.rg;
+  if (p.rnm) return 'RNM ' + p.rnm;
+  if (p.cpf) return 'CPF ' + p.cpf;
+  return '—';
+}
+
+function buildRelatorioPorDiaData() {
+  var payCfg = getPayConfig();
+  var valorDia = payCfg.valorDia || 52;
+  var evtCfg = getEventoConfig();
+  var groups = {};
+  for (var i = 0; i < DAYS.length; i++) groups[DAYS[i].key] = [];
+  var totalAssentos = 0, totalPrevisto = 0, totalRecebido = 0;
+  for (var i = 0; i < allPax.length; i++) {
+    var p = allPax[i];
+    var seats = parseInt(p.seats_needed) || 1;
+    var valor = calcValorPax(p, valorDia);
+    totalAssentos += seats;
+    totalPrevisto += valor;
+    var status = normalizeStatus(p.payment_status);
+    if (status === 'pago') totalRecebido += valor;
+    else if (status === 'parcial') totalRecebido += parseFloat(p.valor_abonado) || 0;
+    var dias = parseDias(p.dias || p.dia);
+    for (var d = 0; d < dias.length; d++) {
+      var key = normalizeDayKey(dias[d]);
+      if (groups.hasOwnProperty(key)) groups[key].push(p);
+    }
+  }
+  for (var k in groups) {
+    groups[k].sort(function(a, b) {
+      var pa = a.ponto != null && a.ponto !== '' ? parseFloat(a.ponto) : Infinity;
+      var pb = b.ponto != null && b.ponto !== '' ? parseFloat(b.ponto) : Infinity;
+      if (isNaN(pa)) pa = Infinity;
+      if (isNaN(pb)) pb = Infinity;
+      if (pa !== pb) return pa - pb;
+      return (a.nome || '').localeCompare(b.nome || '', 'pt-BR');
+    });
+  }
+  return {
+    groups: groups,
+    valorDia: valorDia,
+    evento: evtCfg,
+    totalPassageiros: allPax.length,
+    totalAssentos: totalAssentos,
+    totalPrevisto: totalPrevisto,
+    totalRecebido: totalRecebido,
+    totalPendente: totalPrevisto - totalRecebido
+  };
+}
+
+/* ═══════════════════════════════════════════
+   RELATORIO POR DIA — PDF (jsPDF + autotable)
+═══════════════════════════════════════════ */
+function generateRelatorioPDF() {
+  if (!window.jspdf) { showToast('Erro: biblioteca de PDF não carregou. Verifique sua internet.'); return; }
+  var data = buildRelatorioPorDiaData();
+  var onibus = getOnibusConfig();
+  var capitao = getCapitaoConfig();
+  var doc = new window.jspdf.jsPDF();
+  var pageW = doc.internal.pageSize.getWidth();
+  var pageBottom = 280;
+  var y = 16;
+
+  doc.setFontSize(15); doc.setFont(undefined, 'bold');
+  doc.text('Transporte Jardim do Vale', pageW / 2, y, { align: 'center' }); y += 7;
+  doc.setFontSize(11); doc.setFont(undefined, 'normal');
+  doc.text('Relatório de Passageiros por Dia de Viagem', pageW / 2, y, { align: 'center' }); y += 6;
+  doc.text((data.evento.nome || 'Congresso Itatiba SP'), pageW / 2, y, { align: 'center' }); y += 6;
+  doc.setFontSize(9); doc.setTextColor(120);
+  doc.text('Data de emissão: ' + new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), pageW / 2, y, { align: 'center' });
+  doc.setTextColor(0); y += 9;
+
+  var infoLine = [];
+  if (onibus.empresa) infoLine.push('Empresa de ônibus: ' + onibus.empresa);
+  if (onibus.numero) infoLine.push('Número do ônibus: ' + onibus.numero);
+  if (capitao.nome) infoLine.push('Encarregado: ' + capitao.nome);
+  if (infoLine.length) {
+    doc.setFontSize(9); doc.setFont(undefined, 'normal');
+    doc.text(infoLine.join('     '), 14, y);
+    y += 6;
+  }
+
+  doc.setFillColor(240, 244, 255); doc.rect(14, y - 4, pageW - 28, 16, 'F');
+  doc.setFontSize(9); doc.setFont(undefined, 'normal');
+  doc.text('Total de passageiros: ' + data.totalPassageiros + '     Total de assentos: ' + data.totalAssentos, 17, y + 1);
+  doc.text('Total previsto: R$' + data.totalPrevisto.toFixed(2).replace('.', ',') + '     Total recebido: R$' + data.totalRecebido.toFixed(2).replace('.', ',') + '     Total pendente: R$' + data.totalPendente.toFixed(2).replace('.', ','), 17, y + 7);
+  y += 24;
+
+  // Helper: mede a altura que o bloco de pontos vai ocupar, sem desenhar
+  function medirAlturaPontos(pontosDia) {
+    var h = 8;
+    for (var m = 0; m < pontosDia.length; m++) {
+      var l = doc.splitTextToSize(pontosDia[m].endereco || 'sem endereço definido', pageW - 40);
+      h += l.length * 5 + 4;
+    }
+    return h;
+  }
+
+  for (var i = 0; i < DAYS.length; i++) {
+    var dday = DAYS[i];
+    var list = data.groups[dday.key] || [];
+    if (y > 250) { doc.addPage(); y = 16; }
+
+    if (i > 0) {
+      doc.setDrawColor(201, 162, 39);
+      doc.setLineWidth(0.6);
+      doc.line(14, y, pageW - 14, y);
+      y += 10;
+    }
+
+    doc.setFillColor(30, 58, 95);
+    doc.roundedRect(14, y - 6, pageW - 28, 10, 1.5, 1.5, 'F');
+    doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(255, 255, 255);
+    doc.text(dday.label.toUpperCase() + '   ·   ' + dday.date, 18, y);
+    doc.setTextColor(0); y += 10;
+
+    var rows = [];
+    for (var j = 0; j < list.length; j++) {
+      var p = list[j];
+      rows.push([p.nome || '', getDocPlain(p), p.tel || '', parseInt(p.seats_needed) || 1, p.ponto != null && p.ponto !== '' ? String(p.ponto) : '—']);
+    }
+    doc.autoTable({
+      startY: y,
+      head: [['Nome Completo', 'Documento', 'Telefone', 'Assentos', 'Ponto']],
+      body: rows,
+      styles: { fontSize: 8, cellPadding: 2.2 },
+      headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 247, 252] },
+      columnStyles: { 3: { cellWidth: 20, halign: 'center' }, 4: { cellWidth: 18, halign: 'center' } },
+      margin: { left: 14, right: 14 }
+    });
+    y = doc.lastAutoTable.finalY + 10;
+
+    // Pontos de encontro DESTE dia — bloco protegido (nunca corta entre páginas)
+    var pontosDia = getPontosForDay(dday.key);
+    if (pontosDia.length) {
+      var alturaNecessaria = medirAlturaPontos(pontosDia);
+      if (y + alturaNecessaria > pageBottom) { doc.addPage(); y = 16; }
+      doc.setFont('times', 'bold'); doc.setFontSize(10.5); doc.setTextColor(30, 58, 95);
+      doc.text('Pontos de Encontro deste dia', 14, y); y += 6;
+      doc.setTextColor(51, 65, 85);
+      for (var k = 0; k < pontosDia.length; k++) {
+        doc.setFont('times', 'bold'); doc.setFontSize(9.5);
+        doc.text(String(pontosDia[k].numero) + ' —', 16, y);
+        doc.setFont('times', 'italic');
+        var linePonto = doc.splitTextToSize(pontosDia[k].endereco || 'sem endereço definido', pageW - 40);
+        doc.text(linePonto, 26, y);
+        y += linePonto.length * 5 + 4;
+      }
+      doc.setFont(undefined, 'normal'); doc.setTextColor(0);
+    }
+  }
+
+  if (onibus.instrucoes) {
+    var linesInstr = doc.splitTextToSize(onibus.instrucoes, pageW - 28);
+    var alturaInstr = 5 + linesInstr.length * 4.5 + 6;
+    if (y + alturaInstr > pageBottom) { doc.addPage(); y = 16; } else { y += 8; }
+    doc.setFontSize(10); doc.setFont(undefined, 'bold');
+    doc.text('Instruções do Capitão', 14, y); y += 5;
+    doc.setFontSize(9); doc.setFont(undefined, 'normal');
+    doc.text(linesInstr, 14, y);
+  }
+
+  doc.save('relatorio-passageiros-por-dia.pdf');
+  addLog('Relatório PDF por dia gerado por ' + (currentAdmin || ''));
+  showToast('✅ PDF gerado!');
+}
+
+/* ═══════════════════════════════════════════
+   RELATORIO POR DIA — Excel (ExcelJS)
+═══════════════════════════════════════════ */
+function generateRelatorioExcel() {
+  if (!window.ExcelJS) { showToast('Erro: biblioteca de Excel não carregou. Verifique sua internet.'); return; }
+  var data = buildRelatorioPorDiaData();
+  var onibus = getOnibusConfig();
+  var capitao = getCapitaoConfig();
+  var wb = new ExcelJS.Workbook();
+  wb.creator = 'Transporte Jardim do Vale';
+  wb.created = new Date();
+
+  var headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A5F' } };
+  var headerFont = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 10.5 };
+  var titleFont = { name: 'Calibri', bold: true, size: 13, color: { argb: 'FF1E3A5F' } };
+  var subFont = { name: 'Calibri', size: 10, color: { argb: 'FF475569' } };
+  var thin = { style: 'thin', color: { argb: 'FFD1D5DB' } };
+  var border = { top: thin, left: thin, bottom: thin, right: thin };
+
+  for (var i = 0; i < DAYS.length; i++) {
+    var dday = DAYS[i];
+    var list = data.groups[dday.key] || [];
+    var sheetName = (dday.label || dday.key).replace(/[\\\/\?\*\[\]:]/g, '').substring(0, 28);
+    var ws = wb.addWorksheet(sheetName);
+    ws.columns = [{ width: 34 }, { width: 20 }, { width: 18 }, { width: 11 }, { width: 9 }];
+
+    ws.mergeCells('A1:E1');
+    ws.getCell('A1').value = 'Sistema Coordenado de Transporte · ' + (data.evento.nome || 'Congresso Itatiba SP');
+    ws.getCell('A1').font = titleFont;
+    ws.getCell('A1').alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    ws.mergeCells('A2:B2'); ws.getCell('A2').value = 'Congregação: Jardim do Vale';
+    ws.mergeCells('C2:E2'); ws.getCell('C2').value = 'Dia: ' + dday.label + '   ·   Data: ' + dday.date;
+    ws.getRow(2).font = subFont;
+
+    var totalSeatsDay = 0;
+    for (var j = 0; j < list.length; j++) totalSeatsDay += parseInt(list[j].seats_needed) || 1;
+
+    ws.mergeCells('A3:B3'); ws.getCell('A3').value = 'Empresa de ônibus: ' + (onibus.empresa || '—') + '   ·   Nº ' + (onibus.numero || '—');
+    ws.mergeCells('C3:D3'); ws.getCell('C3').value = 'Encarregado: ' + (capitao.nome || '—');
+    ws.getCell('E3').value = 'Lugares: ' + totalSeatsDay;
+    ws.getRow(3).font = subFont;
+
+    ws.addRow([]);
+    var headRow = ws.addRow(['Nome Completo', 'Documento', 'Telefone', 'Assentos', 'Ponto']);
+    headRow.eachCell(function(cell) {
+      cell.fill = headerFill; cell.font = headerFont; cell.alignment = { horizontal: 'center', vertical: 'middle' }; cell.border = border;
+    });
+    headRow.height = 20;
+
+    for (var j = 0; j < list.length; j++) {
+      var p = list[j];
+      var row = ws.addRow([p.nome || '', getDocPlain(p), p.tel || '', parseInt(p.seats_needed) || 1, p.ponto != null && p.ponto !== '' ? p.ponto : '—']);
+      row.eachCell(function(cell, colNumber) {
+        cell.border = border;
+        cell.font = { name: 'Calibri', size: 10.5 };
+        cell.alignment = colNumber === 1 ? { horizontal: 'left', vertical: 'middle' } : { horizontal: 'center', vertical: 'middle' };
+      });
+      if (j % 2 === 1) {
+        row.eachCell(function(cell) { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F6FD' } }; });
+      }
+    }
+
+    ws.addRow([]);
+    var totRow = ws.addRow(['Total: ' + list.length + ' passageiros', '', '', totalSeatsDay, '']);
+    totRow.font = { name: 'Calibri', bold: true, size: 10.5 };
+    totRow.getCell(1).alignment = { horizontal: 'left' };
+    totRow.getCell(4).alignment = { horizontal: 'center' };
+
+    // Pontos de Encontro DESTE dia — ao pé da mesma aba, tipografia elegante e discreta
+    var pontosDia = getPontosForDay(dday.key);
+    if (pontosDia.length) {
+      ws.addRow([]);
+      var rTitle = ws.addRow(['Pontos de Encontro']);
+      rTitle.getCell(1).font = { name: 'Georgia', bold: true, size: 11.5, color: { argb: 'FF1E3A5F' } };
+      for (var pI = 0; pI < pontosDia.length; pI++) {
+        var rowP = ws.addRow([pontosDia[pI].numero + ' — ' + (pontosDia[pI].endereco || 'sem endereço definido')]);
+        ws.mergeCells('A' + rowP.number + ':E' + rowP.number);
+        rowP.getCell(1).font = { name: 'Georgia', italic: true, size: 10, color: { argb: 'FF334155' } };
+        rowP.getCell(1).alignment = { horizontal: 'left', indent: 1 };
+      }
+    }
+
+    ws.views = [{ state: 'frozen', ySplit: 6 }];
+  }
+
+  wb.xlsx.writeBuffer().then(function(buf) {
+    var blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'relatorio-passageiros-por-dia.xlsx';
+    a.click();
+    addLog('Relatório Excel por dia gerado por ' + (currentAdmin || ''));
+    showToast('✅ Excel gerado!');
+  }).catch(function() { showToast('Erro ao gerar Excel'); });
+}
+
+/* ═══════════════════════════════════════════
    CONFIG: LEMBRETE
 ═══════════════════════════════════════════ */
 function getLemConfig() {
@@ -1949,7 +2907,6 @@ function getLemConfig() {
 function saveLemConfig() {
   var cfg = {
     horario: document.getElementById('lem-horario').value,
-    ponto: document.getElementById('lem-ponto').value,
     msg: document.getElementById('lem-msg').value
   };
   localStorage.setItem('tr_lem_config', JSON.stringify(cfg));
@@ -1959,7 +2916,6 @@ function saveLemConfig() {
 function loadLemConfig() {
   var cfg = getLemConfig();
   document.getElementById('lem-horario').value = cfg.horario || '';
-  document.getElementById('lem-ponto').value = cfg.ponto || '';
   document.getElementById('lem-msg').value = cfg.msg || 'Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Regional de Itatiba. Que Jeová abençoe sua participação! Agradecemos a sua confiança e pontualidade. Até breve no ônibus! 🚌💛';
 }
 
@@ -2030,11 +2986,11 @@ function exportRelatorio() {
     var docStr = '<span style="font-size:9px;color:#94a3b8;font-weight:600;letter-spacing:0.5px">'+docSigla+'</span><br>'+escHtml(docNum);
     rows += '<tr><td>'+(i+1)+'</td><td>'+escHtml(p.nome||'')+'</td><td>'+docStr+'</td><td>'+escHtml(p.tel||'')+'</td><td>'+getDiasLabel(p)+'</td><td>'+seats+'</td><td>R$'+valor.toFixed(2)+'</td><td style="color:'+color+';font-weight:700">'+status+'</td></tr>';
   }
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Transporte</title><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:13px}th{background:#1a56db;color:#fff}</style></head><body>'
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Transporte</title><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:13px}th{background:#1e3a5f;color:#fff}</style></head><body>'
     + '<h2>Transporte Jardim do Vale · Relatório</h2>'
     + '<p>Total: '+allPax.length+' passageiros · A receber: R$'+totalValor.toFixed(2)+' · Recebido: R$'+totalRecebido.toFixed(2)+'</p>'
     + '<table><thead><tr><th>#</th><th>Nome</th><th>Doc</th><th>Tel</th><th>Dias</th><th>Assentos</th><th>Valor</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>'
-    + '<button onclick="window.print()" style="margin-top:16px;padding:10px 20px;background:#1a56db;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Imprimir</button>'
+    + '<button onclick="window.print()" style="margin-top:16px;padding:10px 20px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Imprimir</button>'
     + '</body></html>';
   var w = window.open('','_blank');
   w.document.write(html);
@@ -2089,13 +3045,23 @@ function parseDias(v) {
   return [v];
 }
 
+function normalizeDayKey(v) {
+  var s = String(v || '').toLowerCase().trim();
+  if (s.normalize) s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  else s = s.replace(/[áàâã]/g, 'a').replace(/[éê]/g, 'e').replace(/[íî]/g, 'i').replace(/[óôõ]/g, 'o').replace(/[úû]/g, 'u');
+  if (s.indexOf('sext') === 0) return 'sexta';
+  if (s.indexOf('sab') === 0) return 'sabado';
+  if (s.indexOf('doming') === 0) return 'domingo';
+  return s;
+}
+
 function getDiasLabel(p) {
   var dias = parseDias(p.dias || p.dia);
   if (dias.length === 0) return p.dia || '—';
-  var map = { sexta:'Sexta', sabado:'Sábado', domingo:'Domingo', 'sexta-feira':'Sexta', 'sábado':'Sábado' };
+  var map = { sexta:'Sexta', sabado:'Sábado', domingo:'Domingo' };
   var labels = [];
   for (var i = 0; i < dias.length; i++) {
-    labels.push(map[dias[i].toLowerCase()] || dias[i]);
+    labels.push(map[normalizeDayKey(dias[i])] || dias[i]);
   }
   return labels.join(', ');
 }
@@ -2119,6 +3085,34 @@ function formatTs(ts) {
 function togglePw() {
   var inp = document.getElementById('login-pw');
   inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function togglePubPw() {
+  var inp = document.getElementById('pub-login-pw');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function doPublicLogin() {
+  var u = (document.getElementById('pub-login-user').value || '').trim();
+  var p = (document.getElementById('pub-login-pw').value || '').trim();
+  if (u.toLowerCase() === 'jardim' && p === '1914') {
+    localStorage.setItem('tr_pub_auth', '1');
+    document.getElementById('pub-login-err').style.display = 'none';
+    showPublic();
+  } else {
+    document.getElementById('pub-login-err').style.display = 'block';
+  }
+}
+
+function showPublicLoginGate() {
+  document.getElementById('public-login-screen').style.display = 'flex';
+  document.getElementById('public-screen').style.display = 'none';
+  showAccessTab('pax');
+  document.getElementById('pub-login-user').value = '';
+  document.getElementById('pub-login-pw').value = '';
+  document.getElementById('pub-login-err').style.display = 'none';
+  var card = document.querySelector('#public-login-screen .login-card');
+  if (card) { card.classList.remove('accordion-in'); void card.offsetWidth; card.classList.add('accordion-in'); }
 }
 
 function openModal(id) { document.getElementById(id).className = 'modal-overlay active'; }
@@ -2159,11 +3153,27 @@ document.getElementById('login-pw').addEventListener('keydown', function(e) {
 window.addEventListener('load', function() {
   renderDayButtons();
   hideInfo();
+  loadAdminPasswords();
+  loadPontosConfigFromServer();
+  var isCapitao = /[?&]capitao=1/.test(window.location.search);
   setTimeout(function() {
     document.getElementById('loading-screen').style.display = 'none';
-    showPublic();
+    if (isCapitao) {
+      if (localStorage.getItem('tr_capitao_auth') === '1') { showCapitaoScreen(); }
+      else { showCapitaoGate(); }
+    } else if (localStorage.getItem('tr_pub_auth') === '1') {
+      showPublic();
+    } else {
+      showPublicLoginGate();
+    }
   }, 800);
 });
+
+var __capitaoPwInp = document.getElementById('capitao-pw');
+if (__capitaoPwInp) __capitaoPwInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') doCapitaoLogin(); });
+
+var __pubPwInp = document.getElementById('pub-login-pw');
+if (__pubPwInp) __pubPwInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') doPublicLogin(); });
 
 
 /* ── EVENT DELEGATION ────────────────────────────── */
@@ -2189,9 +3199,10 @@ document.addEventListener('click', function(e) {
         sendWA(id, 'cobrar');
       } else if (action === 'wa-comprovante') {
         sendWA(id, 'comprovante');
-      } else if (action === 'comprovante-full') {
+      } else if (action === 'comprovante-pdf') {
         gerarComprovantePDF(id);
-        setTimeout(function() { sendWA(id, 'comprovante'); }, 1500);
+      } else if (action === 'comprovante-wa') {
+        sendWA(id, 'comprovante');
       } else if (action === 'edit') {
         showEditModal();
         document.getElementById('edit-select').value = id;
@@ -2254,6 +3265,29 @@ window.saveLemConfig = saveLemConfig;
 window.savePayConfig = savePayConfig;
 window.renderPaxList = renderPaxList;
 window.renderPayList = renderPayList;
+window.togglePubPw = togglePubPw;
+window.doPublicLogin = doPublicLogin;
+window.showAccessTab = showAccessTab;
+window.backFromAdmin = backFromAdmin;
+window.saveCbConfig = saveCbConfig;
+window.loadCbConfig = loadCbConfig;
+window.saveOnibusConfig = saveOnibusConfig;
+window.loadOnibusConfig = loadOnibusConfig;
+window.generateRelatorioPDF = generateRelatorioPDF;
+window.generateRelatorioExcel = generateRelatorioExcel;
+window.toggleCapitaoPw = toggleCapitaoPw;
+window.doCapitaoLogin = doCapitaoLogin;
+window.doCapitaoLogout = doCapitaoLogout;
+window.saveCapitaoConfig = saveCapitaoConfig;
+window.copyCapitaoLink = copyCapitaoLink;
+window.setCapitaoDay = setCapitaoDay;
+window.addPontoRow = addPontoRow;
+window.removePontoRow = removePontoRow;
+window.savePontosConfig = savePontosConfig;
+window.switchPontosDay = switchPontosDay;
+window.buildPontoOptionsHtml = buildPontoOptionsHtml;
+window.quickSetPonto = quickSetPonto;
+window.toggleAccordion = toggleAccordion;
 
 /* ═══════════════════════════════════════════
    CHATBOT OPCIONAL — réplica visual do WhatsApp
@@ -2310,7 +3344,12 @@ function cbMsgUser(text) {
 function cbEsc(text) {
   var d = document.createElement('div');
   d.textContent = text;
-  return d.innerHTML;
+  var escaped = d.innerHTML;
+  // Evita que números de telefone quebrem de linha no meio (ex: "5910-6468" partido)
+  escaped = escaped.replace(/(\(?\d{2,3}\)?[ \u00A0]*\d?[ \u00A0]*\d{4,5}-\d{4})/g, function(m) {
+    return '<span style="white-space:nowrap">' + m + '</span>';
+  });
+  return escaped;
 }
 
 /* Coloca o nome com a primeira letra de cada palavra em maiúscula,
@@ -2374,6 +3413,7 @@ function cbOptions(list) {
       box.appendChild(btn);
     })(list[i]);
   }
+  setTimeout(cbScrollDown, 50);
 }
 
 /* Campo de texto — barra inferior real do WhatsApp */
@@ -2387,6 +3427,7 @@ function cbInputStep(placeholder, onNext) {
   inp.placeholder = placeholder;
   cb.pendingTextHandler = onNext;
   setTimeout(function() { inp.focus(); }, 250);
+  setTimeout(cbScrollDown, 50);
 }
 
 function cbSendTyped() {
@@ -2422,22 +3463,26 @@ function cbStepInfoMenu() {
   cbBotSay('Claro! O que você gostaria de saber?', function() {
     cbOptions([
       { label: '💰 Valor por dia', action: function() {
-          cbBotSay('O valor é de R$ 52,00 por dia. O prazo para pagamento é até 05/07/2026. 😊', function() {
+          var t = getCbConfig().valor || 'O valor é de R$ 52,00 por dia. O prazo para pagamento é até 05/07/2026. 😊';
+          cbBotSay(t, function() {
             setTimeout(cbStepDepoisInfo, 900);
           });
         } },
       { label: '💳 Formas de pagamento', action: function() {
-          cbBotSay('Aceitamos Pix.\nChave: jardimdovale@yahoo.com\nTitular: Getulio Bento de Oliveira', function() {
+          var t = getCbConfig().pix || 'Aceitamos Pix.\nChave: jardimdovale@yahoo.com\nTitular: Getulio Bento de Oliveira';
+          cbBotSay(t, function() {
             setTimeout(cbStepDepoisInfo, 900);
           });
         } },
       { label: '👶 Regras para crianças', action: function() {
-          cbBotSay('Menores de 16 anos não acompanhados precisam de autorização por escrito com firma reconhecida. 1 criança de colo (menos de 6 anos) viaja sem assento. Maiores de 6 anos pagam passagem.', function() {
+          var t = getCbConfig().regras || 'Menores de 16 anos não acompanhados precisam de autorização por escrito com firma reconhecida. 1 criança de colo (menos de 6 anos) viaja sem assento. Maiores de 6 anos pagam passagem.';
+          cbBotSay(t, function() {
             setTimeout(cbStepDepoisInfo, 1300);
           });
         } },
       { label: '📞 Falar com responsável', action: function() {
-          cbBotSay('Você pode chamar:\nJesús Blanco — (19) 9 9106-6011\nSergio Simonato — (11) 9 5910-6468', function() {
+          var t = getCbConfig().contatos || 'Você pode chamar:\nJesús Blanco — (19) 9 9106-6011\nSergio Simonato — (11) 9 5910-6468';
+          cbBotSay(t, function() {
             setTimeout(cbStepDepoisInfo, 900);
           });
         } },
@@ -2540,6 +3585,7 @@ function cbStepDias() {
       cbStepResumo();
     };
     box.appendChild(confirmBtn);
+    setTimeout(cbScrollDown, 50);
   });
 }
 
