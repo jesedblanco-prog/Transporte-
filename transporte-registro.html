@@ -63,6 +63,14 @@ input,select,textarea{font-family:inherit;outline:none}
 .accordion-body{max-height:0;overflow:hidden;transition:max-height 0.4s cubic-bezier(.4,0,.2,1)}
 .accordion-item.open .accordion-body{max-height:2200px}
 .accordion-body-inner{padding:0 16px 16px}
+
+/* TOGGLE SWITCH */
+.toggle-switch{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;cursor:pointer;inset:0;background:#cbd5e1;border-radius:12px;transition:.2s}
+.toggle-track:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle-switch input:checked + .toggle-track{background:#1e3a5f}
+.toggle-switch input:checked + .toggle-track:before{transform:translateX(18px)}
 .login-card{background:#fff;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
 .login-card h2{font-size:20px;font-weight:800;color:#1e293b;margin-bottom:4px}
 .login-card p{font-size:13px;color:#64748b;margin-bottom:24px}
@@ -259,8 +267,11 @@ input,select,textarea{font-family:inherit;outline:none}
    CHATBOT OPCIONAL — réplica visual do WhatsApp
    (não altera nada do formulário manual)
 ═══════════════════════════════════════════ */
-#cb-fab{position:fixed;right:18px;bottom:18px;width:58px;height:58px;border-radius:50%;background:#25d366;box-shadow:0 4px 16px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;z-index:500;transition:transform 0.15s}
+#cb-fab{position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1e3a5f,#142c47);box-shadow:0 4px 16px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-size:28px;z-index:500;transition:transform 0.15s;border:2.5px solid #c9a227}
 #cb-fab:active{transform:scale(0.92)}
+#cb-fab-badge{position:fixed;right:20px;bottom:56px;width:14px;height:14px;border-radius:50%;background:#4ade80;border:2px solid #fff;z-index:501}
+#cb-callout{position:fixed;right:84px;bottom:26px;background:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;box-shadow:0 4px 16px rgba(0,0,0,0.15);font-size:12.5px;color:#1e293b;font-weight:600;max-width:170px;line-height:1.4;z-index:500;animation:cbCalloutPop .3s ease}
+@keyframes cbCalloutPop{from{opacity:0;transform:translateY(6px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 #cb-overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:600;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease,background .25s ease}
 #cb-overlay.active{opacity:1;pointer-events:auto;background:rgba(0,0,0,0.55)}
 #cb-panel{width:100%;max-width:420px;height:88vh;max-height:720px;background:#ECE5DD;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 30px rgba(0,0,0,0.3);border-radius:12px 12px 0 0;transform:translateY(40px) scaleY(0.94);transform-origin:bottom;opacity:0;transition:transform .32s cubic-bezier(.16,1,.3,1),opacity .28s ease}
@@ -554,7 +565,9 @@ input,select,textarea{font-family:inherit;outline:none}
   </div>
 
   <!-- CHATBOT OPCIONAL -->
-  <button id="cb-fab" onclick="cbOpen()" title="Fazer cadastro conversando">💬</button>
+  <button id="cb-fab" onclick="cbOpen()" title="Fazer cadastro conversando">🧑‍💼</button>
+  <div id="cb-fab-badge"></div>
+  <div id="cb-callout" onclick="cbOpen()">👋 Clique aqui para te ajudar!</div>
   <div id="cb-overlay" onclick="if(event.target===this) cbClose()">
     <div id="cb-panel">
       <div id="cb-header">
@@ -690,6 +703,10 @@ input,select,textarea{font-family:inherit;outline:none}
           <input type="text" id="pay-prazo" placeholder="05/07/2026">
         </div>
         <div class="form-group">
+          <label>Forma de pagamento (Pix)</label>
+          <textarea id="pay-pix" rows="3" placeholder="Ex: Chave: jardimdovale@yahoo.com&#10;Titular: Getulio Bento de Oliveira"></textarea>
+        </div>
+        <div class="form-group">
           <label>Mensagem WhatsApp (cobrança)</label>
           <textarea id="pay-msg" rows="3" placeholder="Use {nome}, {valor}, {prazo}"></textarea>
         </div>
@@ -719,6 +736,16 @@ input,select,textarea{font-family:inherit;outline:none}
         <div class="form-group">
           <label>Mensagem comprovante (editável)</label>
           <textarea id="lem-msg" rows="3"></textarea>
+        </div>
+        <button class="btn-primary" onclick="saveLemConfig()">💾 Salvar configuração</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👶 Regras para Crianças (Geral)</div>
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Opcional. Se deixar em branco, o chatbot não oferece essa opção aos passageiros.</p>
+        <div class="form-group">
+          <label>Regras (Geral)</label>
+          <textarea id="lem-regras-geral" rows="4" placeholder="Ex: Menores de 16 anos não acompanhados precisam de autorização por escrito..."></textarea>
         </div>
         <button class="btn-primary" onclick="saveLemConfig()">💾 Salvar configuração</button>
       </div>
@@ -809,27 +836,14 @@ input,select,textarea{font-family:inherit;outline:none}
       <!-- CHATBOT TEXTS ACCORDION -->
       <div class="accordion-item" id="acc-chatbot">
         <div class="accordion-header" onclick="toggleAccordion('acc-chatbot')">
-          <span>💬 Chatbot — Textos das respostas</span>
+          <span>💬 Chatbot — Contato do responsável</span>
           <span class="accordion-caret">▾</span>
         </div>
         <div class="accordion-body"><div class="accordion-body-inner">
-        <div class="form-group">
-          <label>Valor por dia</label>
-          <textarea id="cb-cfg-valor" rows="2"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Formas de pagamento (Pix)</label>
-          <textarea id="cb-cfg-pix" rows="3"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Regras para crianças</label>
-          <textarea id="cb-cfg-regras" rows="3"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Contatos dos responsáveis</label>
-          <textarea id="cb-cfg-contatos" rows="3"></textarea>
-        </div>
-        <button class="btn-primary" onclick="saveCbConfig()">💾 Salvar textos do chatbot</button>
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Valor, pagamento, regras e ônibus o chatbot já lê automaticamente de Pagamentos, Lembretes e Ônibus. Aqui só ficam os contatos que o chatbot indica quando alguém pede para "falar com responsável".</p>
+        <div id="contatos-list"></div>
+        <button class="btn-secondary" style="margin-bottom:10px;width:100%" onclick="addContatoRow()">➕ Adicionar contato</button>
+        <button class="btn-primary" onclick="saveCbConfig()">💾 Salvar contatos</button>
         </div></div>
       </div>
 
@@ -964,6 +978,13 @@ input,select,textarea{font-family:inherit;outline:none}
       <div class="section-sub">Agrupa automaticamente por dia de viagem</div>
       <div class="card">
         <p style="font-size:13px;color:#64748b;margin-bottom:12px">Agrupa automaticamente os passageiros por dia de viagem, com totais e dados do ônibus.</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid #f1f5f9;margin-bottom:12px">
+          <span style="font-size:13px;font-weight:600;color:#334155">Mostrar coluna "Assentos"</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="rel-toggle-assentos" checked onchange="saveRelatorioPrefs()">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
         <button class="btn-primary" style="margin-bottom:8px" onclick="generateRelatorioPDF()">📄 Gerar Relatório PDF</button>
         <button class="btn-primary" style="background:#16a34a" onclick="generateRelatorioExcel()">📊 Gerar Relatório Excel</button>
       </div>
@@ -2395,6 +2416,7 @@ function showSection(name) {
   if (name === 'config') { loadEventoConfig(); loadCbConfig(); renderAdminsList(); }
   if (name === 'encarregado') { loadCapitaoConfigPanel(); }
   if (name === 'onibus') { loadOnibusConfig(); loadPontosConfigPanel(); }
+  if (name === 'relatorios') { loadRelatorioPrefsPanel(); }
 }
 
 function showRegTab(tab) {
@@ -2414,9 +2436,11 @@ function getPayConfig() {
 function savePayConfig() {
   var valorDia = parseFloat(document.getElementById('pay-valor-dia').value) || 52;
   var prazo = document.getElementById('pay-prazo').value || '05/07/2026';
+  var pix = document.getElementById('pay-pix').value;
   var msg = document.getElementById('pay-msg').value;
-  var cfg = { valorDia: valorDia, prazo: prazo, msg: msg };
+  var cfg = { valorDia: valorDia, prazo: prazo, pix: pix, msg: msg };
   localStorage.setItem('tr_pay_config', JSON.stringify(cfg));
+  sbConfigUpsert('pay_config', JSON.stringify(cfg)).catch(function() {});
   addLog('Config de cobrança salva por ' + (currentAdmin || ''));
   showToast('✅ Configuração salva!');
   renderPayList();
@@ -2425,32 +2449,91 @@ function loadPayConfig() {
   var cfg = getPayConfig();
   document.getElementById('pay-valor-dia').value = cfg.valorDia || 52;
   document.getElementById('pay-prazo').value = cfg.prazo || '05/07/2026';
+  document.getElementById('pay-pix').value = cfg.pix || '';
   document.getElementById('pay-msg').value = cfg.msg || 'Olá {nome}! 👋 Passamos para lembrá-lo(a) que o pagamento referente ao transporte para o Congresso de Itatiba vence em {prazo}. Valor: R$ {valor}. Contamos com sua colaboração para garantir o serviço com a empresa de ônibus. Obrigado e até breve! 🚌';
+}
+function loadPayConfigFromServer() {
+  sbFetch('config?select=value&key=eq.pay_config', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].value) {
+        try {
+          var cfg = JSON.parse(rows[0].value);
+          if (cfg && typeof cfg === 'object') localStorage.setItem('tr_pay_config', JSON.stringify(cfg));
+        } catch (e) {}
+      }
+    })
+    .catch(function() {});
 }
 
 /* ═══════════════════════════════════════════
    CONFIG: CHATBOT
 ═══════════════════════════════════════════ */
-function getCbConfig() {
-  try { return JSON.parse(localStorage.getItem('tr_cb_config')) || {}; } catch(e) { return {}; }
+function getContatosConfig() {
+  try {
+    var v = JSON.parse(localStorage.getItem('tr_cb_config'));
+    if (v && Array.isArray(v.contatos)) return v.contatos;
+  } catch (e) {}
+  return [
+    { nome: 'Jesús Blanco', telefone: '(19) 9 9106-6011' },
+    { nome: 'Sergio Simonato', telefone: '(11) 9 5910-6468' }
+  ];
+}
+function renderContatosRows(list) {
+  var box = document.getElementById('contatos-list');
+  if (!box) return;
+  var html = '';
+  for (var i = 0; i < list.length; i++) {
+    html += '<div class="ponto-row">'
+      + '<input class="ponto-end" style="flex:1.3" type="text" value="' + escHtml(list[i].nome || '') + '" placeholder="Nome">'
+      + '<input class="ponto-end" type="text" value="' + escHtml(list[i].telefone || '') + '" placeholder="Telefone">'
+      + '<button type="button" class="ponto-rm" onclick="removeContatoRow(this)">✕</button>'
+      + '</div>';
+  }
+  box.innerHTML = html;
+}
+function addContatoRow() {
+  var box = document.getElementById('contatos-list');
+  var div = document.createElement('div');
+  div.className = 'ponto-row';
+  div.innerHTML = '<input class="ponto-end" style="flex:1.3" type="text" value="" placeholder="Nome">'
+    + '<input class="ponto-end" type="text" value="" placeholder="Telefone">'
+    + '<button type="button" class="ponto-rm" onclick="removeContatoRow(this)">✕</button>';
+  box.appendChild(div);
+}
+function removeContatoRow(btn) {
+  btn.parentElement.remove();
 }
 function saveCbConfig() {
-  var cfg = {
-    valor: document.getElementById('cb-cfg-valor').value,
-    pix: document.getElementById('cb-cfg-pix').value,
-    regras: document.getElementById('cb-cfg-regras').value,
-    contatos: document.getElementById('cb-cfg-contatos').value
-  };
+  var rows = document.querySelectorAll('#contatos-list .ponto-row');
+  var list = [];
+  for (var i = 0; i < rows.length; i++) {
+    var inputs = rows[i].querySelectorAll('input');
+    var nome = inputs[0].value.trim();
+    var telefone = inputs[1].value.trim();
+    if (nome || telefone) list.push({ nome: nome, telefone: telefone });
+  }
+  var cfg = { contatos: list };
   localStorage.setItem('tr_cb_config', JSON.stringify(cfg));
-  addLog('Textos do chatbot salvos por ' + (currentAdmin || ''));
-  showToast('✅ Textos do chatbot salvos!');
+  sbConfigUpsert('cb_config', JSON.stringify(cfg)).catch(function() {});
+  addLog('Contatos do chatbot salvos por ' + (currentAdmin || ''));
+  showToast('✅ Contatos salvos!');
+}
+function loadCbConfigFromServer() {
+  sbFetch('config?select=value&key=eq.cb_config', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].value) {
+        try {
+          var cfg = JSON.parse(rows[0].value);
+          if (cfg && typeof cfg === 'object') localStorage.setItem('tr_cb_config', JSON.stringify(cfg));
+        } catch (e) {}
+      }
+    })
+    .catch(function() {});
 }
 function loadCbConfig() {
-  var cfg = getCbConfig();
-  document.getElementById('cb-cfg-valor').value = cfg.valor || 'O valor é de R$ 52,00 por dia. O prazo para pagamento é até 05/07/2026. 😊';
-  document.getElementById('cb-cfg-pix').value = cfg.pix || 'Aceitamos Pix.\nChave: jardimdovale@yahoo.com\nTitular: Getulio Bento de Oliveira';
-  document.getElementById('cb-cfg-regras').value = cfg.regras || 'Menores de 16 anos não acompanhados precisam de autorização por escrito com firma reconhecida. 1 criança de colo (menos de 6 anos) viaja sem assento. Maiores de 6 anos pagam passagem.';
-  document.getElementById('cb-cfg-contatos').value = cfg.contatos || 'Você pode chamar:\nJesús Blanco — (19) 9 9106-6011\nSergio Simonato — (11) 9 5910-6468';
+  renderContatosRows(getContatosConfig());
 }
 
 /* ═══════════════════════════════════════════
@@ -2880,6 +2963,17 @@ function renderCapitaoList() {
 /* ═══════════════════════════════════════════
    RELATORIO POR DIA — dados agrupados
 ═══════════════════════════════════════════ */
+function getRelatorioPrefs() {
+  try { return JSON.parse(localStorage.getItem('tr_relatorio_prefs')) || {}; } catch (e) { return {}; }
+}
+function saveRelatorioPrefs() {
+  var cfg = { mostrarAssentos: document.getElementById('rel-toggle-assentos').checked };
+  localStorage.setItem('tr_relatorio_prefs', JSON.stringify(cfg));
+}
+function loadRelatorioPrefsPanel() {
+  var cfg = getRelatorioPrefs();
+  document.getElementById('rel-toggle-assentos').checked = cfg.mostrarAssentos !== false;
+}
 function getDocPlain(p) {
   var dtype = (p.doc_type || '').toLowerCase();
   if (dtype === 'rnm' && p.rnm) return 'RNM ' + p.rnm;
@@ -3001,19 +3095,29 @@ function generateRelatorioPDF() {
     doc.text(dday.label.toUpperCase() + '   ·   ' + dday.date, 18, y);
     doc.setTextColor(0); y += 10;
 
+    var mostrarAssentos = getRelatorioPrefs().mostrarAssentos !== false;
     var rows = [];
     for (var j = 0; j < list.length; j++) {
       var p = list[j];
-      rows.push([j + 1, p.nome || '', getDocPlain(p), p.tel || '', parseInt(p.seats_needed) || 1, p.ponto != null && p.ponto !== '' ? String(p.ponto) : '—']);
+      var row = [j + 1, p.nome || '', getDocPlain(p), p.tel || ''];
+      if (mostrarAssentos) row.push(parseInt(p.seats_needed) || 1);
+      row.push(p.ponto != null && p.ponto !== '' ? String(p.ponto) : '—');
+      rows.push(row);
     }
+    var head = mostrarAssentos
+      ? ['N°', 'Nome Completo', 'Documento', 'Telefone', 'Assentos', 'Ponto']
+      : ['N°', 'Nome Completo', 'Documento', 'Telefone', 'Ponto'];
+    var colStyles = mostrarAssentos
+      ? { 0: { cellWidth: 12, halign: 'center' }, 4: { cellWidth: 18, halign: 'center' }, 5: { cellWidth: 16, halign: 'center' } }
+      : { 0: { cellWidth: 12, halign: 'center' }, 4: { cellWidth: 18, halign: 'center' } };
     doc.autoTable({
       startY: y,
-      head: [['N°', 'Nome Completo', 'Documento', 'Telefone', 'Assentos', 'Ponto']],
+      head: [head],
       body: rows,
       styles: { fontSize: 8, cellPadding: 2.2 },
       headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [245, 247, 252] },
-      columnStyles: { 0: { cellWidth: 12, halign: 'center' }, 4: { cellWidth: 18, halign: 'center' }, 5: { cellWidth: 16, halign: 'center' } },
+      columnStyles: colStyles,
       margin: { left: 14, right: 14 }
     });
     y = doc.lastAutoTable.finalY + 10;
@@ -3081,12 +3185,15 @@ function generateRelatorioExcel() {
   var thin = { style: 'thin', color: { argb: 'FFD1D5DB' } };
   var border = { top: thin, left: thin, bottom: thin, right: thin };
 
+  var mostrarAssentos = getRelatorioPrefs().mostrarAssentos !== false;
+
   for (var i = 0; i < DAYS.length; i++) {
     var dday = DAYS[i];
     var list = data.groups[dday.key] || [];
     var sheetName = (dday.label || dday.key).replace(/[\\\/\?\*\[\]:]/g, '').substring(0, 28);
     var ws = wb.addWorksheet(sheetName);
     ws.columns = [{ width: 6 }, { width: 34 }, { width: 20 }, { width: 18 }, { width: 11 }, { width: 9 }];
+    if (!mostrarAssentos) ws.getColumn(5).hidden = true;
 
     ws.mergeCells('A1:F1');
     ws.getCell('A1').value = 'Sistema Coordenado de Transporte · ' + (data.evento.nome || 'Congresso Itatiba SP');
@@ -3171,15 +3278,31 @@ function getLemConfig() {
 }
 function saveLemConfig() {
   var cfg = {
-    msg: document.getElementById('lem-msg').value
+    msg: document.getElementById('lem-msg').value,
+    regrasGeral: document.getElementById('lem-regras-geral').value
   };
   localStorage.setItem('tr_lem_config', JSON.stringify(cfg));
+  sbConfigUpsert('lem_config', JSON.stringify(cfg)).catch(function() {});
   addLog('Config de lembrete salva por ' + (currentAdmin || ''));
-  showToast('✅ Mensagem de comprovante salva!');
+  showToast('✅ Configuração salva!');
 }
 function loadLemConfig() {
   var cfg = getLemConfig();
   document.getElementById('lem-msg').value = cfg.msg || 'Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Regional de Itatiba. Que Jeová abençoe sua participação! Agradecemos a sua confiança e pontualidade. Até breve no ônibus! 🚌💛';
+  document.getElementById('lem-regras-geral').value = cfg.regrasGeral || '';
+}
+function loadLemConfigFromServer() {
+  sbFetch('config?select=value&key=eq.lem_config', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].value) {
+        try {
+          var cfg = JSON.parse(rows[0].value);
+          if (cfg && typeof cfg === 'object') localStorage.setItem('tr_lem_config', JSON.stringify(cfg));
+        } catch (e) {}
+      }
+    })
+    .catch(function() {});
 }
 
 /* ═══════════════════════════════════════════
@@ -3420,6 +3543,9 @@ window.addEventListener('load', function() {
   loadAdminPasswords();
   loadPontosConfigFromServer();
   loadOnibusConfigFromServer();
+  loadPayConfigFromServer();
+  loadLemConfigFromServer();
+  loadCbConfigFromServer();
   var isCapitao = /[?&]capitao=1/.test(window.location.search);
   setTimeout(function() {
     document.getElementById('loading-screen').style.display = 'none';
@@ -3536,6 +3662,8 @@ window.showAccessTab = showAccessTab;
 window.backFromAdmin = backFromAdmin;
 window.saveCbConfig = saveCbConfig;
 window.loadCbConfig = loadCbConfig;
+window.addContatoRow = addContatoRow;
+window.removeContatoRow = removeContatoRow;
 window.saveOnibusConfig = saveOnibusConfig;
 window.loadOnibusConfig = loadOnibusConfig;
 window.generateRelatorioPDF = generateRelatorioPDF;
@@ -3555,6 +3683,7 @@ window.buildPontoOptionsHtml = buildPontoOptionsHtml;
 window.quickSetPonto = quickSetPonto;
 window.toggleAccordion = toggleAccordion;
 window.toggleCapitaoPontos = toggleCapitaoPontos;
+window.saveRelatorioPrefs = saveRelatorioPrefs;
 window.renameAdmin = renameAdmin;
 window.removeAdmin = removeAdmin;
 window.addAdmin = addAdmin;
@@ -3568,6 +3697,10 @@ window.addAdmin = addAdmin;
 var cb = { data: {}, dias: [], isFirst: true, primeiroNome: '', totalCadastrados: 0, pendingTextHandler: null };
 
 function cbOpen() {
+  var callout = document.getElementById('cb-callout');
+  if (callout) callout.style.display = 'none';
+  var badge = document.getElementById('cb-fab-badge');
+  if (badge) badge.style.display = 'none';
   cb = { data: {}, dias: [], isFirst: true, primeiroNome: '', totalCadastrados: 0, pendingTextHandler: null };
   document.getElementById('cb-body').innerHTML = '';
   document.getElementById('cb-quickreplies').innerHTML = '';
@@ -3731,33 +3864,40 @@ function cbStepInicio() {
 
 function cbStepInfoMenu() {
   cbBotSay('Claro! O que você gostaria de saber?', function() {
-    cbOptions([
-      { label: '💰 Valor por dia', action: function() {
-          var t = getCbConfig().valor || 'O valor é de R$ 52,00 por dia. O prazo para pagamento é até 05/07/2026. 😊';
-          cbBotSay(t, function() {
-            setTimeout(cbStepDepoisInfo, 900);
-          });
-        } },
-      { label: '💳 Formas de pagamento', action: function() {
-          var t = getCbConfig().pix || 'Aceitamos Pix.\nChave: jardimdovale@yahoo.com\nTitular: Getulio Bento de Oliveira';
-          cbBotSay(t, function() {
-            setTimeout(cbStepDepoisInfo, 900);
-          });
-        } },
-      { label: '👶 Regras para crianças', action: function() {
-          var t = getCbConfig().regras || 'Menores de 16 anos não acompanhados precisam de autorização por escrito com firma reconhecida. 1 criança de colo (menos de 6 anos) viaja sem assento. Maiores de 6 anos pagam passagem.';
-          cbBotSay(t, function() {
-            setTimeout(cbStepDepoisInfo, 1300);
-          });
-        } },
-      { label: '📞 Falar com responsável', action: function() {
-          var t = getCbConfig().contatos || 'Você pode chamar:\nJesús Blanco — (19) 9 9106-6011\nSergio Simonato — (11) 9 5910-6468';
-          cbBotSay(t, function() {
-            setTimeout(cbStepDepoisInfo, 900);
-          });
-        } },
-      { label: '⬅️ Voltar', action: cbStepInicio }
-    ]);
+    var opts = [];
+    opts.push({ label: '💰 Valor por dia', action: function() {
+        var payCfg = getPayConfig();
+        var valor = (payCfg.valorDia || 52).toFixed(2).replace('.', ',');
+        var t = 'O valor é de R$ ' + valor + ' por dia. O prazo para pagamento é até ' + (payCfg.prazo || '05/07/2026') + '. 😊';
+        cbBotSay(t, function() { setTimeout(cbStepDepoisInfo, 900); });
+      } });
+    opts.push({ label: '💳 Formas de pagamento', action: function() {
+        var payCfg = getPayConfig();
+        var t = payCfg.pix || 'Ainda não há uma forma de pagamento cadastrada. Fale com o responsável.';
+        cbBotSay(t, function() { setTimeout(cbStepDepoisInfo, 900); });
+      } });
+    var lemCfg = getLemConfig();
+    if (lemCfg.regrasGeral) {
+      opts.push({ label: '👶 Regras para crianças', action: function() {
+          cbBotSay(lemCfg.regrasGeral, function() { setTimeout(cbStepDepoisInfo, 1300); });
+        } });
+    }
+    opts.push({ label: '📞 Falar com responsável', action: function() {
+        var contatos = getContatosConfig();
+        var t;
+        if (contatos.length) {
+          var linhas = ['Você pode chamar:'];
+          for (var c = 0; c < contatos.length; c++) {
+            linhas.push(contatos[c].nome + ' — ' + contatos[c].telefone);
+          }
+          t = linhas.join('\n');
+        } else {
+          t = 'Ainda não há contatos cadastrados.';
+        }
+        cbBotSay(t, function() { setTimeout(cbStepDepoisInfo, 900); });
+      } });
+    opts.push({ label: '⬅️ Voltar', action: cbStepInicio });
+    cbOptions(opts);
   });
 }
 
