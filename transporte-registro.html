@@ -328,7 +328,7 @@ input,select,textarea{font-family:inherit;outline:none}
 <!-- LOADING -->
 <div id="loading-screen">
   <div class="spinner"></div>
-  <h2>Transporte Jardim do Vale</h2>
+  <h2 id="loading-title">Transporte Jardim do Vale</h2>
   <p>Carregando...</p>
 </div>
 
@@ -699,10 +699,6 @@ input,select,textarea{font-family:inherit;outline:none}
       <div class="card">
         <div class="card-title">⚙️ Configuração do lembrete</div>
         <div class="form-group">
-          <label>Horário de saída</label>
-          <input type="text" id="lem-horario" placeholder="06:00">
-        </div>
-        <div class="form-group">
           <label>Mensagem comprovante (editável)</label>
           <textarea id="lem-msg" rows="3"></textarea>
         </div>
@@ -748,6 +744,10 @@ input,select,textarea{font-family:inherit;outline:none}
             <option value="congresso">🏟 Congresso Regional (3 dias)</option>
             <option value="asamblea">Assembleia de Circuito (1 dia)</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label>Nome da Organização / Congregação</label>
+          <input type="text" id="cfg-nome-org" placeholder="Ex: Jardim do Vale">
         </div>
         <div id="cfg-congresso-dates">
           <div class="form-group">
@@ -827,6 +827,33 @@ input,select,textarea{font-family:inherit;outline:none}
         </div></div>
       </div>
 
+      <!-- ADMINS MANAGEMENT ACCORDION -->
+      <div class="accordion-item" id="acc-admins">
+        <div class="accordion-header" onclick="toggleAccordion('acc-admins')">
+          <span>👥 Gerenciar Administradores</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Renomeie, remova, ou adicione novos administradores. Útil se você for repassar este sistema para outra pessoa/congregação.</p>
+        <div id="admins-list"></div>
+        <div style="border-top:1px solid #e2e8f0;margin:14px 0;padding-top:14px">
+          <div class="form-group">
+            <label>Novo usuário (login)</label>
+            <input type="text" id="new-admin-user" placeholder="Ex: maria2026">
+          </div>
+          <div class="form-group">
+            <label>Nome de exibição</label>
+            <input type="text" id="new-admin-nome" placeholder="Ex: Maria">
+          </div>
+          <div class="form-group">
+            <label>Senha</label>
+            <input type="text" id="new-admin-pw" placeholder="Mínimo 4 caracteres">
+          </div>
+          <button class="btn-primary" onclick="addAdmin()">➕ Adicionar administrador</button>
+        </div>
+        </div></div>
+      </div>
+
       <div class="config-item" onclick="showChangePwModal()">
         <div class="config-item-left">
           <div class="config-icon config-icon-blue">🔑</div>
@@ -850,7 +877,7 @@ input,select,textarea{font-family:inherit;outline:none}
       </div>
 
       <div style="margin-top:20px;text-align:center">
-        <p style="font-size:12px;color:#94a3b8">Transporte Jardim do Vale v4.0</p>
+        <p id="config-footer-brand" style="font-size:12px;color:#94a3b8">Transporte Jardim do Vale v4.0</p>
         <p style="font-size:12px;color:#94a3b8">🔴 Dados em tempo real via Supabase</p>
       </div>
     </div>
@@ -889,6 +916,10 @@ input,select,textarea{font-family:inherit;outline:none}
         <div class="form-group">
           <label>Número do Ônibus</label>
           <input type="text" id="onibus-numero" placeholder="Ex: 07">
+        </div>
+        <div class="form-group">
+          <label>Horário de saída</label>
+          <input type="text" id="onibus-horario" placeholder="Ex: 06:00">
         </div>
         <div class="form-group">
           <label>Instruções do Capitão</label>
@@ -1071,6 +1102,7 @@ var SB_URL = 'https://jjvmtrieudoxjjlkqsng.supabase.co';
 var SB_KEY = 'sb_publishable_rl5OtnLInXXuCsZ0dN8kLg_fJD6TrN0';
 
 var ADMINS = { jesus2025: 'jesus2025', sergio2025: 'sergio2025' };
+var ADMIN_NAMES = { jesus2025: 'Jesús', sergio2025: 'Sergio' };
 var DAYS = [
   { key: 'sexta',  label: 'Sexta-feira',  date: '17/07/2026', full: 'Sexta · 17/07' },
   { key: 'sabado', label: 'Sábado',       date: '18/07/2026', full: 'Sábado · 18/07' },
@@ -1083,7 +1115,7 @@ function getEventoConfig() {
 
 function saveEventoConfig() {
   var tipo = document.getElementById('cfg-tipo-evento').value;
-  var cfg = { tipo: tipo };
+  var cfg = { tipo: tipo, orgNome: document.getElementById('cfg-nome-org').value || 'Jardim do Vale' };
   if (tipo === 'congresso') {
     cfg.nome = document.getElementById('cfg-nome-evento').value || 'Congresso Itatiba SP';
     cfg.dateSex = document.getElementById('cfg-date-sex').value || '17/07/2026';
@@ -1123,6 +1155,11 @@ function updatePaxFilters() {
   bar.innerHTML = html;
 }
 
+function getOrgName() {
+  var cfg = getEventoConfig();
+  return cfg.orgNome || 'Jardim do Vale';
+}
+
 function applyEventoConfig() {
   var cfg = getEventoConfig();
   if (!cfg.tipo || cfg.tipo === 'congresso') {
@@ -1145,14 +1182,30 @@ function applyEventoConfig() {
   renderDayButtons();
   updatePaxFilters();
   var nomeEvento = cfg.nome || cfg.nomeAsamblea || 'Congresso Itatiba SP';
+  var orgNome = getOrgName();
+  var appTitle = 'Transporte ' + orgNome;
+
+  document.title = appTitle;
+  var loadingTitleEl = document.getElementById('loading-title');
+  if (loadingTitleEl) loadingTitleEl.textContent = appTitle;
   var headerEl = document.querySelector('.pub-header p');
   if (headerEl) headerEl.textContent = nomeEvento + ' · Reserve seu assento';
   var adminEl = document.querySelector('.admin-topbar h1');
   if (adminEl) adminEl.textContent = 'Painel Admin · ' + nomeEvento;
+
+  var pubTitleEl = document.querySelector('#public-login-screen h2');
+  if (pubTitleEl) pubTitleEl.textContent = appTitle;
+  var pubH1 = document.querySelector('.pub-header h1');
+  if (pubH1) pubH1.textContent = '🚌 ' + appTitle;
+  var cbTitleEl = document.querySelector('#cb-headtext h3');
+  if (cbTitleEl) cbTitleEl.textContent = orgNome;
+  var footerEl = document.getElementById('config-footer-brand');
+  if (footerEl) footerEl.textContent = appTitle + ' v4.0';
 }
 
 function loadEventoConfig() {
   var cfg = getEventoConfig();
+  document.getElementById('cfg-nome-org').value = cfg.orgNome || 'Jardim do Vale';
   if (!cfg.tipo) return;
   var tipoEl = document.getElementById('cfg-tipo-evento');
   if (tipoEl) tipoEl.value = cfg.tipo;
@@ -1533,7 +1586,6 @@ function renderPayList() {
 ═══════════════════════════════════════════ */
 function renderLemList() {
   var cfg = getLemConfig();
-  document.getElementById('lem-horario').value = cfg.horario || '';
   document.getElementById('lem-msg').value = cfg.msg || 'Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Itatiba. Agradecemos a sua confianca e pontualidade. Ate breve! 🚌';
   // Lembretes section only shows config now - comprovante is in Pagamentos
   var el = document.getElementById('lem-pax-list');
@@ -1608,7 +1660,7 @@ function gerarComprovantePDF(id) {
     + '.print-btn{display:block;width:100%;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px}'
     + '@media print{.print-btn{display:none}}'
     + '</style></head><body>'
-    + '<div class="header"><h1>🚌 Transporte Jardim do Vale</h1><p>Congresso Itatiba SP · Comprovante de Pagamento</p></div>'
+    + '<div class="header"><h1>🚌 Transporte ' + getOrgName() + '</h1><p>' + (getEventoConfig().nome || 'Congresso Itatiba SP') + ' · Comprovante de Pagamento</p></div>'
     + '<div class="grid">'
     + '<div class="field"><label>Passageiro</label><span>' + (p.nome || '') + '</span></div>'
     + '<div class="field"><label>Dias de Viagem</label><span>' + diasLabel + '</span></div>'
@@ -1886,7 +1938,7 @@ function savePw() {
   if (!nova || nova.length < 4) { showToast('Nova senha muito curta'); return; }
   if (nova !== confirm) { showToast('Senhas não conferem'); return; }
   ADMINS[currentAdmin] = nova;
-  sbConfigUpsert('pw_' + currentAdmin, nova).catch(function(){});
+  persistAdminsList();
   closeModal('pw-modal');
   addLog('Senha alterada por ' + currentAdmin);
   showToast('Senha alterada com sucesso!');
@@ -1909,6 +1961,29 @@ function sbConfigUpsert(key, value) {
 }
 
 function loadAdminPasswords() {
+  sbFetch('config?select=key,value&key=eq.admins_list', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].value) {
+        try {
+          var list = JSON.parse(rows[0].value);
+          if (Array.isArray(list) && list.length) {
+            ADMINS = {}; ADMIN_NAMES = {};
+            for (var i = 0; i < list.length; i++) {
+              ADMINS[list[i].username] = list[i].password;
+              ADMIN_NAMES[list[i].username] = list[i].nome || list[i].username;
+            }
+            return;
+          }
+        } catch (e) {}
+      }
+      // Ainda não existe admins_list — busca as chaves antigas (compatibilidade)
+      loadLegacyAdminKeys();
+    })
+    .catch(function() { loadLegacyAdminKeys(); });
+}
+
+function loadLegacyAdminKeys() {
   sbFetch('config?select=key,value&key=in.(pw_jesus2025,pw_sergio2025,pw_capitao,capitao_nome)', 'GET')
     .then(function(r) { return r.ok ? r.json() : []; })
     .then(function(rows) {
@@ -1932,6 +2007,74 @@ function loadAdminPasswords() {
       }
     })
     .catch(function() {});
+}
+
+function persistAdminsList() {
+  var list = [];
+  for (var user in ADMINS) {
+    if (ADMINS.hasOwnProperty(user)) {
+      list.push({ username: user, password: ADMINS[user], nome: ADMIN_NAMES[user] || user });
+    }
+  }
+  sbConfigUpsert('admins_list', JSON.stringify(list)).catch(function() {});
+}
+
+function renderAdminsList() {
+  var box = document.getElementById('admins-list');
+  if (!box) return;
+  var html = '';
+  for (var user in ADMINS) {
+    if (!ADMINS.hasOwnProperty(user)) continue;
+    var isMe = user === currentAdmin;
+    html += '<div class="ponto-row">'
+      + '<input class="ponto-num" style="width:auto;flex:1;text-align:left;padding-left:10px" type="text" value="' + escHtml(ADMIN_NAMES[user] || user) + '" data-user="' + escHtml(user) + '" onchange="renameAdmin(this)">'
+      + '<button type="button" class="ponto-rm" onclick="removeAdmin(\'' + escHtml(user) + '\')"' + (isMe ? ' disabled title="Não é possível remover a si mesmo"' : '') + '>✕</button>'
+      + '</div>'
+      + '<div style="font-size:10.5px;color:#94a3b8;margin:-4px 0 10px 4px">Usuário: ' + escHtml(user) + (isMe ? ' (você)' : '') + '</div>';
+  }
+  box.innerHTML = html;
+}
+
+function renameAdmin(inp) {
+  var user = inp.getAttribute('data-user');
+  var novoNome = inp.value.trim();
+  if (!novoNome) { inp.value = ADMIN_NAMES[user] || user; return; }
+  ADMIN_NAMES[user] = novoNome;
+  persistAdminsList();
+  if (user === currentAdmin) setText('admin-user-badge', '👤 ' + novoNome);
+  addLog('Nome do admin "' + user + '" alterado para "' + novoNome + '"');
+  showToast('✅ Nome atualizado!');
+}
+
+function removeAdmin(user) {
+  if (user === currentAdmin) { showToast('Não é possível remover o admin com a sessão ativa'); return; }
+  var totalAdmins = Object.keys(ADMINS).length;
+  if (totalAdmins <= 1) { showToast('Precisa existir pelo menos 1 administrador'); return; }
+  if (!confirm('Remover o acesso de "' + (ADMIN_NAMES[user] || user) + '"? Ele não poderá mais entrar no painel.')) return;
+  delete ADMINS[user];
+  delete ADMIN_NAMES[user];
+  persistAdminsList();
+  renderAdminsList();
+  addLog('Administrador removido: ' + user + ' por ' + (currentAdmin || ''));
+  showToast('✅ Administrador removido!');
+}
+
+function addAdmin() {
+  var user = (document.getElementById('new-admin-user').value || '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+  var nome = (document.getElementById('new-admin-nome').value || '').trim();
+  var pw = document.getElementById('new-admin-pw').value;
+  if (!user || user.length < 3) { showToast('Usuário inválido (mín. 3 caracteres, sem espaços/acentos)'); return; }
+  if (ADMINS.hasOwnProperty(user)) { showToast('Esse usuário já existe'); return; }
+  if (!pw || pw.length < 4) { showToast('Senha muito curta (mínimo 4 caracteres)'); return; }
+  ADMINS[user] = pw;
+  ADMIN_NAMES[user] = nome || user;
+  persistAdminsList();
+  renderAdminsList();
+  document.getElementById('new-admin-user').value = '';
+  document.getElementById('new-admin-nome').value = '';
+  document.getElementById('new-admin-pw').value = '';
+  addLog('Novo administrador criado: ' + user + ' por ' + (currentAdmin || ''));
+  showToast('✅ Administrador adicionado!');
 }
 
 /* ═══════════════════════════════════════════
@@ -2154,7 +2297,7 @@ function doAdminLogin() {
   document.getElementById('public-login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('public-screen').style.display = 'none';
-  var displayName = found === 'jesus2025' ? 'Jesús' : found === 'sergio2025' ? 'Sergio' : found;
+  var displayName = ADMIN_NAMES[found] || found;
 setText('admin-user-badge', '👤 ' + displayName);
   loadAllData();
   loadPayConfig();
@@ -2226,7 +2369,7 @@ function showSection(name) {
   if (name === 'passageiros') renderPaxList();
   if (name === 'pagamentos') { loadPayConfig(); renderPayList(); }
   if (name === 'lembretes') { loadLemConfig(); renderLemList(); }
-  if (name === 'config') { loadEventoConfig(); loadCbConfig(); }
+  if (name === 'config') { loadEventoConfig(); loadCbConfig(); renderAdminsList(); }
   if (name === 'encarregado') { loadCapitaoConfigPanel(); }
   if (name === 'onibus') { loadOnibusConfig(); loadPontosConfigPanel(); }
 }
@@ -2297,6 +2440,7 @@ function saveOnibusConfig() {
   var cfg = {
     empresa: document.getElementById('onibus-empresa').value,
     numero: document.getElementById('onibus-numero').value,
+    horario: document.getElementById('onibus-horario').value,
     instrucoes: document.getElementById('onibus-instrucoes').value
   };
   localStorage.setItem('tr_onibus_config', JSON.stringify(cfg));
@@ -2307,6 +2451,7 @@ function loadOnibusConfig() {
   var cfg = getOnibusConfig();
   document.getElementById('onibus-empresa').value = cfg.empresa || '';
   document.getElementById('onibus-numero').value = cfg.numero || '';
+  document.getElementById('onibus-horario').value = cfg.horario || '';
   document.getElementById('onibus-instrucoes').value = cfg.instrucoes || '';
 }
 
@@ -2677,7 +2822,7 @@ function generateRelatorioPDF() {
   function desenharCabecalho(comTotais) {
     var y = 16;
     doc.setFontSize(14); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 58, 95);
-    doc.text('Transporte Jardim do Vale', pageW / 2, y, { align: 'center' }); y += 6;
+    doc.text('Transporte ' + getOrgName(), pageW / 2, y, { align: 'center' }); y += 6;
     doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(0);
     doc.text('Relatório de Passageiros por Dia de Viagem · ' + (data.evento.nome || 'Congresso Itatiba SP'), pageW / 2, y, { align: 'center' }); y += 5;
     doc.setFontSize(8.5); doc.setTextColor(120);
@@ -2687,6 +2832,7 @@ function generateRelatorioPDF() {
     var infoLine = [];
     if (onibus.empresa) infoLine.push('Empresa de ônibus: ' + onibus.empresa);
     if (onibus.numero) infoLine.push('Número do ônibus: ' + onibus.numero);
+    if (onibus.horario) infoLine.push('Horário de saída: ' + onibus.horario);
     if (capitao.nome) infoLine.push('Encarregado: ' + capitao.nome);
     if (infoLine.length) {
       doc.setFontSize(9); doc.setFont(undefined, 'normal');
@@ -2798,7 +2944,7 @@ function generateRelatorioExcel() {
   var onibus = getOnibusConfig();
   var capitao = getCapitaoConfig();
   var wb = new ExcelJS.Workbook();
-  wb.creator = 'Transporte Jardim do Vale';
+  wb.creator = 'Transporte ' + getOrgName();
   wb.created = new Date();
 
   var headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A5F' } };
@@ -2821,7 +2967,7 @@ function generateRelatorioExcel() {
     ws.getCell('A1').alignment = { horizontal: 'center' };
     ws.getRow(1).height = 22;
 
-    ws.mergeCells('A2:C2'); ws.getCell('A2').value = 'Congregação: Jardim do Vale';
+    ws.mergeCells('A2:C2'); ws.getCell('A2').value = 'Congregação: ' + getOrgName();
     ws.mergeCells('D2:F2'); ws.getCell('D2').value = 'Dia: ' + dday.label + '   ·   Data: ' + dday.date;
     ws.getRow(2).font = subFont;
 
@@ -2832,6 +2978,9 @@ function generateRelatorioExcel() {
     ws.mergeCells('D3:E3'); ws.getCell('D3').value = 'Encarregado: ' + (capitao.nome || '—');
     ws.getCell('F3').value = 'Lugares: ' + totalSeatsDay;
     ws.getRow(3).font = subFont;
+
+    ws.mergeCells('A4:C4'); ws.getCell('A4').value = 'Horário de saída: ' + (onibus.horario || '—');
+    ws.getRow(4).font = subFont;
 
     ws.addRow([]);
     var headRow = ws.addRow(['N°', 'Nome Completo', 'Documento', 'Telefone', 'Assentos', 'Ponto']);
@@ -2873,7 +3022,7 @@ function generateRelatorioExcel() {
       }
     }
 
-    ws.views = [{ state: 'frozen', ySplit: 6 }];
+    ws.views = [{ state: 'frozen', ySplit: 7 }];
   }
 
   wb.xlsx.writeBuffer().then(function(buf) {
@@ -2895,7 +3044,6 @@ function getLemConfig() {
 }
 function saveLemConfig() {
   var cfg = {
-    horario: document.getElementById('lem-horario').value,
     msg: document.getElementById('lem-msg').value
   };
   localStorage.setItem('tr_lem_config', JSON.stringify(cfg));
@@ -2904,7 +3052,6 @@ function saveLemConfig() {
 }
 function loadLemConfig() {
   var cfg = getLemConfig();
-  document.getElementById('lem-horario').value = cfg.horario || '';
   document.getElementById('lem-msg').value = cfg.msg || 'Confirmamos o recebimento do seu pagamento referente ao transporte para o Congresso Regional de Itatiba. Que Jeová abençoe sua participação! Agradecemos a sua confiança e pontualidade. Até breve no ônibus! 🚌💛';
 }
 
@@ -2976,7 +3123,7 @@ function exportRelatorio() {
     rows += '<tr><td>'+(i+1)+'</td><td>'+escHtml(p.nome||'')+'</td><td>'+docStr+'</td><td>'+escHtml(p.tel||'')+'</td><td>'+getDiasLabel(p)+'</td><td>'+seats+'</td><td>R$'+valor.toFixed(2)+'</td><td style="color:'+color+';font-weight:700">'+status+'</td></tr>';
   }
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Transporte</title><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:13px}th{background:#1e3a5f;color:#fff}</style></head><body>'
-    + '<h2>Transporte Jardim do Vale · Relatório</h2>'
+    + '<h2>Transporte ' + getOrgName() + ' · Relatório</h2>'
     + '<p>Total: '+allPax.length+' passageiros · A receber: R$'+totalValor.toFixed(2)+' · Recebido: R$'+totalRecebido.toFixed(2)+'</p>'
     + '<table><thead><tr><th>#</th><th>Nome</th><th>Doc</th><th>Tel</th><th>Dias</th><th>Assentos</th><th>Valor</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>'
     + '<button onclick="window.print()" style="margin-top:16px;padding:10px 20px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Imprimir</button>'
@@ -3142,6 +3289,7 @@ document.getElementById('login-pw').addEventListener('keydown', function(e) {
 window.addEventListener('load', function() {
   renderDayButtons();
   hideInfo();
+  applyEventoConfig();
   loadAdminPasswords();
   loadPontosConfigFromServer();
   var isCapitao = /[?&]capitao=1/.test(window.location.search);
@@ -3277,6 +3425,9 @@ window.switchPontosDay = switchPontosDay;
 window.buildPontoOptionsHtml = buildPontoOptionsHtml;
 window.quickSetPonto = quickSetPonto;
 window.toggleAccordion = toggleAccordion;
+window.renameAdmin = renameAdmin;
+window.removeAdmin = removeAdmin;
+window.addAdmin = addAdmin;
 
 /* ═══════════════════════════════════════════
    CHATBOT OPCIONAL — réplica visual do WhatsApp
@@ -3438,7 +3589,7 @@ var __cbInp = document.getElementById('cb-text-input');
 if (__cbInp) __cbInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') cbSendTyped(); });
 
 function cbStepInicio() {
-  cbBotSay('Olá! 👋 Sou o assistente virtual do Transporte Jardim do Vale.', function() {
+  cbBotSay('Olá! 👋 Sou o assistente virtual do Transporte ' + getOrgName() + '.', function() {
     cbBotSay('Você deseja fazer seu cadastro ou precisa de alguma informação?', function() {
       cbOptions([
         { label: '📋 Fazer meu cadastro', action: cbStepNome },
