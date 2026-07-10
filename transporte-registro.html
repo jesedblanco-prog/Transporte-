@@ -364,7 +364,7 @@ input,select,textarea{font-family:inherit;outline:none}
   <div class="admin-topbar">
     <div class="admin-topbar-left">
       <div class="admin-bus-icon">🎙️</div>
-      <h1>Painel do Encarregado</h1>
+      <h1 id="capitao-greeting">Painel do Encarregado</h1>
     </div>
     <div class="admin-topbar-right">
       <button class="btn-logout" onclick="doCapitaoLogout()">Sair 🚪</button>
@@ -372,6 +372,21 @@ input,select,textarea{font-family:inherit;outline:none}
   </div>
   <div style="padding:16px">
     <div class="access-tabs" id="capitao-day-tabs"></div>
+    <div id="capitao-summary" style="background:#f0f4ff;border:1.5px solid #dbe4ff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12.5px;color:#334155;font-weight:600;line-height:1.5"></div>
+    <div id="capitao-instrucoes" style="background:#fffbeb;border:1.5px solid #f0d789;border-radius:10px;padding:10px 12px;margin-bottom:10px;display:none">
+      <div style="font-size:11.5px;font-weight:800;color:#8a6d1f;margin-bottom:4px">📋 Instruções do Capitão</div>
+      <div id="capitao-instrucoes-text" style="font-size:12.5px;color:#57501f;line-height:1.4"></div>
+    </div>
+    <div id="capitao-pontos-lista" style="background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:none">
+      <div style="font-size:11.5px;font-weight:800;color:#1e3a5f;margin-bottom:6px">📍 Pontos de Encontro deste dia</div>
+      <div id="capitao-pontos-lista-text" style="font-size:12px;color:#475569;line-height:1.6"></div>
+    </div>
+    <div style="display:flex;align-items:center;background:#fff;border:2px solid #e2e8f0;border-radius:10px;padding:9px 12px;margin-bottom:10px;gap:8px">
+      <span style="color:#94a3b8;font-size:14px">🔍</span>
+      <input id="capitao-search" type="text" placeholder="Buscar passageiro pelo nome..." oninput="renderCapitaoList()" style="border:none;outline:none;flex:1;font-size:13.5px;background:transparent">
+    </div>
+    <div class="access-tabs" id="capitao-ponto-filters" style="margin-bottom:14px"></div>
+    <div id="capitao-count" style="font-size:11px;color:#94a3b8;margin-bottom:10px;font-weight:600"></div>
     <div id="capitao-list"></div>
   </div>
 </div>
@@ -2444,8 +2459,22 @@ function saveOnibusConfig() {
     instrucoes: document.getElementById('onibus-instrucoes').value
   };
   localStorage.setItem('tr_onibus_config', JSON.stringify(cfg));
+  sbConfigUpsert('onibus_config', JSON.stringify(cfg)).catch(function() {});
   addLog('Dados do ônibus salvos por ' + (currentAdmin || ''));
   showToast('✅ Dados do ônibus salvos!');
+}
+function loadOnibusConfigFromServer() {
+  sbFetch('config?select=value&key=eq.onibus_config', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].value) {
+        try {
+          var cfg = JSON.parse(rows[0].value);
+          if (cfg && typeof cfg === 'object') localStorage.setItem('tr_onibus_config', JSON.stringify(cfg));
+        } catch (e) {}
+      }
+    })
+    .catch(function() {});
 }
 function loadOnibusConfig() {
   var cfg = getOnibusConfig();
@@ -2540,13 +2569,18 @@ function showCapitaoGate() {
 function showCapitaoScreen() {
   document.getElementById('capitao-login-screen').style.display = 'none';
   document.getElementById('capitao-screen').style.display = 'block';
+  var capitao = getCapitaoConfig();
+  var greetEl = document.getElementById('capitao-greeting');
+  if (greetEl) greetEl.textContent = capitao.nome ? ('Olá, ' + capitao.nome + ' 👋') : 'Painel do Encarregado';
   loadCapitaoData();
   if (capitaoRefreshTimer) clearInterval(capitaoRefreshTimer);
   capitaoRefreshTimer = setInterval(loadCapitaoData, 10000);
 }
 
 function loadCapitaoData() {
-  sbGet('pasajeros', 'select=nome,tel,dias,dia,seats_needed,ponto&order=nome.asc')
+  loadOnibusConfigFromServer();
+  loadPontosConfigFromServer();
+  sbGet('pasajeros', 'select=nome,tel,dias,dia,seats_needed,ponto,rg,cpf,rnm,doc_type&order=nome.asc')
     .then(function(r) {
       if (!r.ok) {
         // Coluna "ponto" pode não existir ainda no Supabase — tenta sem ela
@@ -2557,6 +2591,8 @@ function loadCapitaoData() {
     .then(function(data) {
       capitaoPax = Array.isArray(data) ? data : [];
       renderCapitaoDayTabs();
+      renderCapitaoSummary();
+      renderCapitaoPontoFilters();
       renderCapitaoList();
     })
     .catch(function() {});
@@ -2576,7 +2612,80 @@ function renderCapitaoDayTabs() {
 
 function setCapitaoDay(key) {
   capitaoDayActive = key;
+  capitaoPontoFilter = 'todos';
   renderCapitaoDayTabs();
+  renderCapitaoSummary();
+  renderCapitaoPontoFilters();
+  renderCapitaoList();
+}
+
+var capitaoPontoFilter = 'todos';
+
+function getCapitaoDayPax() {
+  var pax = [];
+  for (var i = 0; i < capitaoPax.length; i++) {
+    var p = capitaoPax[i];
+    var dias = parseDias(p.dias || p.dia);
+    for (var j = 0; j < dias.length; j++) {
+      if (normalizeDayKey(dias[j]) === capitaoDayActive) { pax.push(p); break; }
+    }
+  }
+  return pax;
+}
+
+function renderCapitaoSummary() {
+  var box = document.getElementById('capitao-summary');
+  if (!box) return;
+  var onibus = getOnibusConfig();
+  var dayPax = getCapitaoDayPax();
+  var linha1 = [];
+  if (onibus.empresa) linha1.push(escHtml(onibus.empresa));
+  if (onibus.numero) linha1.push('Nº ' + escHtml(onibus.numero));
+  if (onibus.horario) linha1.push('Saída ' + escHtml(onibus.horario));
+  var html = '';
+  if (linha1.length) html += '🚌 ' + linha1.join(' · ') + '<br>';
+  html += 'Total neste dia: ' + dayPax.length + ' passageiro(s)';
+  box.innerHTML = html;
+
+  var instrBox = document.getElementById('capitao-instrucoes');
+  var instrText = document.getElementById('capitao-instrucoes-text');
+  if (onibus.instrucoes) {
+    instrBox.style.display = 'block';
+    instrText.textContent = onibus.instrucoes;
+  } else {
+    instrBox.style.display = 'none';
+  }
+
+  var pontosDia = getPontosForDay(capitaoDayActive);
+  var pontosBox = document.getElementById('capitao-pontos-lista');
+  var pontosText = document.getElementById('capitao-pontos-lista-text');
+  if (pontosDia.length) {
+    pontosBox.style.display = 'block';
+    var htmlP = '';
+    for (var k = 0; k < pontosDia.length; k++) {
+      htmlP += '<div>📍 Ponto ' + escHtml(String(pontosDia[k].numero)) + ' — ' + escHtml(pontosDia[k].endereco || 'sem endereço') + '</div>';
+    }
+    pontosText.innerHTML = htmlP;
+  } else {
+    pontosBox.style.display = 'none';
+  }
+}
+
+function renderCapitaoPontoFilters() {
+  var box = document.getElementById('capitao-ponto-filters');
+  if (!box) return;
+  var pontosDia = getPontosForDay(capitaoDayActive);
+  var html = '<button type="button" class="access-tab' + (capitaoPontoFilter === 'todos' ? ' active' : '') + '" onclick="setCapitaoPontoFilter(\'todos\')">Todos</button>';
+  for (var i = 0; i < pontosDia.length; i++) {
+    var num = String(pontosDia[i].numero);
+    html += '<button type="button" class="access-tab' + (capitaoPontoFilter === num ? ' active' : '') + '" onclick="setCapitaoPontoFilter(\'' + escHtml(num) + '\')">📍 ' + escHtml(num) + '</button>';
+  }
+  box.innerHTML = html;
+}
+
+function setCapitaoPontoFilter(val) {
+  capitaoPontoFilter = val;
+  renderCapitaoPontoFilters();
   renderCapitaoList();
 }
 
@@ -2719,18 +2828,23 @@ function loadPontosConfigFromServer() {
 function renderCapitaoList() {
   var list = document.getElementById('capitao-list');
   if (!list) return;
-  var pax = [];
-  for (var i = 0; i < capitaoPax.length; i++) {
-    var p = capitaoPax[i];
-    var dias = parseDias(p.dias || p.dia);
-    for (var j = 0; j < dias.length; j++) {
-      if (normalizeDayKey(dias[j]) === capitaoDayActive) { pax.push(p); break; }
-    }
+  var pax = getCapitaoDayPax();
+
+  var termo = (document.getElementById('capitao-search').value || '').toLowerCase().trim();
+  if (termo) {
+    pax = pax.filter(function(p) { return (p.nome || '').toLowerCase().indexOf(termo) !== -1; });
   }
+  if (capitaoPontoFilter !== 'todos') {
+    pax = pax.filter(function(p) { return String(p.ponto || '') === capitaoPontoFilter; });
+  }
+
   pax.sort(function(a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
 
+  var countEl = document.getElementById('capitao-count');
+  if (countEl) countEl.textContent = pax.length + ' passageiro(s)';
+
   if (!pax.length) {
-    list.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:20px">Nenhum passageiro neste dia.</p>';
+    list.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:20px">Nenhum passageiro encontrado.</p>';
     return;
   }
 
@@ -2739,8 +2853,11 @@ function renderCapitaoList() {
     var p = pax[i];
     var seats = parseInt(p.seats_needed) || 1;
     var tel = normalizeTelBR(p.tel);
+    var docLine = getDocPlain(p);
     html += '<div class="capitao-row">'
-      + '<div><div class="capitao-row-name">' + escHtml(p.nome || '') + '</div><div class="capitao-row-seats">' + seats + ' assento(s)' + (p.ponto != null && p.ponto !== '' ? ' · Ponto ' + escHtml(String(p.ponto)) : '') + '</div></div>'
+      + '<div><div class="capitao-row-name">' + escHtml(p.nome || '') + '</div>'
+      + (p.ponto != null && p.ponto !== '' ? '<div class="capitao-row-ponto" style="font-size:11px;color:#8a6d1f;margin-top:2px;font-weight:600">📍 Ponto ' + escHtml(String(p.ponto)) + '</div>' : '')
+      + '<div class="capitao-row-seats">' + seats + ' assento(s)' + (docLine !== '—' ? ' · ' + escHtml(docLine) : '') + '</div></div>'
       + '<div class="capitao-row-actions">'
       + (tel ? '<a class="capitao-btn call" href="tel:+' + tel + '">📞</a>' : '')
       + (tel ? '<a class="capitao-btn wa" href="https://wa.me/' + tel + '" target="_blank" rel="noopener">💬</a>' : '')
@@ -2841,11 +2958,10 @@ function generateRelatorioPDF() {
     }
 
     if (comTotais) {
-      doc.setFillColor(240, 244, 255); doc.rect(14, y - 4, pageW - 28, 16, 'F');
+      doc.setFillColor(240, 244, 255); doc.rect(14, y - 4, pageW - 28, 10, 'F');
       doc.setFontSize(9); doc.setFont(undefined, 'normal');
       doc.text('Total de passageiros: ' + data.totalPassageiros + '     Total de assentos: ' + data.totalAssentos, 17, y + 1);
-      doc.text('Total previsto: R$' + data.totalPrevisto.toFixed(2).replace('.', ',') + '     Total recebido: R$' + data.totalRecebido.toFixed(2).replace('.', ',') + '     Total pendente: R$' + data.totalPendente.toFixed(2).replace('.', ','), 17, y + 7);
-      y += 24;
+      y += 16;
     } else {
       y += 6;
     }
@@ -3292,6 +3408,7 @@ window.addEventListener('load', function() {
   applyEventoConfig();
   loadAdminPasswords();
   loadPontosConfigFromServer();
+  loadOnibusConfigFromServer();
   var isCapitao = /[?&]capitao=1/.test(window.location.search);
   setTimeout(function() {
     document.getElementById('loading-screen').style.display = 'none';
@@ -3418,6 +3535,7 @@ window.doCapitaoLogout = doCapitaoLogout;
 window.saveCapitaoConfig = saveCapitaoConfig;
 window.copyCapitaoLink = copyCapitaoLink;
 window.setCapitaoDay = setCapitaoDay;
+window.setCapitaoPontoFilter = setCapitaoPontoFilter;
 window.addPontoRow = addPontoRow;
 window.removePontoRow = removePontoRow;
 window.savePontosConfig = savePontosConfig;
