@@ -3923,9 +3923,11 @@ function cbStepInfoMenu() {
         var contatos = getContatosConfig();
         var t;
         if (contatos.length) {
-          var linhas = ['Você pode chamar:'];
+          var linhas = ['Você pode chamar:', ''];
           for (var c = 0; c < contatos.length; c++) {
-            linhas.push(contatos[c].nome + ' — ' + contatos[c].telefone);
+            linhas.push(contatos[c].nome + ':');
+            linhas.push('📞 ' + contatos[c].telefone);
+            if (c < contatos.length - 1) linhas.push('');
           }
           t = linhas.join('\n');
         } else {
