@@ -50,9 +50,10 @@ input,select,textarea{font-family:inherit;outline:none}
 .ponto-row .ponto-num{width:44px;flex-shrink:0;padding:11px 4px;border:2px solid #e2e8f0;border-radius:9px;text-align:center;font-weight:700;font-size:14px;background:#f8fafc;color:#475569}
 .ponto-row .ponto-end{flex:1;padding:11px 12px;border:2px solid #e2e8f0;border-radius:9px;font-size:13px}
 .ponto-row .ponto-rm{width:38px;flex-shrink:0;border-radius:9px;background:#fef2f2;color:#dc2626;font-size:16px}
-.pax-ponto-row{display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:8px}
+.pax-ponto-row{display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:8px;min-width:0}
+.pax-ponto-row label{flex-shrink:0}
 .pax-ponto-row label{font-size:11.5px;color:#64748b;font-weight:600;flex-shrink:0}
-.pax-ponto-select{flex:1;padding:7px 8px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12.5px;background:#f8fafc;color:#1e293b}
+.pax-ponto-select{flex:1;min-width:0;max-width:100%;padding:7px 8px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12.5px;background:#f8fafc;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ACCORDION (Config) */
 .accordion-item{background:#fff;border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
@@ -832,28 +833,6 @@ input,select,textarea{font-family:inherit;outline:none}
           <div>
             <div class="config-label">Alterar senha</div>
             <div class="config-sub">Atualize sua senha de administrador</div>
-          </div>
-        </div>
-        <div class="config-arrow">›</div>
-      </div>
-
-      <div class="config-item" onclick="exportRelatorio()">
-        <div class="config-item-left">
-          <div class="config-icon config-icon-green">📤</div>
-          <div>
-            <div class="config-label">Exportar Relatório HTML</div>
-            <div class="config-sub">Lista completa com pagamentos</div>
-          </div>
-        </div>
-        <div class="config-arrow">›</div>
-      </div>
-
-      <div class="config-item" onclick="exportCSV()">
-        <div class="config-item-left">
-          <div class="config-icon config-icon-green">📊</div>
-          <div>
-            <div class="config-label">Baixar Excel (CSV)</div>
-            <div class="config-sub">Arquivo para abrir no Excel</div>
           </div>
         </div>
         <div class="config-arrow">›</div>
