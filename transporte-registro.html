@@ -731,26 +731,36 @@ input,select,textarea{font-family:inherit;outline:none}
       <div class="section-title">📲 Lembretes</div>
       <div class="section-sub">Comprovantes de pagamento</div>
 
-      <div class="card">
-        <div class="card-title">⚙️ Configuração do lembrete</div>
+      <div class="accordion-item" id="acc-lem-msg">
+        <div class="accordion-header" onclick="toggleAccordion('acc-lem-msg')">
+          <span>⚙️ Configuração do lembrete</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
         <div class="form-group">
           <label>Mensagem comprovante (editável)</label>
           <textarea id="lem-msg" rows="3"></textarea>
         </div>
         <button class="btn-primary" onclick="saveLemConfig()">💾 Salvar configuração</button>
+        </div></div>
       </div>
 
-      <div class="card">
-        <div class="card-title">👶 Regras para Crianças (Geral)</div>
+      <div class="accordion-item" id="acc-lem-regras">
+        <div class="accordion-header" onclick="toggleAccordion('acc-lem-regras')">
+          <span>👶 Regras para Crianças (Geral)</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
         <p style="font-size:13px;color:#64748b;margin-bottom:12px">Opcional. Se deixar em branco, o chatbot não oferece essa opção aos passageiros.</p>
         <div class="form-group">
           <label>Regras (Geral)</label>
           <textarea id="lem-regras-geral" rows="4" placeholder="Ex: Menores de 16 anos não acompanhados precisam de autorização por escrito..."></textarea>
         </div>
         <button class="btn-primary" onclick="saveLemConfig()">💾 Salvar configuração</button>
+        </div></div>
       </div>
 
-      <div class="card">
+      <div class="card" style="margin-top:4px">
         <div class="card-title">✅ Passageiros pagos — enviar comprovante</div>
         <div id="lem-pax-list"></div>
       </div>
@@ -940,7 +950,12 @@ input,select,textarea{font-family:inherit;outline:none}
     <div style="padding:16px">
       <div class="section-title">🚌 Dados do Ônibus</div>
       <div class="section-sub">Usados no relatório de passageiros por dia</div>
-      <div class="card" style="margin-bottom:12px">
+      <div class="accordion-item" id="acc-onibus-dados">
+        <div class="accordion-header" onclick="toggleAccordion('acc-onibus-dados')">
+          <span>🚌 Dados do Ônibus</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
         <div class="form-group">
           <label>Empresa de Ônibus</label>
           <input type="text" id="onibus-empresa" placeholder="Ex: Viação Exemplo">
@@ -958,15 +973,21 @@ input,select,textarea{font-family:inherit;outline:none}
           <textarea id="onibus-instrucoes" rows="3" placeholder="Instruções para o capitão do ônibus..."></textarea>
         </div>
         <button class="btn-primary" onclick="saveOnibusConfig()">💾 Salvar dados do ônibus</button>
+        </div></div>
       </div>
 
-      <div class="card">
-        <div class="card-title">📍 Pontos de Encontro</div>
+      <div class="accordion-item" id="acc-onibus-pontos">
+        <div class="accordion-header" onclick="toggleAccordion('acc-onibus-pontos')">
+          <span>📍 Pontos de Encontro</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
         <p style="font-size:13px;color:#64748b;margin-bottom:12px">Cadastre os pontos onde o ônibus vai parar. Edite por dia — se um ponto muda de lugar num dia específico, ajuste só naquele dia.</p>
         <div class="access-tabs" id="pontos-day-tabs" style="margin-bottom:12px"></div>
         <div id="pontos-list"></div>
         <button class="btn-secondary" style="margin-bottom:10px;width:100%" onclick="addPontoRow()">➕ Adicionar ponto</button>
         <button class="btn-primary" onclick="savePontosConfig()">💾 Salvar pontos de encontro</button>
+        </div></div>
       </div>
     </div>
   </div>
@@ -2392,9 +2413,10 @@ function toggleCapitaoPontos() {
 }
 
 function toggleAccordion(id) {
-  var items = document.querySelectorAll('#sec-config .accordion-item');
   var target = document.getElementById(id);
   if (!target) return;
+  var scope = target.closest('.admin-section') || document;
+  var items = scope.querySelectorAll('.accordion-item');
   var wasOpen = target.className.indexOf('open') !== -1;
   for (var i = 0; i < items.length; i++) {
     items[i].className = items[i].className.replace(' open', '');
