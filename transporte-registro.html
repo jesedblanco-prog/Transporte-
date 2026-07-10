@@ -55,6 +55,12 @@ input,select,textarea{font-family:inherit;outline:none}
 .pax-ponto-row label{font-size:11.5px;color:#64748b;font-weight:600;flex-shrink:0}
 .pax-ponto-select{flex:1;min-width:0;max-width:100%;padding:7px 8px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12.5px;background:#f8fafc;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+/* CAPITAO FILTER ROWS */
+.cap-filter-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.cap-filter-chip{flex:1;min-width:64px;text-align:center;padding:9px 4px;border-radius:9px;font-size:11.5px;font-weight:700;background:#e8edf7;color:#64748b;border:none}
+.cap-filter-chip.active{background:#1e3a5f;color:#fff}
+.cap-filter-chip.ponto.active{background:#c9a227;color:#1e1a0a}
+
 /* ACCORDION (Config) */
 .accordion-item{background:#fff;border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
 .accordion-header{display:flex;align-items:center;justify-content:space-between;padding:15px 16px;cursor:pointer;font-weight:700;font-size:14px;color:#1e293b}
@@ -383,10 +389,10 @@ input,select,textarea{font-family:inherit;outline:none}
   </div>
   <div style="padding:16px">
     <div id="capitao-summary" style="background:#f0f4ff;border:1.5px solid #dbe4ff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12.5px;color:#334155;font-weight:600;line-height:1.5"></div>
-    <div id="capitao-instrucoes" style="background:linear-gradient(135deg,#1e3a5f,#142c47);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(30,58,95,0.25);display:none">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#c9a227,#b8860b);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">📋</div>
-        <div style="font-size:14px;font-weight:800;color:#fff">Instruções do Capitão</div>
+    <div id="capitao-instrucoes" style="background:linear-gradient(135deg,#1e3a5f,#142c47);border-radius:12px;padding:8px 10px;margin-bottom:10px;display:none">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+        <div style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#c9a227,#b8860b);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">📋</div>
+        <div style="font-size:11px;font-weight:800;color:#fff">Instruções do Capitão</div>
       </div>
       <div id="capitao-instrucoes-text"></div>
     </div>
@@ -401,8 +407,8 @@ input,select,textarea{font-family:inherit;outline:none}
       <span style="color:#94a3b8;font-size:14px">🔍</span>
       <input id="capitao-search" type="text" placeholder="Buscar passageiro pelo nome..." oninput="renderCapitaoList()" style="border:none;outline:none;flex:1;font-size:13.5px;background:transparent">
     </div>
-    <div class="access-tabs" id="capitao-day-tabs" style="margin-bottom:10px"></div>
-    <div class="access-tabs" id="capitao-ponto-filters" style="margin-bottom:14px"></div>
+    <div class="cap-filter-row" id="capitao-day-tabs"></div>
+    <div class="cap-filter-row" id="capitao-ponto-filters"></div>
     <div id="capitao-count" style="font-size:11px;color:#94a3b8;margin-bottom:10px;font-weight:600"></div>
     <div id="capitao-list"></div>
   </div>
@@ -2718,10 +2724,10 @@ function renderCapitaoDayTabs() {
   var box = document.getElementById('capitao-day-tabs');
   if (!box) return;
   if (!capitaoDayActive && DAYS.length) capitaoDayActive = DAYS[0].key;
-  var html = '';
+  var html = '<button type="button" class="cap-filter-chip' + (capitaoDayActive === 'todos' ? ' active' : '') + '" onclick="setCapitaoDay(\'todos\')">Todos</button>';
   for (var i = 0; i < DAYS.length; i++) {
     var d = DAYS[i];
-    html += '<button type="button" class="access-tab' + (d.key === capitaoDayActive ? ' active' : '') + '" onclick="setCapitaoDay(\'' + d.key + '\')">' + escHtml(d.label) + '</button>';
+    html += '<button type="button" class="cap-filter-chip' + (d.key === capitaoDayActive ? ' active' : '') + '" onclick="setCapitaoDay(\'' + d.key + '\')">' + escHtml(d.label) + '</button>';
   }
   box.innerHTML = html;
 }
@@ -2738,6 +2744,7 @@ function setCapitaoDay(key) {
 var capitaoPontoFilter = 'todos';
 
 function getCapitaoDayPax() {
+  if (capitaoDayActive === 'todos') return capitaoPax.slice();
   var pax = [];
   for (var i = 0; i < capitaoPax.length; i++) {
     var p = capitaoPax[i];
@@ -2760,7 +2767,7 @@ function renderCapitaoSummary() {
   if (onibus.horario) linha1.push('Saída ' + escHtml(onibus.horario));
   var html = '';
   if (linha1.length) html += '🚌 ' + linha1.join(' · ') + '<br>';
-  html += 'Total neste dia: ' + dayPax.length + ' passageiro(s)';
+  html += (capitaoDayActive === 'todos' ? 'Total (todos os dias): ' : 'Total neste dia: ') + dayPax.length + ' passageiro(s)';
   box.innerHTML = html;
 
   var instrBox = document.getElementById('capitao-instrucoes');
@@ -2774,9 +2781,9 @@ function renderCapitaoSummary() {
     if (!itens.length) itens = [onibus.instrucoes];
     var htmlI = '';
     for (var ii = 0; ii < itens.length; ii++) {
-      htmlI += '<div style="display:flex;gap:10px;margin-bottom:' + (ii === itens.length - 1 ? '0' : '10px') + ';align-items:flex-start">'
-        + '<div style="width:22px;height:22px;border-radius:50%;background:#c9a227;color:#1e1a0a;font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">' + (ii + 1) + '</div>'
-        + '<div style="font-size:14px;color:#f0f4ff;line-height:1.5">' + escHtml(itens[ii]) + '</div>'
+      htmlI += '<div style="display:flex;gap:6px;margin-bottom:' + (ii === itens.length - 1 ? '0' : '4px') + ';align-items:flex-start">'
+        + '<div style="width:15px;height:15px;border-radius:50%;background:#c9a227;color:#1e1a0a;font-size:8.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">' + (ii + 1) + '</div>'
+        + '<div style="font-size:11.5px;color:#f0f4ff;line-height:1.4">' + escHtml(itens[ii]) + '</div>'
         + '</div>';
     }
     instrText.innerHTML = htmlI;
@@ -2784,38 +2791,43 @@ function renderCapitaoSummary() {
     instrBox.style.display = 'none';
   }
 
-  var pontosDia = getPontosForDay(capitaoDayActive);
   var pontosBox = document.getElementById('capitao-pontos-lista');
   var pontosText = document.getElementById('capitao-pontos-lista-text');
-  if (pontosDia.length) {
-    pontosBox.style.display = 'block';
-    var htmlP = '';
-    for (var k = 0; k < pontosDia.length; k++) {
-      htmlP += '<div style="background:#f8fafc;border-radius:8px;padding:12px 14px;margin-bottom:8px">'
-        + '<div style="font-size:15px;font-weight:800;color:#1e3a5f;margin-bottom:3px">Ponto ' + escHtml(String(pontosDia[k].numero)) + '</div>'
-        + '<div style="font-size:14px;color:#334155;line-height:1.4">' + escHtml(pontosDia[k].endereco || 'sem endereço') + '</div>'
-        + '</div>';
-    }
-    pontosText.innerHTML = htmlP;
-  } else {
+  if (capitaoDayActive === 'todos') {
     pontosBox.style.display = 'none';
+  } else {
+    var pontosDia = getPontosForDay(capitaoDayActive);
+    if (pontosDia.length) {
+      pontosBox.style.display = 'block';
+      var htmlP = '';
+      for (var k = 0; k < pontosDia.length; k++) {
+        htmlP += '<div style="background:#f8fafc;border-radius:8px;padding:12px 14px;margin-bottom:8px">'
+          + '<div style="font-size:15px;font-weight:800;color:#1e3a5f;margin-bottom:3px">Ponto ' + escHtml(String(pontosDia[k].numero)) + '</div>'
+          + '<div style="font-size:14px;color:#334155;line-height:1.4">' + escHtml(pontosDia[k].endereco || 'sem endereço') + '</div>'
+          + '</div>';
+      }
+      pontosText.innerHTML = htmlP;
+    } else {
+      pontosBox.style.display = 'none';
+    }
   }
 }
 
 function renderCapitaoPontoFilters() {
   var box = document.getElementById('capitao-ponto-filters');
   if (!box) return;
+  if (capitaoDayActive === 'todos') { box.innerHTML = ''; return; }
   var pontosDia = getPontosForDay(capitaoDayActive);
-  var html = '<button type="button" class="access-tab' + (capitaoPontoFilter === 'todos' ? ' active' : '') + '" onclick="setCapitaoPontoFilter(\'todos\')">Todos</button>';
+  var html = '';
   for (var i = 0; i < pontosDia.length; i++) {
     var num = String(pontosDia[i].numero);
-    html += '<button type="button" class="access-tab' + (capitaoPontoFilter === num ? ' active' : '') + '" onclick="setCapitaoPontoFilter(\'' + escHtml(num) + '\')">📍 ' + escHtml(num) + '</button>';
+    html += '<button type="button" class="cap-filter-chip ponto' + (capitaoPontoFilter === num ? ' active' : '') + '" onclick="setCapitaoPontoFilter(\'' + escHtml(num) + '\')">📍 ' + escHtml(num) + '</button>';
   }
   box.innerHTML = html;
 }
 
 function setCapitaoPontoFilter(val) {
-  capitaoPontoFilter = val;
+  capitaoPontoFilter = (capitaoPontoFilter === val) ? 'todos' : val;
   renderCapitaoPontoFilters();
   renderCapitaoList();
 }
