@@ -389,6 +389,8 @@ input,select,textarea{font-family:inherit;outline:none}
   </div>
   <div style="padding:16px">
     <div id="capitao-summary" style="background:#f0f4ff;border:1.5px solid #dbe4ff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12.5px;color:#334155;font-weight:600;line-height:1.5"></div>
+    <div id="capitao-anexo-box" style="display:none;margin-bottom:10px"></div>
+    <div id="capitao-encarregados-box" style="display:none;margin-bottom:10px"></div>
     <div id="capitao-instrucoes" style="background:linear-gradient(135deg,#1e3a5f,#142c47);border-radius:12px;padding:8px 10px;margin-bottom:10px;display:none">
       <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
         <div style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#c9a227,#b8860b);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">📋</div>
@@ -769,6 +771,19 @@ input,select,textarea{font-family:inherit;outline:none}
         </div></div>
       </div>
 
+      <div class="accordion-item" id="acc-lem-anexos">
+        <div class="accordion-header" onclick="toggleAccordion('acc-lem-anexos')">
+          <span>📎 Anexos para o Encarregado</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">PDF, Excel ou imagem (JPG/PNG) — o encarregado poderá visualizar ou baixar direto do link dele. Envie quantos precisar (máx. 10MB cada).</p>
+        <div id="capitao-anexos-lista"></div>
+        <input type="file" id="capitao-anexo-file" accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png" style="margin-bottom:10px;width:100%;font-size:12.5px">
+        <button class="btn-primary" onclick="uploadCapitaoAnexo()">📤 Enviar anexo</button>
+        </div></div>
+      </div>
+
       <div class="card" style="margin-top:4px">
         <div class="card-title">✅ Passageiros pagos — enviar comprovante</div>
         <div id="lem-pax-list"></div>
@@ -950,6 +965,27 @@ input,select,textarea{font-family:inherit;outline:none}
         </div>
         <button class="btn-primary" style="margin-bottom:8px" onclick="saveCapitaoConfig()">💾 Salvar</button>
         <button class="btn-primary" style="background:#25d366" onclick="copyCapitaoLink()">📋 Copiar link para o encarregado</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🧭 Encarregados do Ônibus</div>
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Lista de encarregados com telefone e organização — visível para o encarregado no link dele, com botão de ligar e WhatsApp.</p>
+        <div id="encarregados-list"></div>
+        <div style="border-top:1px solid #e2e8f0;margin:14px 0;padding-top:14px">
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="new-enc-nome" placeholder="Ex: Sergio Simonato">
+          </div>
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="text" id="new-enc-tel" placeholder="Ex: (11) 9 5910-6468">
+          </div>
+          <div class="form-group">
+            <label>Nome da Organização / Congregação</label>
+            <input type="text" id="new-enc-org" placeholder="Ex: Jardim do Vale">
+          </div>
+          <button class="btn-primary" onclick="addEncarregadoRoster()">➕ Adicionar encarregado</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2443,9 +2479,9 @@ function showSection(name) {
   }
   if (name === 'passageiros') renderPaxList();
   if (name === 'pagamentos') { loadPayConfig(); renderPayList(); }
-  if (name === 'lembretes') { loadLemConfig(); renderLemList(); }
+  if (name === 'lembretes') { loadLemConfig(); renderLemList(); loadCapitaoAnexoPanel(); }
   if (name === 'config') { loadEventoConfig(); loadCbConfig(); renderAdminsList(); }
-  if (name === 'encarregado') { loadCapitaoConfigPanel(); }
+  if (name === 'encarregado') { loadCapitaoConfigPanel(); renderEncarregadosRosterAdmin(); }
   if (name === 'onibus') { loadOnibusConfig(); loadPontosConfigPanel(); }
   if (name === 'relatorios') { loadRelatorioPrefsPanel(); }
 }
@@ -2630,6 +2666,222 @@ function getCapitaoConfig() {
   try { return JSON.parse(localStorage.getItem('tr_capitao_config')) || {}; } catch(e) { return {}; }
 }
 
+/* ═══════════════════════════════════════════
+   ANEXOS PARA O ENCARREGADO (Supabase Storage) — múltiplos arquivos
+═══════════════════════════════════════════ */
+var WA_SVG = '<svg viewBox="0 0 32 32" width="15" height="15" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M16 3C9.1 3 3.5 8.6 3.5 15.5c0 2.4.7 4.7 1.9 6.7L3 29l7.1-2.3c1.9 1 4 1.6 6 1.6 6.9 0 12.5-5.6 12.5-12.5S22.9 3 16 3zm0 22.7c-1.9 0-3.7-.5-5.3-1.4l-.4-.2-4.2 1.4 1.4-4.1-.2-.4c-1-1.6-1.5-3.5-1.5-5.5 0-5.7 4.6-10.3 10.2-10.3s10.2 4.6 10.2 10.3S21.7 25.7 16 25.7zm5.6-7.6c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-2-1.8-2.3-.2-.3 0-.5.1-.6.1-.1.3-.4.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.2-.7-1.7-1-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.9 1.2 3.1c.1.2 2.2 3.4 5.4 4.7.8.3 1.4.5 1.8.7.8.2 1.4.2 2 .1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.1-.3-.2-.6-.3z"/></svg>';
+
+function getCapitaoAnexosConfig() {
+  try {
+    var v = JSON.parse(localStorage.getItem('tr_capitao_anexos'));
+    return Array.isArray(v) ? v : [];
+  } catch (e) { return []; }
+}
+
+function uploadCapitaoAnexo() {
+  var fileInput = document.getElementById('capitao-anexo-file');
+  var file = fileInput.files[0];
+  if (!file) { showToast('Selecione um arquivo primeiro'); return; }
+  var allowedExt = ['pdf', 'xlsx', 'xls', 'jpg', 'jpeg', 'png'];
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (allowedExt.indexOf(ext) === -1) { showToast('Formato não permitido. Use PDF, Excel ou imagem (JPG/PNG).'); return; }
+  if (file.size > 10 * 1024 * 1024) { showToast('Arquivo muito grande (máx 10MB)'); return; }
+
+  showToast('Enviando arquivo...');
+  var path = Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  fetch(SB_URL + '/storage/v1/object/anexos-encarregado/' + path, {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': file.type || 'application/octet-stream',
+      'x-upsert': 'true'
+    },
+    body: file
+  })
+    .then(function(r) {
+      if (!r.ok) throw new Error('upload failed');
+      var publicUrl = SB_URL + '/storage/v1/object/public/anexos-encarregado/' + path;
+      var lista = getCapitaoAnexosConfig();
+      lista.push({ url: publicUrl, nome: file.name, tipo: ext, path: path });
+      localStorage.setItem('tr_capitao_anexos', JSON.stringify(lista));
+      return sbConfigUpsert('capitao_anexos', JSON.stringify(lista));
+    })
+    .then(function() {
+      showToast('✅ Anexo enviado!');
+      addLog('Anexo do encarregado adicionado por ' + (currentAdmin || ''));
+      loadCapitaoAnexoPanel();
+      fileInput.value = '';
+    })
+    .catch(function() {
+      showToast('❌ Erro ao enviar. Verifique se o bucket "anexos-encarregado" foi criado no Supabase.');
+    });
+}
+
+function removeCapitaoAnexo(idx) {
+  var lista = getCapitaoAnexosConfig();
+  var item = lista[idx];
+  if (!item) return;
+  if (!confirm('Remover o anexo "' + item.nome + '"? Essa ação não pode ser desfeita.')) return;
+  lista.splice(idx, 1);
+  localStorage.setItem('tr_capitao_anexos', JSON.stringify(lista));
+  sbConfigUpsert('capitao_anexos', JSON.stringify(lista)).catch(function() {});
+  if (item.path) {
+    fetch(SB_URL + '/storage/v1/object/anexos-encarregado/' + item.path, {
+      method: 'DELETE',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    }).catch(function() {});
+  }
+  loadCapitaoAnexoPanel();
+  addLog('Anexo do encarregado removido por ' + (currentAdmin || ''));
+  showToast('Anexo removido');
+}
+
+function loadCapitaoAnexoPanel() {
+  var lista = getCapitaoAnexosConfig();
+  var box = document.getElementById('capitao-anexos-lista');
+  if (!box) return;
+  if (!lista.length) {
+    box.innerHTML = '<p style="font-size:12.5px;color:#94a3b8;margin-bottom:10px">Nenhum anexo enviado ainda.</p>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < lista.length; i++) {
+    var icone = lista[i].tipo === 'pdf' ? '📄' : (lista[i].tipo === 'xlsx' || lista[i].tipo === 'xls') ? '📊' : '🖼️';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:8px;padding:10px 12px;margin-bottom:8px">'
+      + '<span style="font-size:12.5px;color:#334155">' + icone + ' ' + escHtml(lista[i].nome) + '</span>'
+      + '<button type="button" class="ponto-rm" onclick="removeCapitaoAnexo(' + i + ')">✕</button>'
+      + '</div>';
+  }
+  box.innerHTML = html;
+}
+
+function loadCapitaoAnexoFromServer() {
+  return sbFetch('config?select=value&key=eq.capitao_anexos', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].value) {
+        try {
+          var lista = JSON.parse(rows[0].value);
+          if (Array.isArray(lista)) localStorage.setItem('tr_capitao_anexos', JSON.stringify(lista));
+        } catch (e) {}
+      }
+    })
+    .catch(function() {});
+}
+
+function renderCapitaoAnexo() {
+  var lista = getCapitaoAnexosConfig();
+  var box = document.getElementById('capitao-anexo-box');
+  if (!box) return;
+  if (!lista.length) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  var html = '';
+  for (var i = 0; i < lista.length; i++) {
+    var icone = lista[i].tipo === 'pdf' ? '📄' : (lista[i].tipo === 'xlsx' || lista[i].tipo === 'xls') ? '📊' : '🖼️';
+    html += '<a href="' + lista[i].url + '" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);text-decoration:none">'
+      + '<span style="font-size:13px;font-weight:700;color:#1e3a5f">' + icone + ' ' + escHtml(lista[i].nome) + '</span>'
+      + '<span style="font-size:12px;color:#8a6d1f;font-weight:700">Abrir ↗</span>'
+      + '</a>';
+  }
+  box.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════
+   ENCARREGADOS DO ÔNIBUS (lista com contato)
+═══════════════════════════════════════════ */
+function getEncarregadosRoster() {
+  try {
+    var v = JSON.parse(localStorage.getItem('tr_encarregados_roster'));
+    return Array.isArray(v) ? v : [];
+  } catch (e) { return []; }
+}
+
+function saveEncarregadosRoster(lista) {
+  localStorage.setItem('tr_encarregados_roster', JSON.stringify(lista));
+  sbConfigUpsert('encarregados_roster', JSON.stringify(lista)).catch(function() {});
+}
+
+function addEncarregadoRoster() {
+  var nome = (document.getElementById('new-enc-nome').value || '').trim();
+  var tel = (document.getElementById('new-enc-tel').value || '').trim();
+  var org = (document.getElementById('new-enc-org').value || '').trim();
+  if (!nome || !tel) { showToast('Preencha ao menos nome e telefone'); return; }
+  var lista = getEncarregadosRoster();
+  lista.push({ nome: nome, telefone: tel, organizacao: org });
+  saveEncarregadosRoster(lista);
+  document.getElementById('new-enc-nome').value = '';
+  document.getElementById('new-enc-tel').value = '';
+  document.getElementById('new-enc-org').value = '';
+  renderEncarregadosRosterAdmin();
+  addLog('Encarregado adicionado à lista por ' + (currentAdmin || ''));
+  showToast('✅ Encarregado adicionado!');
+}
+
+function removeEncarregadoRoster(idx) {
+  var lista = getEncarregadosRoster();
+  var item = lista[idx];
+  if (!item) return;
+  if (!confirm('Remover "' + item.nome + '" da lista de encarregados?')) return;
+  lista.splice(idx, 1);
+  saveEncarregadosRoster(lista);
+  renderEncarregadosRosterAdmin();
+  showToast('Removido');
+}
+
+function renderEncarregadosRosterAdmin() {
+  var box = document.getElementById('encarregados-list');
+  if (!box) return;
+  var lista = getEncarregadosRoster();
+  if (!lista.length) {
+    box.innerHTML = '<p style="font-size:12.5px;color:#94a3b8;margin-bottom:10px">Nenhum encarregado cadastrado ainda.</p>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < lista.length; i++) {
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:8px;padding:10px 12px;margin-bottom:8px">'
+      + '<div><div style="font-size:12.5px;font-weight:700;color:#1e293b">' + escHtml(lista[i].nome) + '</div>'
+      + '<div style="font-size:11px;color:#64748b">' + escHtml(lista[i].telefone) + (lista[i].organizacao ? ' · ' + escHtml(lista[i].organizacao) : '') + '</div></div>'
+      + '<button type="button" class="ponto-rm" onclick="removeEncarregadoRoster(' + i + ')">✕</button>'
+      + '</div>';
+  }
+  box.innerHTML = html;
+}
+
+function loadEncarregadosRosterFromServer() {
+  return sbFetch('config?select=value&key=eq.encarregados_roster', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].value) {
+        try {
+          var lista = JSON.parse(rows[0].value);
+          if (Array.isArray(lista)) localStorage.setItem('tr_encarregados_roster', JSON.stringify(lista));
+        } catch (e) {}
+      }
+    })
+    .catch(function() {});
+}
+
+function renderCapitaoEncarregadosBox() {
+  var lista = getEncarregadosRoster();
+  var box = document.getElementById('capitao-encarregados-box');
+  if (!box) return;
+  if (!lista.length) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  var html = '<div style="font-size:11.5px;font-weight:800;color:#1e3a5f;margin-bottom:8px">🧭 Encarregados do Ônibus</div>';
+  for (var i = 0; i < lista.length; i++) {
+    var tel = normalizeTelBR(lista[i].telefone);
+    html += '<div style="background:#fff;border-radius:10px;padding:11px 12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05)">'
+      + '<div style="font-size:13.5px;font-weight:700;color:#1e293b;margin-bottom:2px">' + escHtml(lista[i].nome) + '</div>'
+      + (lista[i].organizacao ? '<div style="font-size:11px;color:#8a6d1f;font-weight:600;margin-bottom:6px">🏛️ ' + escHtml(lista[i].organizacao) + '</div>' : '<div style="margin-bottom:6px"></div>')
+      + '<div style="display:flex;gap:8px">'
+      + (tel ? '<a href="tel:+' + tel + '" style="flex:1;padding:7px;border-radius:7px;font-size:11px;font-weight:700;text-align:center;background:#eef2f7;color:#1e3a5f;text-decoration:none">📞 Ligar</a>' : '')
+      + (tel ? '<a href="https://wa.me/' + tel + '" target="_blank" rel="noopener" style="flex:1;padding:7px;border-radius:7px;font-size:11px;font-weight:700;text-align:center;background:#25d366;color:#fff;text-decoration:none">' + WA_SVG + 'WhatsApp</a>' : '')
+      + '</div></div>';
+  }
+  box.innerHTML = html;
+}
+
 function saveCapitaoConfig() {
   var pw = document.getElementById('capitao-cfg-pw').value;
   var nome = document.getElementById('capitao-cfg-nome').value;
@@ -2702,6 +2954,8 @@ function showCapitaoScreen() {
 function loadCapitaoData() {
   loadOnibusConfigFromServer();
   loadPontosConfigFromServer();
+  loadCapitaoAnexoFromServer().then(renderCapitaoAnexo);
+  loadEncarregadosRosterFromServer().then(renderCapitaoEncarregadosBox);
   sbGet('pasajeros', 'select=nome,tel,dias,dia,seats_needed,ponto,rg,cpf,rnm,doc_type&order=nome.asc')
     .then(function(r) {
       if (!r.ok) {
@@ -3595,6 +3849,8 @@ window.addEventListener('load', function() {
   loadPayConfigFromServer();
   loadLemConfigFromServer();
   loadCbConfigFromServer();
+  loadCapitaoAnexoFromServer();
+  loadEncarregadosRosterFromServer();
   var isCapitao = /[?&]capitao=1/.test(window.location.search);
   setTimeout(function() {
     document.getElementById('loading-screen').style.display = 'none';
@@ -3733,6 +3989,10 @@ window.quickSetPonto = quickSetPonto;
 window.toggleAccordion = toggleAccordion;
 window.toggleCapitaoPontos = toggleCapitaoPontos;
 window.saveRelatorioPrefs = saveRelatorioPrefs;
+window.uploadCapitaoAnexo = uploadCapitaoAnexo;
+window.removeCapitaoAnexo = removeCapitaoAnexo;
+window.addEncarregadoRoster = addEncarregadoRoster;
+window.removeEncarregadoRoster = removeEncarregadoRoster;
 window.renameAdmin = renameAdmin;
 window.removeAdmin = removeAdmin;
 window.addAdmin = addAdmin;
