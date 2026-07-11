@@ -1013,6 +1013,8 @@ input,select,textarea{font-family:inherit;outline:none}
           <span class="accordion-caret">▾</span>
         </div>
         <div class="accordion-body"><div class="accordion-body-inner">
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Cada dia pode ter uma empresa/ônibus diferente. Edite por dia — as Instruções do Capitão ficam compartilhadas para os 3 dias.</p>
+        <div class="access-tabs" id="onibus-day-tabs" style="margin-bottom:12px"></div>
         <div class="form-group">
           <label>Empresa de Ônibus</label>
           <input type="text" id="onibus-empresa" placeholder="Ex: Viação Exemplo">
@@ -1026,7 +1028,7 @@ input,select,textarea{font-family:inherit;outline:none}
           <input type="text" id="onibus-horario" placeholder="Ex: 06:00">
         </div>
         <div class="form-group">
-          <label>Instruções do Capitão</label>
+          <label>Instruções do Capitão (compartilhado)</label>
           <textarea id="onibus-instrucoes" rows="3" placeholder="Instruções para o capitão do ônibus..."></textarea>
         </div>
         <button class="btn-primary" onclick="saveOnibusConfig()">💾 Salvar dados do ônibus</button>
@@ -2618,18 +2620,75 @@ function loadCbConfig() {
 /* ═══════════════════════════════════════════
    CONFIG: ONIBUS (dados do relatório)
 ═══════════════════════════════════════════ */
-function getOnibusConfig() {
-  try { return JSON.parse(localStorage.getItem('tr_onibus_config')) || {}; } catch(e) { return {}; }
+function getOnibusConfigAll() {
+  try {
+    var raw = JSON.parse(localStorage.getItem('tr_onibus_config'));
+    if (raw && !raw.sexta && !raw.sabado && !raw.domingo && (raw.empresa || raw.numero || raw.horario)) {
+      // formato antigo (compartilhado) — migra para os 3 dias
+      var shared = { empresa: raw.empresa || '', numero: raw.numero || '', horario: raw.horario || '' };
+      return {
+        sexta: { empresa: shared.empresa, numero: shared.numero, horario: shared.horario },
+        sabado: { empresa: shared.empresa, numero: shared.numero, horario: shared.horario },
+        domingo: { empresa: shared.empresa, numero: shared.numero, horario: shared.horario },
+        instrucoes: raw.instrucoes || ''
+      };
+    }
+    return raw || {};
+  } catch (e) { return {}; }
 }
-function saveOnibusConfig() {
-  var cfg = {
+
+function getOnibusForDay(dayKey) {
+  var all = getOnibusConfigAll();
+  if (all[dayKey] && (all[dayKey].empresa || all[dayKey].numero || all[dayKey].horario)) return all[dayKey];
+  var keys = ['sexta', 'sabado', 'domingo'];
+  for (var i = 0; i < keys.length; i++) {
+    if (all[keys[i]] && (all[keys[i]].empresa || all[keys[i]].numero || all[keys[i]].horario)) return all[keys[i]];
+  }
+  return {};
+}
+
+function getOnibusInstrucoes() {
+  return getOnibusConfigAll().instrucoes || '';
+}
+
+var onibusEditState = null;
+var onibusActiveDay = 'sexta';
+
+function renderOnibusDayTabs() {
+  var box = document.getElementById('onibus-day-tabs');
+  if (!box) return;
+  var days = [{ k: 'sexta', l: 'Sexta' }, { k: 'sabado', l: 'Sábado' }, { k: 'domingo', l: 'Domingo' }];
+  var html = '';
+  for (var i = 0; i < days.length; i++) {
+    html += '<button type="button" class="access-tab' + (days[i].k === onibusActiveDay ? ' active' : '') + '" onclick="switchOnibusDay(\'' + days[i].k + '\')">' + days[i].l + '</button>';
+  }
+  box.innerHTML = html;
+}
+
+function syncOnibusDomToState() {
+  if (!onibusEditState) return;
+  onibusEditState[onibusActiveDay] = {
     empresa: document.getElementById('onibus-empresa').value,
     numero: document.getElementById('onibus-numero').value,
-    horario: document.getElementById('onibus-horario').value,
-    instrucoes: document.getElementById('onibus-instrucoes').value
+    horario: document.getElementById('onibus-horario').value
   };
-  localStorage.setItem('tr_onibus_config', JSON.stringify(cfg));
-  sbConfigUpsert('onibus_config', JSON.stringify(cfg)).catch(function() {});
+}
+
+function switchOnibusDay(day) {
+  syncOnibusDomToState();
+  onibusActiveDay = day;
+  renderOnibusDayTabs();
+  var dados = onibusEditState[day] || { empresa: '', numero: '', horario: '' };
+  document.getElementById('onibus-empresa').value = dados.empresa || '';
+  document.getElementById('onibus-numero').value = dados.numero || '';
+  document.getElementById('onibus-horario').value = dados.horario || '';
+}
+
+function saveOnibusConfig() {
+  syncOnibusDomToState();
+  onibusEditState.instrucoes = document.getElementById('onibus-instrucoes').value;
+  localStorage.setItem('tr_onibus_config', JSON.stringify(onibusEditState));
+  sbConfigUpsert('onibus_config', JSON.stringify(onibusEditState)).catch(function() {});
   addLog('Dados do ônibus salvos por ' + (currentAdmin || ''));
   showToast('✅ Dados do ônibus salvos!');
 }
@@ -2647,11 +2706,15 @@ function loadOnibusConfigFromServer() {
     .catch(function() {});
 }
 function loadOnibusConfig() {
-  var cfg = getOnibusConfig();
-  document.getElementById('onibus-empresa').value = cfg.empresa || '';
-  document.getElementById('onibus-numero').value = cfg.numero || '';
-  document.getElementById('onibus-horario').value = cfg.horario || '';
-  document.getElementById('onibus-instrucoes').value = cfg.instrucoes || '';
+  onibusEditState = getOnibusConfigAll();
+  var keys = ['sexta', 'sabado', 'domingo'];
+  for (var i = 0; i < keys.length; i++) { if (!onibusEditState[keys[i]]) onibusEditState[keys[i]] = { empresa: '', numero: '', horario: '' }; }
+  onibusActiveDay = 'sexta';
+  renderOnibusDayTabs();
+  document.getElementById('onibus-empresa').value = onibusEditState.sexta.empresa || '';
+  document.getElementById('onibus-numero').value = onibusEditState.sexta.numero || '';
+  document.getElementById('onibus-horario').value = onibusEditState.sexta.horario || '';
+  document.getElementById('onibus-instrucoes').value = onibusEditState.instrucoes || '';
 }
 
 /* ═══════════════════════════════════════════
@@ -3035,7 +3098,8 @@ function getCapitaoDayPax() {
 function renderCapitaoSummary() {
   var box = document.getElementById('capitao-summary');
   if (!box) return;
-  var onibus = getOnibusConfig();
+  var refDay = capitaoDayActive === 'todos' ? (DAYS[0] ? DAYS[0].key : 'sexta') : capitaoDayActive;
+  var onibus = getOnibusForDay(refDay);
   var dayPax = getCapitaoDayPax();
   var linha1 = [];
   if (onibus.empresa) linha1.push(escHtml(onibus.empresa));
@@ -3048,13 +3112,14 @@ function renderCapitaoSummary() {
 
   var instrBox = document.getElementById('capitao-instrucoes');
   var instrText = document.getElementById('capitao-instrucoes-text');
-  if (onibus.instrucoes) {
+  var instrucoesTexto = getOnibusInstrucoes();
+  if (instrucoesTexto) {
     instrBox.style.display = 'block';
-    var itens = onibus.instrucoes
+    var itens = instrucoesTexto
       .split(/\n+|(?<=[.!?])\s+(?=[A-ZÀ-Ú])/)
       .map(function(s) { return s.trim(); })
       .filter(function(s) { return s.length > 0; });
-    if (!itens.length) itens = [onibus.instrucoes];
+    if (!itens.length) itens = [instrucoesTexto];
     var htmlI = '';
     for (var ii = 0; ii < itens.length; ii++) {
       htmlI += '<div style="display:flex;gap:6px;margin-bottom:' + (ii === itens.length - 1 ? '0' : '4px') + ';align-items:flex-start">'
@@ -3360,13 +3425,13 @@ function buildRelatorioPorDiaData() {
 function generateRelatorioPDF() {
   if (!window.jspdf) { showToast('Erro: biblioteca de PDF não carregou. Verifique sua internet.'); return; }
   var data = buildRelatorioPorDiaData();
-  var onibus = getOnibusConfig();
   var capitao = getCapitaoConfig();
   var doc = new window.jspdf.jsPDF();
   var pageW = doc.internal.pageSize.getWidth();
   var pageBottom = 280;
 
-  function desenharCabecalho(comTotais) {
+  function desenharCabecalho(comTotais, dayKey) {
+    var onibus = dayKey ? getOnibusForDay(dayKey) : {};
     var y = 16;
     doc.setFontSize(14); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 58, 95);
     doc.text('Transporte ' + getOrgName(), pageW / 2, y, { align: 'center' }); y += 6;
@@ -3412,7 +3477,7 @@ function generateRelatorioPDF() {
     var dday = DAYS[i];
     var list = data.groups[dday.key] || [];
     if (i > 0) doc.addPage();
-    var y = desenharCabecalho(i === 0);
+    var y = desenharCabecalho(i === 0, dday.key);
 
     doc.setFillColor(30, 58, 95);
     doc.roundedRect(14, y - 6, pageW - 28, 10, 1.5, 1.5, 'F');
@@ -3451,7 +3516,7 @@ function generateRelatorioPDF() {
     var pontosDia = getPontosForDay(dday.key);
     if (pontosDia.length) {
       var alturaNecessaria = medirAlturaPontos(pontosDia);
-      if (y + alturaNecessaria > pageBottom) { doc.addPage(); y = desenharCabecalho(false); }
+      if (y + alturaNecessaria > pageBottom) { doc.addPage(); y = desenharCabecalho(false, dday.key); }
       doc.setFont('times', 'bold'); doc.setFontSize(10.5); doc.setTextColor(30, 58, 95);
       doc.text('Pontos de Encontro deste dia', 14, y); y += 6;
       doc.setTextColor(51, 65, 85);
@@ -3466,10 +3531,10 @@ function generateRelatorioPDF() {
       doc.setFont(undefined, 'normal'); doc.setTextColor(0);
     }
 
-    if (i === DAYS.length - 1 && onibus.instrucoes) {
-      var linesInstr = doc.splitTextToSize(onibus.instrucoes, pageW - 28);
+    if (i === DAYS.length - 1 && getOnibusInstrucoes()) {
+      var linesInstr = doc.splitTextToSize(getOnibusInstrucoes(), pageW - 28);
       var alturaInstr = 5 + linesInstr.length * 4.5 + 6;
-      if (y + alturaInstr > pageBottom) { doc.addPage(); y = desenharCabecalho(false); } else { y += 8; }
+      if (y + alturaInstr > pageBottom) { doc.addPage(); y = desenharCabecalho(false, dday.key); } else { y += 8; }
       doc.setFontSize(10); doc.setFont(undefined, 'bold');
       doc.text('Instruções do Capitão', 14, y); y += 5;
       doc.setFontSize(9); doc.setFont(undefined, 'normal');
@@ -3497,7 +3562,6 @@ function generateRelatorioPDF() {
 function generateRelatorioExcel() {
   if (!window.ExcelJS) { showToast('Erro: biblioteca de Excel não carregou. Verifique sua internet.'); return; }
   var data = buildRelatorioPorDiaData();
-  var onibus = getOnibusConfig();
   var capitao = getCapitaoConfig();
   var wb = new ExcelJS.Workbook();
   wb.creator = 'Transporte ' + getOrgName();
@@ -3514,6 +3578,7 @@ function generateRelatorioExcel() {
 
   for (var i = 0; i < DAYS.length; i++) {
     var dday = DAYS[i];
+    var onibus = getOnibusForDay(dday.key);
     var list = data.groups[dday.key] || [];
     var sheetName = (dday.label || dday.key).replace(/[\\\/\?\*\[\]:]/g, '').substring(0, 28);
     var ws = wb.addWorksheet(sheetName);
@@ -4006,6 +4071,7 @@ window.addPontoRow = addPontoRow;
 window.removePontoRow = removePontoRow;
 window.savePontosConfig = savePontosConfig;
 window.switchPontosDay = switchPontosDay;
+window.switchOnibusDay = switchOnibusDay;
 window.buildPontoOptionsHtml = buildPontoOptionsHtml;
 window.quickSetPonto = quickSetPonto;
 window.toggleAccordion = toggleAccordion;
