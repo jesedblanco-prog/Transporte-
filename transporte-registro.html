@@ -893,6 +893,30 @@ input,select,textarea{font-family:inherit;outline:none}
         </div></div>
       </div>
 
+      <!-- BACKUP ACCORDION -->
+      <div class="accordion-item" id="acc-backup">
+        <div class="accordion-header" onclick="toggleAccordion('acc-backup')">
+          <span>💾 Backup Completo</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Baixa um arquivo com todos os passageiros e configurações atuais. Guarde esse arquivo em local seguro (Drive, computador) — é sua proteção caso algo dê errado no Supabase.</p>
+        <button class="btn-primary" onclick="baixarBackupCompleto()">💾 Baixar Backup Completo</button>
+        </div></div>
+      </div>
+
+      <!-- BACKUP ACCORDION (somente proprietário) -->
+      <div class="accordion-item" id="acc-backup" style="display:none">
+        <div class="accordion-header" onclick="toggleAccordion('acc-backup')">
+          <span>💾 Backup Completo</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Baixa um arquivo com todos os passageiros e configurações atuais. Guarde-o em um lugar seguro (Google Drive, e-mail) periodicamente.</p>
+        <button class="btn-primary" onclick="baixarBackupCompleto()">💾 Baixar Backup Completo</button>
+        </div></div>
+      </div>
+
       <!-- NOVO EVENTO ACCORDION -->
       <div class="accordion-item" id="acc-novoevento" style="border:2px solid #fee2e2">
         <div class="accordion-header" onclick="toggleAccordion('acc-novoevento')">
@@ -914,7 +938,7 @@ input,select,textarea{font-family:inherit;outline:none}
         <div class="accordion-body"><div class="accordion-body-inner">
         <p style="font-size:13px;color:#64748b;margin-bottom:12px">Renomeie, remova, ou adicione novos administradores. Útil se você for repassar este sistema para outra pessoa/congregação.</p>
         <div id="admins-list"></div>
-        <div style="border-top:1px solid #e2e8f0;margin:14px 0;padding-top:14px">
+        <div id="admin-add-box" style="border-top:1px solid #e2e8f0;margin:14px 0;padding-top:14px">
           <div class="form-group">
             <label>Novo usuário (login)</label>
             <input type="text" id="new-admin-user" placeholder="Ex: maria2026">
@@ -926,6 +950,10 @@ input,select,textarea{font-family:inherit;outline:none}
           <div class="form-group">
             <label>Senha</label>
             <input type="text" id="new-admin-pw" placeholder="Mínimo 4 caracteres">
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="new-admin-owner" style="width:auto">
+            <label style="margin:0" for="new-admin-owner">👑 É proprietário (acesso total: backup, gerenciar admins)</label>
           </div>
           <button class="btn-primary" onclick="addAdmin()">➕ Adicionar administrador</button>
         </div>
@@ -1222,6 +1250,7 @@ var SB_KEY = 'sb_publishable_rl5OtnLInXXuCsZ0dN8kLg_fJD6TrN0';
 
 var ADMINS = { jesus2025: 'jesus2025', sergio2025: 'sergio2025' };
 var ADMIN_NAMES = { jesus2025: 'Jesús', sergio2025: 'Sergio' };
+var ADMIN_OWNERS = { jesus2025: true, sergio2025: false };
 var DAYS = [
   { key: 'sexta',  label: 'Sexta-feira',  date: '17/07/2026', full: 'Sexta · 17/07' },
   { key: 'sabado', label: 'Sábado',       date: '18/07/2026', full: 'Sábado · 18/07' },
@@ -2087,10 +2116,11 @@ function loadAdminPasswords() {
         try {
           var list = JSON.parse(rows[0].value);
           if (Array.isArray(list) && list.length) {
-            ADMINS = {}; ADMIN_NAMES = {};
+            ADMINS = {}; ADMIN_NAMES = {}; ADMIN_OWNERS = {};
             for (var i = 0; i < list.length; i++) {
               ADMINS[list[i].username] = list[i].password;
               ADMIN_NAMES[list[i].username] = list[i].nome || list[i].username;
+              ADMIN_OWNERS[list[i].username] = !!list[i].owner;
             }
             return;
           }
@@ -2132,29 +2162,65 @@ function persistAdminsList() {
   var list = [];
   for (var user in ADMINS) {
     if (ADMINS.hasOwnProperty(user)) {
-      list.push({ username: user, password: ADMINS[user], nome: ADMIN_NAMES[user] || user });
+      list.push({ username: user, password: ADMINS[user], nome: ADMIN_NAMES[user] || user, owner: !!ADMIN_OWNERS[user] });
     }
   }
   sbConfigUpsert('admins_list', JSON.stringify(list)).catch(function() {});
 }
 
+function isCurrentAdminOwner() {
+  return !!ADMIN_OWNERS[currentAdmin];
+}
+
+function baixarBackupCompleto() {
+  if (!isCurrentAdminOwner()) { showToast('Somente o proprietário pode baixar o backup'); return; }
+  showToast('Preparando backup...');
+  Promise.all([
+    sbGet('pasajeros', 'select=*').then(function(r) { return r.ok ? r.json() : []; }),
+    sbGet('config', 'select=*').then(function(r) { return r.ok ? r.json() : []; })
+  ]).then(function(results) {
+    var backup = {
+      geradoEm: new Date().toISOString(),
+      geradoPor: currentAdmin,
+      versao: 'v4.0',
+      pasajeros: results[0],
+      config: results[1]
+    };
+    var blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var dataStr = new Date().toISOString().slice(0, 10);
+    a.download = 'backup-transporte-' + dataStr + '.json';
+    a.click();
+    addLog('Backup completo baixado por ' + currentAdmin);
+    showToast('✅ Backup baixado! Guarde em lugar seguro.');
+  }).catch(function() {
+    showToast('Erro ao gerar backup. Verifique sua internet.');
+  });
+}
+
 function renderAdminsList() {
   var box = document.getElementById('admins-list');
   if (!box) return;
+  var souProprietario = isCurrentAdminOwner();
   var html = '';
   for (var user in ADMINS) {
     if (!ADMINS.hasOwnProperty(user)) continue;
     var isMe = user === currentAdmin;
+    var isOwnerUser = !!ADMIN_OWNERS[user];
     html += '<div class="ponto-row">'
-      + '<input class="ponto-num" style="width:auto;flex:1;text-align:left;padding-left:10px" type="text" value="' + escHtml(ADMIN_NAMES[user] || user) + '" data-user="' + escHtml(user) + '" onchange="renameAdmin(this)">'
-      + '<button type="button" class="ponto-rm" onclick="removeAdmin(\'' + escHtml(user) + '\')"' + (isMe ? ' disabled title="Não é possível remover a si mesmo"' : '') + '>✕</button>'
+      + '<input class="ponto-num" style="width:auto;flex:1;text-align:left;padding-left:10px" type="text" value="' + escHtml(ADMIN_NAMES[user] || user) + '" data-user="' + escHtml(user) + '" onchange="renameAdmin(this)"' + (souProprietario ? '' : ' disabled') + '>'
+      + '<button type="button" class="ponto-rm" onclick="removeAdmin(\'' + escHtml(user) + '\')"' + (isMe || !souProprietario ? ' disabled title="' + (isMe ? 'Não é possível remover a si mesmo' : 'Somente o proprietário pode remover') + '"' : '') + '>✕</button>'
       + '</div>'
-      + '<div style="font-size:10.5px;color:#94a3b8;margin:-4px 0 10px 4px">Usuário: ' + escHtml(user) + (isMe ? ' (você)' : '') + '</div>';
+      + '<div style="font-size:10.5px;color:#94a3b8;margin:-4px 0 10px 4px">Usuário: ' + escHtml(user) + (isMe ? ' (você)' : '') + (isOwnerUser ? ' · 👑 Proprietário' : '') + '</div>';
   }
   box.innerHTML = html;
+  var addBox = document.getElementById('admin-add-box');
+  if (addBox) addBox.style.display = souProprietario ? 'block' : 'none';
 }
 
 function renameAdmin(inp) {
+  if (!isCurrentAdminOwner()) { showToast('Somente o proprietário pode editar administradores'); renderAdminsList(); return; }
   var user = inp.getAttribute('data-user');
   var novoNome = inp.value.trim();
   if (!novoNome) { inp.value = ADMIN_NAMES[user] || user; return; }
@@ -2166,12 +2232,14 @@ function renameAdmin(inp) {
 }
 
 function removeAdmin(user) {
+  if (!isCurrentAdminOwner()) { showToast('Somente o proprietário pode remover administradores'); return; }
   if (user === currentAdmin) { showToast('Não é possível remover o admin com a sessão ativa'); return; }
   var totalAdmins = Object.keys(ADMINS).length;
   if (totalAdmins <= 1) { showToast('Precisa existir pelo menos 1 administrador'); return; }
   if (!confirm('Remover o acesso de "' + (ADMIN_NAMES[user] || user) + '"? Ele não poderá mais entrar no painel.')) return;
   delete ADMINS[user];
   delete ADMIN_NAMES[user];
+  delete ADMIN_OWNERS[user];
   persistAdminsList();
   renderAdminsList();
   addLog('Administrador removido: ' + user + ' por ' + (currentAdmin || ''));
@@ -2179,6 +2247,7 @@ function removeAdmin(user) {
 }
 
 function addAdmin() {
+  if (!isCurrentAdminOwner()) { showToast('Somente o proprietário pode adicionar administradores'); return; }
   var user = (document.getElementById('new-admin-user').value || '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
   var nome = (document.getElementById('new-admin-nome').value || '').trim();
   var pw = document.getElementById('new-admin-pw').value;
@@ -2187,11 +2256,13 @@ function addAdmin() {
   if (!pw || pw.length < 4) { showToast('Senha muito curta (mínimo 4 caracteres)'); return; }
   ADMINS[user] = pw;
   ADMIN_NAMES[user] = nome || user;
+  ADMIN_OWNERS[user] = !!document.getElementById('new-admin-owner').checked;
   persistAdminsList();
   renderAdminsList();
   document.getElementById('new-admin-user').value = '';
   document.getElementById('new-admin-nome').value = '';
   document.getElementById('new-admin-pw').value = '';
+  document.getElementById('new-admin-owner').checked = false;
   addLog('Novo administrador criado: ' + user + ' por ' + (currentAdmin || ''));
   showToast('✅ Administrador adicionado!');
 }
@@ -2494,7 +2565,11 @@ function showSection(name) {
   if (name === 'passageiros') renderPaxList();
   if (name === 'pagamentos') { loadPayConfig(); renderPayList(); }
   if (name === 'lembretes') { loadLemConfig(); renderLemList(); loadCapitaoAnexoPanel(); }
-  if (name === 'config') { loadEventoConfig(); loadCbConfig(); renderAdminsList(); }
+  if (name === 'config') {
+    loadEventoConfig(); loadCbConfig(); renderAdminsList();
+    var backupCard = document.getElementById('acc-backup');
+    if (backupCard) backupCard.style.display = isCurrentAdminOwner() ? 'block' : 'none';
+  }
   if (name === 'encarregado') { loadCapitaoConfigPanel(); renderEncarregadosRosterAdmin(); }
   if (name === 'onibus') { loadOnibusConfig(); loadPontosConfigPanel(); }
   if (name === 'relatorios') { loadRelatorioPrefsPanel(); }
@@ -4084,6 +4159,7 @@ window.removeEncarregadoRoster = removeEncarregadoRoster;
 window.renameAdmin = renameAdmin;
 window.removeAdmin = removeAdmin;
 window.addAdmin = addAdmin;
+window.baixarBackupCompleto = baixarBackupCompleto;
 
 /* ═══════════════════════════════════════════
    CHATBOT OPCIONAL — réplica visual do WhatsApp
