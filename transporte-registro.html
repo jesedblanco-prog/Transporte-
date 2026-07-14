@@ -194,6 +194,11 @@ input,select,textarea{font-family:inherit;outline:none}
 .admin-section.active{display:block}
 .section-title{font-size:18px;font-weight:800;color:#1e293b;margin-bottom:4px}
 .section-sub{font-size:13px;color:#64748b;margin-bottom:16px}
+.header-row{display:flex;align-items:center;gap:10px;margin-bottom:4px;opacity:0;transform:translateY(6px);animation:headerIn 0.55s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes headerIn{to{opacity:1;transform:translateY(0)}}
+.header-icon{width:36px;height:36px;border-radius:13px;background:linear-gradient(135deg,#eef2fb,#e6ecf9);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(30,58,95,0.08),inset 0 0 0 1px rgba(30,58,95,0.06)}
+.header-title{font-size:17.5px;font-weight:800;color:#1e293b;letter-spacing:-0.2px}
+.header-sub{font-size:12px;color:#94a3b8;margin:4px 0 16px 46px;font-weight:500}
 
 /* KPI GRID */
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
@@ -675,8 +680,11 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- DASHBOARD -->
   <div class="admin-section active" id="sec-dashboard">
     <div style="padding:16px">
-      <div class="section-title">📊 Dashboard</div>
-      <div class="section-sub" id="dash-sub">Dados em tempo real</div>
+      <div class="header-row" id="hdr-dashboard">
+        <div class="header-icon"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#1e3a5f" opacity="0.12"/><rect x="6" y="13" width="3" height="6" rx="1" fill="#1e3a5f"/><rect x="10.5" y="9" width="3" height="10" rx="1" fill="#1e3a5f"/><rect x="15" y="6" width="3" height="13" rx="1" fill="#c9a227"/></svg></div>
+        <div class="header-title">Dashboard</div>
+      </div>
+      <div class="header-sub" id="dash-sub">Dados em tempo real</div>
 
       <div id="dash-alert" style="display:none"></div>
 
@@ -736,8 +744,11 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- PASSAGEIROS -->
   <div class="admin-section" id="sec-passageiros">
     <div style="padding:16px">
-      <div class="section-title">👥 Passageiros</div>
-      <div class="section-sub">Lista completa · <span id="pax-count-label">carregando...</span></div>
+      <div class="header-row" id="hdr-passageiros">
+        <div class="header-icon"><svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#1e3a5f" opacity="0.14"/><path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6" fill="#1e3a5f" opacity="0.14"/><circle cx="12" cy="8" r="3" fill="#1e3a5f"/><path d="M6 19c0.6-2.6 3-4.4 6-4.4s5.4 1.8 6 4.4" stroke="#1e3a5f" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="header-title">Passageiros</div>
+      </div>
+      <div class="header-sub">Lista completa · <span id="pax-count-label">carregando...</span></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <button class="btn-secondary" style="font-size:12px;padding:7px 12px" onclick="showEditModal()">✏️ Editar Passageiro</button>
         <button class="btn-secondary" style="font-size:12px;padding:7px 12px" onclick="exportCSV()">📊 Exportar CSV</button>
@@ -756,8 +767,11 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- PAGAMENTOS -->
   <div class="admin-section" id="sec-pagamentos">
     <div style="padding:16px">
-      <div class="section-title">💰 Pagamentos</div>
-      <div class="section-sub">Controle de cobranças</div>
+      <div class="header-row" id="hdr-pagamentos">
+        <div class="header-icon"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3" fill="#1e3a5f" opacity="0.14"/><rect x="2" y="9" width="20" height="3" fill="#1e3a5f"/><rect x="5" y="14.5" width="6" height="2" rx="1" fill="#c9a227"/></svg></div>
+        <div class="header-title">Pagamentos</div>
+      </div>
+      <div class="header-sub">Controle de cobranças</div>
 
       <div class="accordion-item" id="acc-cobranca">
         <div class="accordion-header" onclick="toggleAccordion('acc-cobranca')">
@@ -800,8 +814,11 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- LEMBRETES -->
   <div class="admin-section" id="sec-lembretes">
     <div style="padding:16px">
-      <div class="section-title">📲 Lembretes</div>
-      <div class="section-sub">Comprovantes de pagamento</div>
+      <div class="header-row" id="hdr-lembretes">
+        <div class="header-icon"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2" fill="#1e3a5f" opacity="0.14"/><path d="M3 8l9 6 9-6" stroke="#1e3a5f" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="header-title">Lembretes</div>
+      </div>
+      <div class="header-sub">Comprovantes de pagamento</div>
 
       <div class="accordion-item" id="acc-lem-msg">
         <div class="accordion-header" onclick="toggleAccordion('acc-lem-msg')">
@@ -855,8 +872,11 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- REGISTRO -->
   <div class="admin-section" id="sec-registro">
     <div style="padding:16px">
-      <div class="section-title">📋 Registro de Acessos</div>
-      <div class="section-sub">Histórico de ações administrativas</div>
+      <div class="header-row" id="hdr-registro">
+        <div class="header-icon"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2" fill="#1e3a5f" opacity="0.14"/><path d="M8 8h8M8 12h8M8 16h5" stroke="#1e3a5f" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+        <div class="header-title">Registro de Acessos</div>
+      </div>
+      <div class="header-sub">Histórico de ações administrativas</div>
       <div class="card">
         <div id="log-list">
           <p style="color:#94a3b8;font-size:13px">Nenhum registro ainda.</p>
@@ -868,8 +888,11 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- CONFIG -->
   <div class="admin-section" id="sec-config">
     <div style="padding:16px">
-      <div class="section-title">⚙️ Configurações</div>
-      <div class="section-sub">Gerenciamento do sistema</div>
+      <div class="header-row" id="hdr-config">
+        <div class="header-icon"><svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#1e3a5f" opacity="0.14"/><circle cx="12" cy="12" r="3.4" fill="#1e3a5f"/><g stroke="#c9a227" stroke-width="2" stroke-linecap="round"><line x1="12" y1="3" x2="12" y2="5.4"/><line x1="12" y1="18.6" x2="12" y2="21"/><line x1="3" y1="12" x2="5.4" y2="12"/><line x1="18.6" y1="12" x2="21" y2="12"/></g></svg></div>
+        <div class="header-title">Configurações</div>
+      </div>
+      <div class="header-sub">Gerenciamento do sistema</div>
 
       <!-- EVENT CONFIG ACCORDION -->
       <div class="accordion-item" id="acc-evento">
@@ -1041,8 +1064,11 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- ENCARREGADO SECTION (admin) -->
   <div class="admin-section" id="sec-encarregado">
     <div style="padding:16px">
-      <div class="section-title">🧭 Encarregado</div>
-      <div class="section-sub">Acesso e contatos para o dia da viagem</div>
+      <div class="header-row" id="hdr-encarregado">
+        <div class="header-icon"><svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#1e3a5f" opacity="0.14"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z" fill="#c9a227"/></svg></div>
+        <div class="header-title">Encarregado</div>
+      </div>
+      <div class="header-sub">Acesso e contatos para o dia da viagem</div>
 
       <div class="accordion-item" id="acc-encarregado-acesso" style="margin-bottom:12px">
         <div class="accordion-header" onclick="toggleAccordion('acc-encarregado-acesso')">
@@ -1095,8 +1121,11 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- ONIBUS SECTION (independente) -->
   <div class="admin-section" id="sec-onibus">
     <div style="padding:16px">
-      <div class="section-title">🚌 Dados do Ônibus</div>
-      <div class="section-sub">Usados no relatório de passageiros por dia</div>
+      <div class="header-row" id="hdr-onibus">
+        <div class="header-icon"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="3" fill="#1e3a5f" opacity="0.14"/><rect x="5" y="6.5" width="6" height="5" rx="1" fill="#1e3a5f"/><rect x="13" y="6.5" width="6" height="5" rx="1" fill="#1e3a5f"/><circle cx="7" cy="20" r="1.6" fill="#c9a227"/><circle cx="17" cy="20" r="1.6" fill="#c9a227"/></svg></div>
+        <div class="header-title">Dados do Ônibus</div>
+      </div>
+      <div class="header-sub">Usados no relatório de passageiros por dia</div>
       <div class="accordion-item" id="acc-onibus-dados">
         <div class="accordion-header" onclick="toggleAccordion('acc-onibus-dados')">
           <span>🚌 Dados do Ônibus</span>
@@ -1144,8 +1173,11 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- RELATORIOS SECTION (independente) -->
   <div class="admin-section" id="sec-relatorios">
     <div style="padding:16px">
-      <div class="section-title">📊 Relatório de Passageiros por Dia</div>
-      <div class="section-sub">Agrupa automaticamente por dia de viagem</div>
+      <div class="header-row" id="hdr-relatorios">
+        <div class="header-icon"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="#1e3a5f" opacity="0.14"/><rect x="6" y="7" width="12" height="2" fill="#1e3a5f"/><rect x="6" y="11" width="12" height="2" fill="#1e3a5f"/><rect x="6" y="15" width="7" height="2" fill="#c9a227"/></svg></div>
+        <div class="header-title">Relatório de Passageiros por Dia</div>
+      </div>
+      <div class="header-sub">Agrupa automaticamente por dia de viagem</div>
       <div class="card">
         <p style="font-size:13px;color:#64748b;margin-bottom:12px">Agrupa automaticamente os passageiros por dia de viagem, com totais e dados do ônibus.</p>
         <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid #f1f5f9;margin-bottom:12px">
@@ -2698,6 +2730,9 @@ function showSection(name) {
     if (s) s.className = 'admin-section' + (sections[i] === name ? ' active' : '');
     if (n) n.className = 'nav-tab' + (sections[i] === name ? ' active' : '');
   }
+  window.scrollTo(0, 0);
+  var hdr = document.getElementById('hdr-' + name);
+  if (hdr) { hdr.style.animation = 'none'; void hdr.offsetWidth; hdr.style.animation = ''; }
   updateNavIconColors();
   if (name === 'passageiros') renderPaxList();
   if (name === 'pagamentos') { loadPayConfig(); renderPayList(); }
