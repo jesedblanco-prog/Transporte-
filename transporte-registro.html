@@ -168,6 +168,13 @@ input,select,textarea{font-family:inherit;outline:none}
 .admin-topbar-right{display:flex;align-items:center;gap:10px}
 .admin-user-badge{background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
 .btn-logout{background:rgba(255,255,255,0.15);color:#fff;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600}
+.topbar-user{display:flex;align-items:center;gap:8px}
+.topbar-avatar{width:32px;height:32px;border-radius:11px;background:linear-gradient(135deg,#c9a227,#b8860b);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#1e1a0a;box-shadow:0 3px 8px rgba(0,0,0,0.25);flex-shrink:0}
+.topbar-user-info{display:flex;flex-direction:column;line-height:1.15}
+.topbar-user-name{font-size:12.5px;font-weight:800;color:#fff}
+.topbar-user-role{font-size:9.5px;color:rgba(255,255,255,0.55);font-weight:600}
+.btn-logout-icon{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;border:none;transition:background .2s;flex-shrink:0}
+.btn-logout-icon:active{background:rgba(220,38,38,0.35)}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;display:flex;z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,0.08);overflow-x:auto;-webkit-overflow-scrolling:touch;padding:12px 4px 14px}
@@ -287,11 +294,19 @@ input,select,textarea{font-family:inherit;outline:none}
    CHATBOT OPCIONAL — réplica visual do WhatsApp
    (não altera nada do formulário manual)
 ═══════════════════════════════════════════ */
-#cb-fab{position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1e3a5f,#142c47);box-shadow:0 4px 16px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-size:28px;z-index:500;transition:transform 0.15s;border:2.5px solid #c9a227}
-#cb-fab:active{transform:scale(0.92)}
-#cb-fab-badge{position:fixed;right:20px;bottom:56px;width:14px;height:14px;border-radius:50%;background:#4ade80;border:2px solid #fff;z-index:501}
-#cb-callout{position:fixed;right:84px;bottom:26px;background:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;box-shadow:0 4px 16px rgba(0,0,0,0.15);font-size:12.5px;color:#1e293b;font-weight:600;max-width:170px;line-height:1.4;z-index:500;animation:cbCalloutPop .3s ease}
-@keyframes cbCalloutPop{from{opacity:0;transform:translateY(6px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+#cb-fab-wrap{position:fixed;right:14px;bottom:14px;width:58px;height:58px;z-index:500}
+#cb-fab-spin{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,#c9a227,#f0d789,#c9a227,#8a6d1f,#c9a227);animation:cbFabSpin 4s linear infinite;padding:3px}
+#cb-fab-spin::before{content:'';position:absolute;inset:3px;border-radius:50%;background:#1e3a5f}
+@keyframes cbFabSpin{to{transform:rotate(360deg)}}
+#cb-fab-glow{position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,rgba(240,215,137,0.65) 0%,rgba(201,162,39,0) 70%);opacity:0;pointer-events:none}
+#cb-fab-glow.flash{animation:cbGlowFlash 0.6s ease-out}
+@keyframes cbGlowFlash{0%{opacity:0.9;transform:scale(0.7)}100%{opacity:0;transform:scale(1.5)}}
+#cb-fab{position:absolute;inset:4px;border-radius:50%;background:linear-gradient(135deg,#f0d789,#c9a227);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(201,162,39,0.4);z-index:2;transition:transform 0.35s cubic-bezier(.34,1.56,.64,1);border:none}
+#cb-fab.bounce{animation:cbElasticPop 0.55s cubic-bezier(.34,1.56,.64,1)}
+@keyframes cbElasticPop{0%{transform:scale(1)}35%{transform:scale(0.82)}65%{transform:scale(1.12)}100%{transform:scale(1)}}
+#cb-fab-badge{position:fixed;right:16px;bottom:52px;width:14px;height:14px;border-radius:50%;background:#4ade80;border:2px solid #fff;z-index:501}
+#cb-callout{position:fixed;right:78px;bottom:24px;background:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;box-shadow:0 12px 30px rgba(0,0,0,0.3);font-size:12.5px;color:#1e293b;font-weight:600;max-width:170px;line-height:1.4;z-index:500;opacity:0;transform:translateY(6px) scale(0.96);transform-origin:bottom right;transition:opacity 0.45s cubic-bezier(.16,1,.3,1),transform 0.45s cubic-bezier(.16,1,.3,1);pointer-events:none}
+#cb-callout.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
 #cb-overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:600;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease,background .25s ease}
 #cb-overlay.active{opacity:1;pointer-events:auto;background:rgba(0,0,0,0.55)}
 #cb-panel{width:100%;max-width:420px;height:88vh;max-height:720px;background:#ECE5DD;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 30px rgba(0,0,0,0.3);border-radius:12px 12px 0 0;transform:translateY(40px) scaleY(0.94);transform-origin:bottom;opacity:0;transition:transform .32s cubic-bezier(.16,1,.3,1),opacity .28s ease}
@@ -603,9 +618,15 @@ input,select,textarea{font-family:inherit;outline:none}
   </div>
 
   <!-- CHATBOT OPCIONAL -->
-  <button id="cb-fab" onclick="cbOpen()" title="Fazer cadastro conversando">🧑‍💼</button>
-  <div id="cb-fab-badge"></div>
   <div id="cb-callout" onclick="cbOpen()">👋 Clique aqui para te ajudar!</div>
+  <div id="cb-fab-wrap">
+    <div id="cb-fab-spin"></div>
+    <div id="cb-fab-glow"></div>
+    <button id="cb-fab" onclick="cbFabClicked()" title="Fazer cadastro conversando">
+      <svg width="24" height="24" viewBox="0 0 40 40"><circle cx="20" cy="15.5" r="7" fill="#1e3a5f"/><path d="M6 36c0-8.3 6.3-14 14-14s14 5.7 14 14Z" fill="#1e3a5f"/></svg>
+    </button>
+  </div>
+  <div id="cb-fab-badge"></div>
   <div id="cb-overlay" onclick="if(event.target===this) cbClose()">
     <div id="cb-panel">
       <div id="cb-header">
@@ -638,8 +659,16 @@ input,select,textarea{font-family:inherit;outline:none}
       <h1>Painel Admin · Congresso Itatiba</h1>
     </div>
     <div class="admin-topbar-right">
-      <span class="admin-user-badge" id="admin-user-badge">👤 —</span>
-      <button class="btn-logout" onclick="doLogout()">Sair 🚪</button>
+      <div class="topbar-user">
+        <div class="topbar-avatar" id="topbar-avatar">–</div>
+        <div class="topbar-user-info">
+          <span class="topbar-user-name" id="topbar-user-name">—</span>
+          <span class="topbar-user-role" id="topbar-user-role"></span>
+        </div>
+      </div>
+      <button class="btn-logout-icon" onclick="doLogout()" title="Sair">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
     </div>
   </div>
 
@@ -1012,6 +1041,9 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- ENCARREGADO SECTION (admin) -->
   <div class="admin-section" id="sec-encarregado">
     <div style="padding:16px">
+      <div class="section-title">🧭 Encarregado</div>
+      <div class="section-sub">Acesso e contatos para o dia da viagem</div>
+
       <div class="accordion-item" id="acc-encarregado-acesso" style="margin-bottom:12px">
         <div class="accordion-header" onclick="toggleAccordion('acc-encarregado-acesso')">
           <span>🧭 Acesso do Encarregado</span>
@@ -2296,7 +2328,7 @@ function renameAdmin(inp) {
   if (!novoNome) { inp.value = ADMIN_NAMES[user] || user; return; }
   ADMIN_NAMES[user] = novoNome;
   persistAdminsList();
-  if (user === currentAdmin) setText('admin-user-badge', '👤 ' + novoNome);
+  if (user === currentAdmin) updateTopbarUser(novoNome);
   addLog('Nome do admin "' + user + '" alterado para "' + novoNome + '"');
   showToast('✅ Nome atualizado!');
 }
@@ -2558,7 +2590,16 @@ function doAdminLogin() {
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('public-screen').style.display = 'none';
   var displayName = ADMIN_NAMES[found] || found;
-setText('admin-user-badge', '👤 ' + displayName);
+function updateTopbarUser(nome) {
+  var avatarEl = document.getElementById('topbar-avatar');
+  var nameEl = document.getElementById('topbar-user-name');
+  var roleEl = document.getElementById('topbar-user-role');
+  if (avatarEl) avatarEl.textContent = (nome || '?').trim().charAt(0).toUpperCase();
+  if (nameEl) nameEl.textContent = nome || '—';
+  if (roleEl) roleEl.textContent = isCurrentAdminOwner() ? 'Proprietário' : 'Administrador';
+}
+
+updateTopbarUser(displayName);
   loadAllData();
   loadPayConfig();
   loadLemConfig();
@@ -2602,6 +2643,15 @@ function showPublic() {
   if (pl) pl.style.display = 'none';
   var pb = document.querySelector('#public-screen .pub-body');
   if (pb) { pb.classList.remove('accordion-in'); void pb.offsetWidth; pb.classList.add('accordion-in'); }
+  cbUserInteracted = false;
+  if (cbCalloutTimer) clearInterval(cbCalloutTimer);
+  setTimeout(cbStartCalloutLoop, 1200);
+  var regForm = document.getElementById('reg-form');
+  if (regForm && !regForm.dataset.cbListenerAttached) {
+    regForm.addEventListener('focusin', markUserInteracted);
+    regForm.addEventListener('input', markUserInteracted);
+    regForm.dataset.cbListenerAttached = '1';
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -4257,8 +4307,9 @@ window.baixarBackupCompleto = baixarBackupCompleto;
 var cb = { data: {}, dias: [], isFirst: true, primeiroNome: '', totalCadastrados: 0, pendingTextHandler: null };
 
 function cbOpen() {
+  markUserInteracted();
   var callout = document.getElementById('cb-callout');
-  if (callout) callout.style.display = 'none';
+  if (callout) callout.classList.remove('show');
   var badge = document.getElementById('cb-fab-badge');
   if (badge) badge.style.display = 'none';
   cb = { data: {}, dias: [], isFirst: true, primeiroNome: '', totalCadastrados: 0, pendingTextHandler: null };
@@ -4267,6 +4318,52 @@ function cbOpen() {
   document.getElementById('cb-inputbar').style.display = 'none';
   document.getElementById('cb-overlay').className = 'active';
   cbStepInicio();
+}
+
+function cbFabClicked() {
+  var fabBtn = document.getElementById('cb-fab');
+  var glow = document.getElementById('cb-fab-glow');
+  if (fabBtn) {
+    fabBtn.classList.remove('bounce');
+    void fabBtn.offsetWidth;
+    fabBtn.classList.add('bounce');
+  }
+  if (glow) {
+    glow.classList.remove('flash');
+    void glow.offsetWidth;
+    glow.classList.add('flash');
+  }
+  cbOpen();
+}
+
+/* ═══════════════════════════════════════════
+   AVISO INTERMITENTE DO BOTÃO DE CHAT
+   Pisca até o usuário interagir (formulário ou chat)
+═══════════════════════════════════════════ */
+var cbUserInteracted = false;
+var cbCalloutTimer = null;
+
+function cbShowCalloutPulse() {
+  if (cbUserInteracted) return;
+  var callout = document.getElementById('cb-callout');
+  if (!callout) return;
+  callout.classList.add('show');
+  setTimeout(function() {
+    if (!cbUserInteracted) callout.classList.remove('show');
+  }, 2400);
+}
+
+function cbStartCalloutLoop() {
+  cbShowCalloutPulse();
+  cbCalloutTimer = setInterval(cbShowCalloutPulse, 4500);
+}
+
+function markUserInteracted() {
+  if (cbUserInteracted) return;
+  cbUserInteracted = true;
+  var callout = document.getElementById('cb-callout');
+  if (callout) callout.classList.remove('show');
+  if (cbCalloutTimer) clearInterval(cbCalloutTimer);
 }
 
 function cbClose() {
@@ -4655,6 +4752,7 @@ function cbStepFinal() {
 }
 
 window.cbOpen = cbOpen;
+window.cbFabClicked = cbFabClicked;
 window.cbClose = cbClose;
 window.cbSendTyped = cbSendTyped;
 </script>
