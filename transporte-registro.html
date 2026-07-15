@@ -4654,8 +4654,7 @@ function cbStepDias() {
   if (DAYS.length === 1) {
     cb.dias = [DAYS[0].key];
     cb.data.seats = 1;
-    cb.data.category = 'geral';
-    cbStepResumo();
+    cbStepCategoria();
     return;
   }
   cbBotSay('Quais dias você vai viajar? Pode escolher mais de um. Quando terminar, toque em "Confirmar dias".', function() {
@@ -4685,24 +4684,39 @@ function cbStepDias() {
       cbMsgUser(lbls.join(', '));
       box.innerHTML = '';
       cb.data.seats = 1;
-      cb.data.category = 'geral';
-      cbStepResumo();
+      cbStepCategoria();
     };
     box.appendChild(confirmBtn);
     setTimeout(cbScrollDown, 50);
   });
 }
 
+function cbStepCategoria() {
+  cbBotSay('Qual é a categoria dessa pessoa?', function() {
+    cbOptions([
+      { label: '👤 Geral', action: function() { cb.data.category = 'geral'; cbStepResumo(); } },
+      { label: '👨‍👩‍👧 Familiar', action: function() { cb.data.category = 'familiar'; cbStepResumo(); } },
+      { label: '🎓 Estudante', action: function() { cb.data.category = 'estudante'; cbStepResumo(); } },
+      { label: '🎟 Convidado', action: function() { cb.data.category = 'convidado'; cbStepResumo(); } },
+      { label: '💼 Trabalhador', action: function() { cb.data.category = 'trabalhador'; cbStepResumo(); } },
+      { label: '🧓 Idoso', action: function() { cb.data.category = 'idoso'; cbStepResumo(); } },
+      { label: '📋 Outro', action: function() { cb.data.category = 'outro'; cbStepResumo(); } }
+    ]);
+  });
+}
+
 function cbStepResumo() {
   var labels = [];
   for (var j = 0; j < DAYS.length; j++) { if (cb.dias.indexOf(DAYS[j].key) !== -1) labels.push(DAYS[j].label); }
-  var valorDia = 52;
+  var valorDia = getPayConfig().valorDia || 52;
   var total = labels.length * valorDia;
+  var catLabels = { geral: 'Geral', familiar: 'Familiar', estudante: 'Estudante', convidado: 'Convidado', trabalhador: 'Trabalhador', idoso: 'Idoso', outro: 'Outro' };
   cbBotSay('Perfeito! Confira os dados antes de enviar:\n\nNome: ' + cb.data.nome +
     '\nDocumento (' + cb.data.doc_type.toUpperCase() + '): ' + cb.data.doc_numero +
     '\nTelefone: ' + cb.data.tel +
     '\nDias: ' + labels.join(', ') +
-    '\nTotal estimado: R$ ' + total + ',00', function() {
+    '\nCategoria: ' + (catLabels[cb.data.category] || 'Geral') +
+    '\nTotal a pagar: R$ ' + total.toFixed(2).replace('.', ',') + ' (R$ ' + valorDia.toFixed(2).replace('.', ',') + '/dia)', function() {
       cbOptions([
         { label: '✅ Confirmar e enviar', action: cbEnviar },
         { label: '✏️ Corrigir do início', action: cbStepNome }
