@@ -310,11 +310,25 @@ input,select,textarea{font-family:inherit;outline:none}
 #cb-fab.bounce{animation:cbElasticPop 0.55s cubic-bezier(.34,1.56,.64,1)}
 @keyframes cbElasticPop{0%{transform:scale(1)}35%{transform:scale(0.82)}65%{transform:scale(1.12)}100%{transform:scale(1)}}
 #cb-fab-badge{position:fixed;right:16px;bottom:52px;width:14px;height:14px;border-radius:50%;background:#4ade80;border:2px solid #fff;z-index:501}
+
+/* SUCESSO DO CADASTRO */
+#success-overlay,#cb-success-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.35s ease;z-index:9000}
+#success-overlay.show,#cb-success-overlay.show{opacity:1;pointer-events:auto}
+#cb-success-overlay{position:absolute;z-index:600}
+.success-card{background:rgba(255,255,255,0.94);backdrop-filter:blur(10px);border-radius:22px;padding:30px 26px;width:270px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);transform:scale(0.85);transition:transform 0.35s cubic-bezier(.34,1.56,.64,1)}
+.show .success-card{transform:scale(1)}
+.success-check{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#25d366,#1fb855);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 24px rgba(37,211,102,0.4)}
+.success-check svg{stroke-dasharray:24;stroke-dashoffset:24;animation:successDrawCheck 0.5s ease-out 0.2s forwards}
+@keyframes successDrawCheck{to{stroke-dashoffset:0}}
+.success-title{font-size:17px;font-weight:800;color:#1e293b;margin-bottom:6px}
+.success-sub{font-size:12.5px;color:#64748b;line-height:1.5;margin-bottom:18px}
+.success-sub b{color:#1e3a5f}
+#success-btn-later{margin-top:8px}
 #cb-callout{position:fixed;right:78px;bottom:24px;background:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;box-shadow:0 12px 30px rgba(0,0,0,0.3);font-size:12.5px;color:#1e293b;font-weight:600;max-width:170px;line-height:1.4;z-index:500;opacity:0;transform:translateY(6px) scale(0.96);transform-origin:bottom right;transition:opacity 0.45s cubic-bezier(.16,1,.3,1),transform 0.45s cubic-bezier(.16,1,.3,1);pointer-events:none}
 #cb-callout.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
 #cb-overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0);z-index:600;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease,background .25s ease}
 #cb-overlay.active{opacity:1;pointer-events:auto;background:rgba(0,0,0,0.55)}
-#cb-panel{width:100%;max-width:420px;height:88vh;max-height:720px;background:#ECE5DD;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 30px rgba(0,0,0,0.3);border-radius:12px 12px 0 0;transform:translateY(40px) scaleY(0.94);transform-origin:bottom;opacity:0;transition:transform .32s cubic-bezier(.16,1,.3,1),opacity .28s ease}
+#cb-panel{position:relative;width:100%;max-width:420px;height:88vh;max-height:720px;background:#ECE5DD;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 30px rgba(0,0,0,0.3);border-radius:12px 12px 0 0;transform:translateY(40px) scaleY(0.94);transform-origin:bottom;opacity:0;transition:transform .32s cubic-bezier(.16,1,.3,1),opacity .28s ease}
 #cb-overlay.active #cb-panel{transform:translateY(0) scaleY(1);opacity:1}
 #cb-panel,#cb-panel *{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 
@@ -632,6 +646,20 @@ input,select,textarea{font-family:inherit;outline:none}
     </button>
   </div>
   <div id="cb-fab-badge"></div>
+
+  <!-- SUCESSO DO CADASTRO (formulário manual) -->
+  <div id="success-overlay">
+    <div class="success-card">
+      <div class="success-check">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="success-title" id="success-title">Cadastro realizado!</div>
+      <div class="success-sub" id="success-sub"></div>
+      <button class="btn-primary" id="success-btn-next" style="display:none" onclick="successContinue()">➕ Cadastrar próxima pessoa</button>
+      <button class="btn-secondary" id="success-btn-later" style="display:none;width:100%" onclick="successLater()">Concluir depois</button>
+      <button class="btn-primary" id="success-btn-done" style="display:none" onclick="successFinish()">🎫 Ver minha passagem</button>
+    </div>
+  </div>
   <div id="cb-overlay" onclick="if(event.target===this) cbClose()">
     <div id="cb-panel">
       <div id="cb-header">
@@ -648,6 +676,16 @@ input,select,textarea{font-family:inherit;outline:none}
       </div>
       <div id="cb-body"></div>
       <div id="cb-quickreplies"></div>
+      <!-- SUCESSO DO CADASTRO (chatbot) -->
+      <div id="cb-success-overlay">
+        <div class="success-card" style="width:210px;padding:22px 18px">
+          <div class="success-check" style="width:56px;height:56px">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="success-title" id="cb-success-title" style="font-size:14px">Cadastro realizado!</div>
+          <div class="success-sub" id="cb-success-sub" style="font-size:11px"></div>
+        </div>
+      </div>
       <div id="cb-inputbar" style="display:none">
         <input type="text" id="cb-text-input" placeholder="Mensagem">
         <button id="cb-send" onclick="cbSendTyped()">➤</button>
@@ -2457,6 +2495,53 @@ function setDocType(t) {
    e os acompanhantes ficam automaticamente vinculados ao titular. */
 var multiReg = { total: null, atual: 1, primeiroNome: '' };
 
+function showSuccessOverlay(nome, faltam, isLast) {
+  var overlay = document.getElementById('success-overlay');
+  var titleEl = document.getElementById('success-title');
+  var subEl = document.getElementById('success-sub');
+  var btnNext = document.getElementById('success-btn-next');
+  var btnLater = document.getElementById('success-btn-later');
+  var btnDone = document.getElementById('success-btn-done');
+  var primeiroNome = (nome || '').split(' ')[0];
+
+  if (isLast) {
+    titleEl.textContent = 'Reserva confirmada! 🎉';
+    subEl.innerHTML = '<b>' + escHtml(nome) + '</b> foi registrado(a) com sucesso.';
+    btnNext.style.display = 'none';
+    btnLater.style.display = 'none';
+    btnDone.style.display = 'block';
+  } else {
+    titleEl.textContent = 'Cadastro realizado!';
+    subEl.innerHTML = '<b>' + escHtml(nome) + '</b> foi registrado(a) com sucesso.<br>Falta cadastrar <b>' + faltam + ' pessoa(s)</b>.';
+    btnNext.style.display = 'block';
+    btnLater.style.display = 'block';
+    btnDone.style.display = 'none';
+  }
+  overlay.className = 'show';
+}
+
+function hideSuccessOverlay() {
+  document.getElementById('success-overlay').className = '';
+}
+
+function successContinue() {
+  hideSuccessOverlay();
+  var nomeInput = document.getElementById('reg-nome');
+  if (nomeInput) nomeInput.focus();
+}
+
+function successLater() {
+  hideSuccessOverlay();
+  multiReg = { total: null, atual: 1, primeiroNome: '' };
+  showToast('Você pode continuar o cadastro depois pelo mesmo formulário.');
+}
+
+function successFinish() {
+  hideSuccessOverlay();
+  showRegTab('passagem');
+  loadMyTicket();
+}
+
 function doRegister() {
   var nome = val('reg-nome');
   var doc = val('reg-doc');
@@ -2507,14 +2592,12 @@ function doRegister() {
       if (multiReg.atual < multiReg.total) {
         var faltam = multiReg.total - multiReg.atual;
         multiReg.atual++;
-        showToast('Registro salvo! Falta cadastrar ' + faltam + ' pessoa(s) 👤');
         clearRegForm();
+        showSuccessOverlay(nome, faltam, false);
       } else {
-        showToast('Reserva confirmada! 🎉');
-        showRegTab('passagem');
-        loadMyTicket();
         multiReg = { total: null, atual: 1, primeiroNome: '' };
         clearRegForm();
+        showSuccessOverlay(nome, 0, true);
       }
     })
     .catch(function(e) {
@@ -4727,6 +4810,19 @@ function cbStepResumo() {
 /* Cada cadastro (titular ou acompanhante) é enviado como um
    registro 100% independente, com todos os mesmos campos que
    um cadastro normal — nada é compartilhado ou resumido. */
+function showCbSuccessOverlay(nome, faltam, callback) {
+  var overlay = document.getElementById('cb-success-overlay');
+  var titleEl = document.getElementById('cb-success-title');
+  var subEl = document.getElementById('cb-success-sub');
+  titleEl.textContent = 'Cadastro realizado!';
+  subEl.innerHTML = '<b>' + escHtml((nome || '').split(' ')[0]) + '</b> registrado(a).' + (faltam > 0 ? '<br>Falta <b>' + faltam + ' pessoa(s)</b>.' : '');
+  overlay.className = 'show';
+  setTimeout(function() {
+    overlay.className = '';
+    setTimeout(function() { if (callback) callback(); }, 350);
+  }, 1600);
+}
+
 function cbEnviar() {
   cbShowTyping();
   var payload = {
@@ -4760,8 +4856,11 @@ function cbEnviar() {
       cb.totalCadastrados++;
       cb.isFirst = false;
       cbHideTyping();
-      cbMsgBot('✅ ' + cb.data.nome.split(' ')[0] + ', seu cadastro foi enviado com sucesso!');
-      cbStepMaisAlguem();
+      var nomeSalvo = cb.data.nome;
+      showCbSuccessOverlay(nomeSalvo, 0, function() {
+        cbMsgBot('✅ ' + nomeSalvo.split(' ')[0] + ', seu cadastro foi enviado com sucesso!');
+        cbStepMaisAlguem();
+      });
     })
     .catch(function(e) {
       console.error(e);
