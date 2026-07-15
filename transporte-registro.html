@@ -311,6 +311,18 @@ input,select,textarea{font-family:inherit;outline:none}
 @keyframes cbElasticPop{0%{transform:scale(1)}35%{transform:scale(0.82)}65%{transform:scale(1.12)}100%{transform:scale(1)}}
 #cb-fab-badge{position:fixed;right:16px;bottom:52px;width:14px;height:14px;border-radius:50%;background:#4ade80;border:2px solid #fff;z-index:501}
 
+/* CAMPO EM VERMELHO (erro de nome) */
+.field-error{border-color:#dc2626 !important;background:#fef2f2 !important;animation:fieldShake 0.4s}
+@keyframes fieldShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* AVISO NOME INCOMPLETO (estilo dynamic island) */
+.island-toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) scale(0.9);background:#0f172a;border-radius:24px;padding:10px 18px 10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 28px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.06);max-width:88%;z-index:9500;opacity:0;pointer-events:none;transition:opacity 0.3s cubic-bezier(.16,1,.3,1),transform 0.3s cubic-bezier(.16,1,.3,1)}
+.island-toast.show{opacity:1;transform:translateX(-50%) scale(1)}
+.island-icon{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#f0d789,#c9a227);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.island-text{display:flex;flex-direction:column}
+.island-title{font-size:12px;font-weight:700;color:#fff;letter-spacing:-0.1px;white-space:nowrap}
+.island-sub{font-size:10.5px;color:rgba(255,255,255,0.55);margin-top:1px;white-space:nowrap}
+
 /* SUCESSO DO CADASTRO */
 #success-overlay,#cb-success-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.35s ease;z-index:9000}
 #success-overlay.show,#cb-success-overlay.show{opacity:1;pointer-events:auto}
@@ -578,7 +590,8 @@ input,select,textarea{font-family:inherit;outline:none}
 
         <div class="form-group">
           <label>Nome completo</label>
-          <input type="text" id="reg-nome" placeholder="Seu nome completo">
+          <input type="text" id="reg-nome" placeholder="Seu nome completo" oninput="clearNomeError()">
+          <div id="nome-err-msg" style="display:none;font-size:11px;color:#dc2626;font-weight:600;margin-top:5px">⚠️ Falta o sobrenome</div>
         </div>
         <div class="form-group">
           <label id="doc-label">Número do RG</label>
@@ -648,6 +661,17 @@ input,select,textarea{font-family:inherit;outline:none}
   <div id="cb-fab-badge"></div>
 
   <!-- SUCESSO DO CADASTRO (formulário manual) -->
+  <!-- AVISO: NOME INCOMPLETO (formulário manual) -->
+  <div id="name-toast" class="island-toast">
+    <div class="island-icon">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1e1a0a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+    </div>
+    <div class="island-text">
+      <div class="island-title">Nome incompleto</div>
+      <div class="island-sub">Informe nome e sobrenome</div>
+    </div>
+  </div>
+
   <div id="success-overlay">
     <div class="success-card">
       <div class="success-check">
@@ -677,6 +701,17 @@ input,select,textarea{font-family:inherit;outline:none}
       <div id="cb-body"></div>
       <div id="cb-quickreplies"></div>
       <!-- SUCESSO DO CADASTRO (chatbot) -->
+      <!-- AVISO: NOME INCOMPLETO (chatbot) -->
+      <div id="cb-name-toast" class="island-toast" style="position:absolute">
+        <div class="island-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1e1a0a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+        </div>
+        <div class="island-text">
+          <div class="island-title">Nome incompleto</div>
+          <div class="island-sub">Informe nome e sobrenome</div>
+        </div>
+      </div>
+
       <div id="cb-success-overlay">
         <div class="success-card" style="width:210px;padding:22px 18px">
           <div class="success-check" style="width:56px;height:56px">
@@ -2542,10 +2577,62 @@ function successFinish() {
   loadMyTicket();
 }
 
+function isFullName(v) {
+  var parts = String(v || '').trim().split(/\s+/).filter(function(p) { return p.length > 0; });
+  return parts.length >= 2;
+}
+
+var nameToastTimer = null;
+function showNameToast() {
+  var t = document.getElementById('name-toast');
+  if (t) {
+    clearTimeout(nameToastTimer);
+    t.classList.remove('show');
+    void t.offsetWidth;
+    t.classList.add('show');
+    nameToastTimer = setTimeout(function() { t.classList.remove('show'); }, 3200);
+  }
+  var input = document.getElementById('reg-nome');
+  var msg = document.getElementById('nome-err-msg');
+  if (input) {
+    input.classList.remove('field-error');
+    void input.offsetWidth;
+    input.classList.add('field-error');
+  }
+  if (msg) msg.style.display = 'block';
+}
+
+function clearNomeError() {
+  var input = document.getElementById('reg-nome');
+  var msg = document.getElementById('nome-err-msg');
+  if (input) input.classList.remove('field-error');
+  if (msg) msg.style.display = 'none';
+}
+
+var cbNameToastTimer = null;
+function showCbNameToast() {
+  var t = document.getElementById('cb-name-toast');
+  if (t) {
+    clearTimeout(cbNameToastTimer);
+    t.classList.remove('show');
+    void t.offsetWidth;
+    t.classList.add('show');
+    cbNameToastTimer = setTimeout(function() { t.classList.remove('show'); }, 3200);
+  }
+  var cbInput = document.getElementById('cb-text-input');
+  if (cbInput) {
+    cbInput.classList.remove('field-error');
+    void cbInput.offsetWidth;
+    cbInput.classList.add('field-error');
+    setTimeout(function() { cbInput.classList.remove('field-error'); }, 1200);
+  }
+}
+
 function doRegister() {
   var nome = val('reg-nome');
   var doc = val('reg-doc');
   var tel = val('reg-tel');
+  if (!isFullName(nome)) { showNameToast(); return; }
   if (!nome || !doc || !tel) { showToast('Preencha nome, documento e telefone'); return; }
   if (selectedDays.length === 0) { showToast('Selecione pelo menos um dia'); return; }
 
@@ -4697,10 +4784,19 @@ function cbStepDepoisInfo() {
 
 function cbStepNome() {
   cbBotSay('Perfeito! Vamos começar seu cadastro. 😊 Qual é o seu nome completo?', function() {
-    cbInputStep('Digite seu nome completo', function(v) {
-      cb.data.nome = cbTitleCase(v);
-      cbStepDocTipo();
-    });
+    cbAskNome();
+  });
+}
+
+function cbAskNome() {
+  cbInputStep('Digite seu nome completo', function(v) {
+    if (!isFullName(v)) {
+      showCbNameToast();
+      cbAskNome();
+      return;
+    }
+    cb.data.nome = cbTitleCase(v);
+    cbStepDocTipo();
   });
 }
 
