@@ -3657,7 +3657,7 @@ function loadPontosPubData() {
 function renderPontosPubHorario() {
   var box = document.getElementById('pontos-pub-horario-badge');
   if (!box) return;
-  var onibus = getOnibusConfig();
+  var onibus = getOnibusForDay(pontosPubDayActive || 'sexta');
   if (!onibus.horario) { box.style.display = 'none'; return; }
   box.innerHTML = '<div class="pp-horario-badge">'
     + '<div class="pp-horario-ic">⏰</div>'
@@ -3684,6 +3684,7 @@ function renderPontosPubDayTabs() {
 function setPontosPubDay(key) {
   pontosPubDayActive = key;
   renderPontosPubDayTabs();
+  renderPontosPubHorario();
   renderPontosPubList();
 }
 
