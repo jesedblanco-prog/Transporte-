@@ -311,6 +311,16 @@ input,select,textarea{font-family:inherit;outline:none}
 @keyframes cbElasticPop{0%{transform:scale(1)}35%{transform:scale(0.82)}65%{transform:scale(1.12)}100%{transform:scale(1)}}
 #cb-fab-badge{position:fixed;right:16px;bottom:52px;width:14px;height:14px;border-radius:50%;background:#4ade80;border:2px solid #fff;z-index:501}
 
+/* BUSCA POR DOCUMENTO (Minha Passagem) */
+.result-row{background:#fff;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer;margin-bottom:8px}
+.result-row-name{font-size:14px;font-weight:700;color:#1e293b}
+.result-row-chevron{color:#94a3b8;font-size:14px;transition:transform 0.25s}
+.doc-detail-card{background:#fff;border-radius:14px;padding:16px;margin:-2px 0 12px;box-shadow:0 2px 10px rgba(0,0,0,0.08)}
+.doc-detail-card .d-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:12.5px}
+.doc-detail-card .d-row:last-of-type{border-bottom:none}
+.doc-detail-card .d-label{color:#94a3b8;font-weight:600}
+.doc-detail-card .d-value{color:#1e293b;font-weight:700;text-align:right}
+
 /* PONTOS PÚBLICO */
 .pp-block{background:#fff;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,0.08)}
 .pp-head{padding:14px 16px 10px;display:flex;align-items:center;gap:10px}
@@ -688,10 +698,17 @@ input,select,textarea{font-family:inherit;outline:none}
 
     <!-- MINHA PASSAGEM TAB -->
     <div id="reg-passagem" style="display:none">
+      <div style="padding:0 4px">
+        <div style="display:flex;align-items:center;background:#fff;border:2px solid #e2e8f0;border-radius:10px;padding:10px 13px;margin-bottom:12px;gap:8px">
+          <span style="color:#94a3b8">🔍</span>
+          <input type="text" id="doc-search-input" placeholder="Número do RG, CPF ou RNM" style="border:none;outline:none;flex:1;font-size:13.5px;background:transparent">
+        </div>
+        <button class="btn-primary" style="margin-bottom:16px" onclick="searchByDocumento()">Consultar</button>
+        <div id="doc-search-results"></div>
+      </div>
       <div id="ticket-not-found" style="text-align:center;padding:40px 20px">
         <div style="font-size:48px;margin-bottom:12px">🎫</div>
-        <p style="color:#64748b;font-size:14px">Você ainda não tem uma reserva registrada neste aparelho.</p>
-        <button class="btn-primary" style="margin-top:16px;max-width:200px;margin-left:auto;margin-right:auto;display:block" onclick="showRegTab('cadastro')">Fazer cadastro</button>
+        <p style="color:#64748b;font-size:14px">Nenhum registro encontrado. Digite seu documento acima para consultar.</p>
       </div>
       <div id="ticket-found" style="display:none"></div>
     </div>
@@ -2773,6 +2790,75 @@ function clearRegForm() {
 /* ═══════════════════════════════════════════
    MY TICKET
 ═══════════════════════════════════════════ */
+function normalizeDoc(v) {
+  return String(v || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+}
+
+function searchByDocumento() {
+  var termo = normalizeDoc(document.getElementById('doc-search-input').value);
+  var resultsBox = document.getElementById('doc-search-results');
+  if (!termo) { resultsBox.innerHTML = ''; return; }
+  resultsBox.innerHTML = '<p style="text-align:center;color:#94a3b8;font-size:12.5px;padding:10px">Buscando...</p>';
+
+  sbGet('pasajeros', 'select=*')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(data) {
+      var matches = (data || []).filter(function(p) {
+        return (p.rg && normalizeDoc(p.rg) === termo) ||
+               (p.cpf && normalizeDoc(p.cpf) === termo) ||
+               (p.rnm && normalizeDoc(p.rnm) === termo);
+      });
+      renderDocSearchResults(matches);
+    })
+    .catch(function() {
+      resultsBox.innerHTML = '<p style="text-align:center;color:#dc2626;font-size:12.5px;padding:10px">Erro ao consultar. Verifique sua internet.</p>';
+    });
+}
+
+function renderDocSearchResults(matches) {
+  var box = document.getElementById('doc-search-results');
+  if (!matches.length) {
+    box.innerHTML = '<p style="text-align:center;color:#94a3b8;font-size:12.5px;padding:16px">Nenhum registro encontrado com esse documento.</p>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < matches.length; i++) {
+    var p = matches[i];
+    html += '<div class="result-row" onclick="toggleDocResult(\'' + p.id + '\')">'
+      + '<div class="result-row-name">' + escHtml(p.nome || '') + '</div>'
+      + '<div class="result-row-chevron" id="chevron-' + p.id + '">›</div>'
+      + '</div>'
+      + '<div id="detail-' + p.id + '" style="display:none"></div>';
+  }
+  box.innerHTML = html;
+  window.__docSearchMatches = matches;
+}
+
+function toggleDocResult(id) {
+  var detailBox = document.getElementById('detail-' + id);
+  var chevron = document.getElementById('chevron-' + id);
+  if (!detailBox) return;
+  if (detailBox.style.display === 'block') {
+    detailBox.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+    return;
+  }
+  var p = (window.__docSearchMatches || []).filter(function(x) { return String(x.id) === String(id); })[0];
+  if (!p) return;
+  var status = normalizeStatus(p.payment_status);
+  var badgeClass = status === 'pago' ? 'badge-pago' : status === 'parcial' ? 'badge-parcial' : 'badge-nao-pago';
+  var badgeLabel = status === 'pago' ? '✅ Pago' : status === 'parcial' ? '⚡ Parcial (R$ ' + (parseFloat(p.valor_abonado) || 0).toFixed(2).replace('.', ',') + ' abonado)' : '❌ Não pago';
+  detailBox.innerHTML = '<div class="doc-detail-card">'
+    + '<div class="d-row"><div class="d-label">Documento</div><div class="d-value">' + escHtml(getDocPlain(p)) + '</div></div>'
+    + '<div class="d-row"><div class="d-label">Telefone</div><div class="d-value">' + escHtml(p.tel || '—') + '</div></div>'
+    + '<div class="d-row"><div class="d-label">Dias</div><div class="d-value">' + escHtml(getDiasLabel(p)) + '</div></div>'
+    + '<div class="d-row"><div class="d-label">Assentos</div><div class="d-value">' + (p.seats_needed || 1) + '</div></div>'
+    + '<span class="pax-badge ' + badgeClass + '" style="margin-top:10px">' + badgeLabel + '</span>'
+    + '</div>';
+  detailBox.style.display = 'block';
+  chevron.style.transform = 'rotate(90deg)';
+}
+
 function loadMyTicket() {
   var myId = localStorage.getItem('tr_my_id');
   var found = document.getElementById('ticket-found');
@@ -2986,6 +3072,13 @@ function showRegTab(tab) {
   document.getElementById('reg-passagem').style.display = tab === 'passagem' ? 'block' : 'none';
   document.getElementById('tab-cadastro').className = 'reg-tab' + (tab === 'cadastro' ? ' active' : '');
   document.getElementById('tab-passagem').className = 'reg-tab' + (tab === 'passagem' ? ' active' : '');
+  var fabWrap = document.getElementById('cb-fab-wrap');
+  var fabBadge = document.getElementById('cb-fab-badge');
+  var callout = document.getElementById('cb-callout');
+  var showFab = tab !== 'passagem';
+  if (fabWrap) fabWrap.style.display = showFab ? 'block' : 'none';
+  if (fabBadge) fabBadge.style.display = showFab ? 'block' : 'none';
+  if (callout && !showFab) callout.classList.remove('show');
   if (tab === 'passagem') loadMyTicket();
 }
 
@@ -4803,6 +4896,8 @@ var cbCalloutTimer = null;
 
 function cbShowCalloutPulse() {
   if (cbUserInteracted) return;
+  var passagemTab = document.getElementById('reg-passagem');
+  if (passagemTab && passagemTab.style.display === 'block') return;
   var callout = document.getElementById('cb-callout');
   if (!callout) return;
   callout.classList.add('show');
