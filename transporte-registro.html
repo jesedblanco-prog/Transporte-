@@ -1312,15 +1312,20 @@ input,select,textarea{font-family:inherit;outline:none}
         <button class="btn-primary" style="background:#16a34a" onclick="generateRelatorioExcel()">📊 Gerar Relatório Excel</button>
       </div>
 
-      <div class="card" style="margin-top:12px">
-        <div class="card-title">📍 Pontos de Encontro (link público)</div>
+      <div class="accordion-item" id="acc-pontos-pub" style="margin-top:12px">
+        <div class="accordion-header" onclick="toggleAccordion('acc-pontos-pub')">
+          <span>📍 Pontos de Encontro (link público)</span>
+          <span class="accordion-caret">▾</span>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">
         <p style="font-size:13px;color:#64748b;margin-bottom:12px">Link com senha para compartilhar no grupo do WhatsApp — os passageiros veem os pontos, mapas do Google e quem está em cada um.</p>
         <div class="form-group">
           <label>Senha do link</label>
-          <input type="text" id="pontos-pub-cfg-pw" placeholder="19191919">
+          <input type="text" id="pontos-pub-cfg-pw" placeholder="1919">
         </div>
         <button class="btn-primary" style="margin-bottom:8px" onclick="savePontosPubPw()">💾 Salvar senha</button>
         <button class="btn-primary" style="background:#25d366" onclick="shareWhatsappPontos()">💬 Compartilhar no WhatsApp</button>
+        </div></div>
       </div>
     </div>
   </div>
@@ -3509,7 +3514,7 @@ function togglePontosPubPw() {
 function doPontosPubLogin() {
   var pw = document.getElementById('pontos-pub-pw').value;
   var cfg = getPontosPubPwConfig();
-  var validPw = cfg.pw || '19191919';
+  var validPw = cfg.pw || '1919';
   if (pw !== validPw) {
     document.getElementById('pontos-pub-login-err').style.display = 'block';
     return;
@@ -3622,7 +3627,7 @@ function savePontosPubPw() {
 function loadPontosPubPwPanel() {
   var cfg = getPontosPubPwConfig();
   var inp = document.getElementById('pontos-pub-cfg-pw');
-  if (inp) inp.value = cfg.pw || '19191919';
+  if (inp) inp.value = cfg.pw || '1919';
 }
 
 function loadPontosPubPwFromServer() {
