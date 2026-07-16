@@ -3574,12 +3574,15 @@ function mapEmbedUrl(endereco) {
   return 'https://www.google.com/maps?q=' + encodeURIComponent(endereco || '') + '&output=embed';
 }
 
+var pontosPubRenderedSig = '';
+
 function renderPontosPubList() {
   var box = document.getElementById('pontos-pub-list');
   if (!box) return;
   var pontosDia = getPontosForDay(pontosPubDayActive);
   if (!pontosDia.length) {
     box.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:20px">Nenhum ponto cadastrado para este dia.</p>';
+    pontosPubRenderedSig = '';
     return;
   }
 
@@ -3592,27 +3595,42 @@ function renderPontosPubList() {
     }
   }
 
-  var html = '';
-  for (var k = 0; k < pontosDia.length; k++) {
-    var numero = String(pontosDia[k].numero);
-    var endereco = pontosDia[k].endereco || 'sem endereço definido';
-    var pax = dayPax.filter(function(p) { return String(p.ponto || '') === numero; });
-    pax.sort(function(a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+  // Assinatura do dia + pontos (número+endereço). Só refaz o mapa se isso mudar.
+  var sig = pontosPubDayActive + '|' + pontosDia.map(function(p) { return p.numero + ':' + (p.endereco || ''); }).join(',');
 
-    html += '<div class="pp-block">'
-      + '<div class="pp-head"><div class="pp-num">' + escHtml(numero) + '</div><div class="pp-name">' + escHtml(endereco) + '</div></div>'
-      + '<iframe class="pp-map" loading="lazy" src="' + mapEmbedUrl(endereco) + '"></iframe>'
-      + '<div class="pp-pax"><div class="pp-pax-count">' + pax.length + ' passageiro(s)</div>';
+  if (sig !== pontosPubRenderedSig) {
+    // Recria tudo (inclusive os mapas) — só acontece quando os pontos realmente mudam
+    var html = '';
+    for (var k = 0; k < pontosDia.length; k++) {
+      var numero = String(pontosDia[k].numero);
+      var endereco = pontosDia[k].endereco || 'sem endereço definido';
+      html += '<div class="pp-block">'
+        + '<div class="pp-head"><div class="pp-num">' + escHtml(numero) + '</div><div class="pp-name">' + escHtml(endereco) + '</div></div>'
+        + '<iframe class="pp-map" loading="lazy" src="' + mapEmbedUrl(endereco) + '"></iframe>'
+        + '<div class="pp-pax" id="pp-pax-' + escHtml(numero) + '"></div>'
+        + '</div>';
+    }
+    box.innerHTML = html;
+    pontosPubRenderedSig = sig;
+  }
+
+  // Atualiza só a lista de passageiros de cada ponto, sem tocar no mapa
+  for (var k2 = 0; k2 < pontosDia.length; k2++) {
+    var numero2 = String(pontosDia[k2].numero);
+    var paxBox = document.getElementById('pp-pax-' + numero2);
+    if (!paxBox) continue;
+    var pax = dayPax.filter(function(p) { return String(p.ponto || '') === numero2; });
+    pax.sort(function(a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+    var paxHtml = '<div class="pp-pax-count">' + pax.length + ' passageiro(s)</div>';
     if (pax.length) {
       for (var m = 0; m < pax.length; m++) {
-        html += '<div class="pp-pax-row"><div class="pp-pax-dot"></div>' + escHtml(pax[m].nome || '') + '</div>';
+        paxHtml += '<div class="pp-pax-row"><div class="pp-pax-dot"></div>' + escHtml(pax[m].nome || '') + '</div>';
       }
     } else {
-      html += '<div style="font-size:12px;color:#cbd5e1">Nenhum passageiro atribuído ainda</div>';
+      paxHtml += '<div style="font-size:12px;color:#cbd5e1">Nenhum passageiro atribuído ainda</div>';
     }
-    html += '</div></div>';
+    paxBox.innerHTML = paxHtml;
   }
-  box.innerHTML = html;
 }
 
 function savePontosPubPw() {
