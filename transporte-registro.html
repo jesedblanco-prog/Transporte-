@@ -311,6 +311,18 @@ input,select,textarea{font-family:inherit;outline:none}
 @keyframes cbElasticPop{0%{transform:scale(1)}35%{transform:scale(0.82)}65%{transform:scale(1.12)}100%{transform:scale(1)}}
 #cb-fab-badge{position:fixed;right:16px;bottom:52px;width:14px;height:14px;border-radius:50%;background:#4ade80;border:2px solid #fff;z-index:501}
 
+/* PONTOS PÚBLICO */
+.pp-block{background:#fff;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,0.08)}
+.pp-head{padding:14px 16px 10px;display:flex;align-items:center;gap:10px}
+.pp-num{width:30px;height:30px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
+.pp-name{font-size:14.5px;font-weight:800;color:#1e293b}
+.pp-map{width:100%;height:170px;border:0;display:block;background:#dbe4ee}
+.pp-pax{padding:12px 16px 16px}
+.pp-pax-count{font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:8px}
+.pp-pax-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px;color:#334155}
+.pp-pax-row:last-child{border-bottom:none}
+.pp-pax-dot{width:6px;height:6px;border-radius:50%;background:#c9a227;flex-shrink:0}
+
 /* CAMPO EM VERMELHO (erro de nome) */
 .field-error{border-color:#dc2626 !important;background:#fef2f2 !important;animation:fieldShake 0.4s}
 @keyframes fieldShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
@@ -434,6 +446,42 @@ input,select,textarea{font-family:inherit;outline:none}
     </div>
     <div id="capitao-login-err" class="login-error">Senha incorreta. Tente novamente.</div>
     <button class="btn-login" onclick="doCapitaoLogin()">Entrar →</button>
+  </div>
+</div>
+
+<!-- PONTOS PÚBLICO GATE -->
+<div id="pontos-pub-login-screen" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#1e3a5f 0%,#142c47 100%);z-index:8500;align-items:center;justify-content:center;padding:16px">
+  <div class="login-card">
+    <div style="font-size:34px;text-align:center;margin-bottom:6px">📍</div>
+    <h2 style="text-align:center">Pontos de Encontro</h2>
+    <p style="text-align:center">Digite a senha para ver os pontos e mapas</p>
+    <div class="login-field">
+      <label>Senha</label>
+      <div class="login-field-pw">
+        <input type="password" id="pontos-pub-pw" placeholder="••••••••">
+        <button class="toggle-pw" onclick="togglePontosPubPw()">👁</button>
+      </div>
+    </div>
+    <div id="pontos-pub-login-err" class="login-error">Senha incorreta. Tente novamente.</div>
+    <button class="btn-login" onclick="doPontosPubLogin()">Entrar →</button>
+  </div>
+</div>
+
+<!-- PONTOS PÚBLICO SCREEN -->
+<div id="pontos-pub-screen" style="display:none;background:#f0f4ff;min-height:100vh">
+  <div class="admin-topbar" style="position:sticky">
+    <div class="admin-topbar-left">
+      <div class="admin-bus-icon">📍</div>
+      <h1>Pontos de Encontro</h1>
+    </div>
+  </div>
+  <div style="padding:16px 16px 40px">
+    <div style="display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:#25d366;font-weight:700;margin-bottom:12px">
+      <span style="width:6px;height:6px;border-radius:50%;background:#25d366;display:inline-block"></span>
+      Atualizado em tempo real
+    </div>
+    <div class="access-tabs" id="pontos-pub-day-tabs" style="margin-bottom:14px"></div>
+    <div id="pontos-pub-list"></div>
   </div>
 </div>
 
@@ -1262,6 +1310,17 @@ input,select,textarea{font-family:inherit;outline:none}
         </div>
         <button class="btn-primary" style="margin-bottom:8px" onclick="generateRelatorioPDF()">📄 Gerar Relatório PDF</button>
         <button class="btn-primary" style="background:#16a34a" onclick="generateRelatorioExcel()">📊 Gerar Relatório Excel</button>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="card-title">📍 Pontos de Encontro (link público)</div>
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px">Link com senha para compartilhar no grupo do WhatsApp — os passageiros veem os pontos, mapas do Google e quem está em cada um.</p>
+        <div class="form-group">
+          <label>Senha do link</label>
+          <input type="text" id="pontos-pub-cfg-pw" placeholder="19191919">
+        </div>
+        <button class="btn-primary" style="margin-bottom:8px" onclick="savePontosPubPw()">💾 Salvar senha</button>
+        <button class="btn-primary" style="background:#25d366" onclick="shareWhatsappPontos()">💬 Compartilhar no WhatsApp</button>
       </div>
     </div>
   </div>
@@ -2914,7 +2973,7 @@ function showSection(name) {
   }
   if (name === 'encarregado') { loadCapitaoConfigPanel(); renderEncarregadosRosterAdmin(); }
   if (name === 'onibus') { loadOnibusConfig(); loadPontosConfigPanel(); }
-  if (name === 'relatorios') { loadRelatorioPrefsPanel(); }
+  if (name === 'relatorios') { loadRelatorioPrefsPanel(); loadPontosPubPwPanel(); }
 }
 
 function showRegTab(tab) {
@@ -3429,6 +3488,169 @@ function doCapitaoLogout() {
   if (capitaoRefreshTimer) clearInterval(capitaoRefreshTimer);
   document.getElementById('capitao-screen').style.display = 'none';
   showCapitaoGate();
+}
+
+/* ═══════════════════════════════════════════
+   PONTOS DE ENCONTRO — LINK PÚBLICO (?pontos=1)
+═══════════════════════════════════════════ */
+var pontosPubDayActive = null;
+var pontosPubRefreshTimer = null;
+var pontosPubPax = [];
+
+function getPontosPubPwConfig() {
+  try { return JSON.parse(localStorage.getItem('tr_pontos_pub_config')) || {}; } catch (e) { return {}; }
+}
+
+function togglePontosPubPw() {
+  var inp = document.getElementById('pontos-pub-pw');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function doPontosPubLogin() {
+  var pw = document.getElementById('pontos-pub-pw').value;
+  var cfg = getPontosPubPwConfig();
+  var validPw = cfg.pw || '19191919';
+  if (pw !== validPw) {
+    document.getElementById('pontos-pub-login-err').style.display = 'block';
+    return;
+  }
+  document.getElementById('pontos-pub-login-err').style.display = 'none';
+  localStorage.setItem('tr_pontos_pub_auth', '1');
+  showPontosPublicScreen();
+}
+
+function showPontosPublicGate() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('pontos-pub-screen').style.display = 'none';
+  document.getElementById('pontos-pub-login-screen').style.display = 'flex';
+  document.getElementById('pontos-pub-pw').value = '';
+  document.getElementById('pontos-pub-login-err').style.display = 'none';
+}
+
+function showPontosPublicScreen() {
+  document.getElementById('pontos-pub-login-screen').style.display = 'none';
+  document.getElementById('pontos-pub-screen').style.display = 'block';
+  loadPontosPubData();
+  if (pontosPubRefreshTimer) clearInterval(pontosPubRefreshTimer);
+  pontosPubRefreshTimer = setInterval(loadPontosPubData, 15000);
+}
+
+function loadPontosPubData() {
+  loadPontosConfigFromServer();
+  sbGet('pasajeros', 'select=nome,dias,dia,ponto&order=nome.asc')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(data) {
+      pontosPubPax = Array.isArray(data) ? data : [];
+      renderPontosPubDayTabs();
+      renderPontosPubList();
+    })
+    .catch(function() {});
+}
+
+function renderPontosPubDayTabs() {
+  var box = document.getElementById('pontos-pub-day-tabs');
+  if (!box) return;
+  if (!pontosPubDayActive && DAYS.length) pontosPubDayActive = DAYS[0].key;
+  var html = '';
+  for (var i = 0; i < DAYS.length; i++) {
+    var d = DAYS[i];
+    html += '<button type="button" class="access-tab' + (d.key === pontosPubDayActive ? ' active' : '') + '" onclick="setPontosPubDay(\'' + d.key + '\')">' + escHtml(d.label) + '</button>';
+  }
+  box.innerHTML = html;
+}
+
+function setPontosPubDay(key) {
+  pontosPubDayActive = key;
+  renderPontosPubDayTabs();
+  renderPontosPubList();
+}
+
+function mapEmbedUrl(endereco) {
+  return 'https://www.google.com/maps?q=' + encodeURIComponent(endereco || '') + '&output=embed';
+}
+
+function renderPontosPubList() {
+  var box = document.getElementById('pontos-pub-list');
+  if (!box) return;
+  var pontosDia = getPontosForDay(pontosPubDayActive);
+  if (!pontosDia.length) {
+    box.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:20px">Nenhum ponto cadastrado para este dia.</p>';
+    return;
+  }
+
+  var dayPax = [];
+  for (var i = 0; i < pontosPubPax.length; i++) {
+    var p = pontosPubPax[i];
+    var dias = parseDias(p.dias || p.dia);
+    for (var j = 0; j < dias.length; j++) {
+      if (normalizeDayKey(dias[j]) === pontosPubDayActive) { dayPax.push(p); break; }
+    }
+  }
+
+  var html = '';
+  for (var k = 0; k < pontosDia.length; k++) {
+    var numero = String(pontosDia[k].numero);
+    var endereco = pontosDia[k].endereco || 'sem endereço definido';
+    var pax = dayPax.filter(function(p) { return String(p.ponto || '') === numero; });
+    pax.sort(function(a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+
+    html += '<div class="pp-block">'
+      + '<div class="pp-head"><div class="pp-num">' + escHtml(numero) + '</div><div class="pp-name">' + escHtml(endereco) + '</div></div>'
+      + '<iframe class="pp-map" loading="lazy" src="' + mapEmbedUrl(endereco) + '"></iframe>'
+      + '<div class="pp-pax"><div class="pp-pax-count">' + pax.length + ' passageiro(s)</div>';
+    if (pax.length) {
+      for (var m = 0; m < pax.length; m++) {
+        html += '<div class="pp-pax-row"><div class="pp-pax-dot"></div>' + escHtml(pax[m].nome || '') + '</div>';
+      }
+    } else {
+      html += '<div style="font-size:12px;color:#cbd5e1">Nenhum passageiro atribuído ainda</div>';
+    }
+    html += '</div></div>';
+  }
+  box.innerHTML = html;
+}
+
+function savePontosPubPw() {
+  var pw = document.getElementById('pontos-pub-cfg-pw').value;
+  if (!pw || pw.length < 4) { showToast('Senha muito curta (mínimo 4 caracteres)'); return; }
+  localStorage.setItem('tr_pontos_pub_config', JSON.stringify({ pw: pw }));
+  sbConfigUpsert('pw_pontos_publico', pw).catch(function() {});
+  addLog('Senha do link de pontos alterada por ' + (currentAdmin || ''));
+  showToast('✅ Senha salva!');
+}
+
+function loadPontosPubPwPanel() {
+  var cfg = getPontosPubPwConfig();
+  var inp = document.getElementById('pontos-pub-cfg-pw');
+  if (inp) inp.value = cfg.pw || '19191919';
+}
+
+function loadPontosPubPwFromServer() {
+  sbFetch('config?select=value&key=eq.pw_pontos_publico', 'GET')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      if (rows && rows[0] && rows[0].value) {
+        localStorage.setItem('tr_pontos_pub_config', JSON.stringify({ pw: rows[0].value }));
+      }
+    })
+    .catch(function() {});
+}
+
+function copyPontosPubLink() {
+  var url = window.location.origin + window.location.pathname + '?pontos=1';
+  var texto = '📍 Pontos de encontro do transporte:\n' + url;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto).then(function() { showToast('✅ Link copiado! Cole no grupo do WhatsApp.'); })
+      .catch(function() { showToast(texto); });
+  } else {
+    showToast(texto);
+  }
+}
+
+function shareWhatsappPontos() {
+  var url = window.location.origin + window.location.pathname + '?pontos=1';
+  var texto = encodeURIComponent('📍 Pontos de encontro do transporte:\n' + url);
+  window.open('https://wa.me/?text=' + texto, '_blank');
 }
 
 function showCapitaoGate() {
@@ -4355,12 +4577,17 @@ window.addEventListener('load', function() {
   loadCbConfigFromServer();
   loadCapitaoAnexoFromServer();
   loadEncarregadosRosterFromServer();
+  loadPontosPubPwFromServer();
   var isCapitao = /[?&]capitao=1/.test(window.location.search);
+  var isPontosPublic = /[?&]pontos=1/.test(window.location.search);
   setTimeout(function() {
     document.getElementById('loading-screen').style.display = 'none';
     if (isCapitao) {
       if (localStorage.getItem('tr_capitao_auth') === '1') { showCapitaoScreen(); }
       else { showCapitaoGate(); }
+    } else if (isPontosPublic) {
+      if (localStorage.getItem('tr_pontos_pub_auth') === '1') { showPontosPublicScreen(); }
+      else { showPontosPublicGate(); }
     } else if (localStorage.getItem('tr_pub_auth') === '1') {
       showPublic();
     } else {
@@ -4371,6 +4598,9 @@ window.addEventListener('load', function() {
 
 var __capitaoPwInp = document.getElementById('capitao-pw');
 if (__capitaoPwInp) __capitaoPwInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') doCapitaoLogin(); });
+
+var __pontosPubPwInp = document.getElementById('pontos-pub-pw');
+if (__pontosPubPwInp) __pontosPubPwInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') doPontosPubLogin(); });
 
 var __pubPwInp = document.getElementById('pub-login-pw');
 if (__pubPwInp) __pubPwInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') doPublicLogin(); });
