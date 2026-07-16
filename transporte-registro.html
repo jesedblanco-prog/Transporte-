@@ -322,6 +322,12 @@ input,select,textarea{font-family:inherit;outline:none}
 .doc-detail-card .d-value{color:#1e293b;font-weight:700;text-align:right}
 
 /* PONTOS PÚBLICO */
+.pp-horario-badge{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#1e3a5f,#142c47);border-radius:14px;padding:13px 16px;margin-bottom:16px;box-shadow:0 6px 18px rgba(30,58,95,0.3);animation:ppBreatheWhole 2s ease-in-out infinite;transform-origin:center}
+@keyframes ppBreatheWhole{0%,100%{transform:scale(1);box-shadow:0 6px 18px rgba(30,58,95,0.3)}50%{transform:scale(1.035);box-shadow:0 10px 26px rgba(201,162,39,0.5)}}
+.pp-horario-ic{width:34px;height:34px;border-radius:50%;background:rgba(201,162,39,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.pp-horario-text .lb{font-size:10px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.pp-horario-text .val{font-size:17px;color:#fff;font-weight:800}
+.pp-horario-text .arrive{font-size:10.5px;color:#f0d789;font-weight:700;margin-top:2px;line-height:1.35}
 .pp-block{background:#fff;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,0.08)}
 .pp-head{padding:14px 16px 10px;display:flex;align-items:center;gap:10px}
 .pp-num{width:30px;height:30px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
@@ -490,6 +496,7 @@ input,select,textarea{font-family:inherit;outline:none}
       <span style="width:6px;height:6px;border-radius:50%;background:#25d366;display:inline-block"></span>
       Atualizado em tempo real
     </div>
+    <div id="pontos-pub-horario-badge" style="display:none"></div>
     <div class="access-tabs" id="pontos-pub-day-tabs" style="margin-bottom:14px"></div>
     <div id="pontos-pub-list"></div>
   </div>
@@ -3635,6 +3642,8 @@ function showPontosPublicScreen() {
 
 function loadPontosPubData() {
   loadPontosConfigFromServer();
+  loadOnibusConfigFromServer();
+  renderPontosPubHorario();
   sbGet('pasajeros', 'select=nome,dias,dia,ponto&order=nome.asc')
     .then(function(r) { return r.ok ? r.json() : []; })
     .then(function(data) {
@@ -3643,6 +3652,21 @@ function loadPontosPubData() {
       renderPontosPubList();
     })
     .catch(function() {});
+}
+
+function renderPontosPubHorario() {
+  var box = document.getElementById('pontos-pub-horario-badge');
+  if (!box) return;
+  var onibus = getOnibusConfig();
+  if (!onibus.horario) { box.style.display = 'none'; return; }
+  box.innerHTML = '<div class="pp-horario-badge">'
+    + '<div class="pp-horario-ic">⏰</div>'
+    + '<div class="pp-horario-text">'
+    + '<div class="lb">Horário de saída</div>'
+    + '<div class="val">' + escHtml(onibus.horario) + '</div>'
+    + '<div class="arrive">Agradecemos se puder chegar com 15 minutos de antecedência</div>'
+    + '</div></div>';
+  box.style.display = 'block';
 }
 
 function renderPontosPubDayTabs() {
