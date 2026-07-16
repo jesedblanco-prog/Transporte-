@@ -782,7 +782,7 @@ input,select,textarea{font-family:inherit;outline:none}
   <div class="admin-topbar">
     <div class="admin-topbar-left">
       <div class="admin-bus-icon">🚌</div>
-      <h1>Painel Admin · Congresso Itatiba</h1>
+      <h1 id="admin-main-title">Painel Admin · Congresso Itatiba</h1>
     </div>
     <div class="admin-topbar-right">
       <div class="topbar-user">
@@ -1609,7 +1609,7 @@ function applyEventoConfig() {
   renderIntroTitle(appTitle);
   var headerEl = document.querySelector('.pub-header p');
   if (headerEl) headerEl.textContent = nomeEvento + ' · Reserve seu assento';
-  var adminEl = document.querySelector('.admin-topbar h1');
+  var adminEl = document.getElementById('admin-main-title');
   if (adminEl) adminEl.textContent = 'Painel Admin · ' + nomeEvento;
 
   var pubTitleEl = document.querySelector('#public-login-screen h2');
