@@ -1677,8 +1677,9 @@ function iniciarNovoEvento() {
     showToast('Senha incorreta. Operação cancelada.');
     return;
   }
-  sbDelete('pasajeros', 'id=neq.00000000-0000-0000-0000-000000000000')
-    .then(function() {
+  sbDelete('pasajeros', 'id=gte.0')
+    .then(function(r) {
+      if (!r.ok) { throw new Error('delete failed'); }
       allPax = [];
       localStorage.removeItem('tr_pay_config');
       localStorage.removeItem('tr_lem_config');
@@ -1690,7 +1691,7 @@ function iniciarNovoEvento() {
       showToast('✅ Sistema pronto para novo evento!');
       showSection('config');
     })
-    .catch(function() { showToast('Erro ao apagar passageiros.'); });
+    .catch(function() { showToast('❌ Erro ao apagar passageiros. Nada foi apagado.'); });
 }
 
 /* ═══════════════════════════════════════════
@@ -4560,8 +4561,9 @@ function confirmDeleteAll() {
     showToast('Senha incorreta. Operação cancelada.');
     return;
   }
-  sbDelete('pasajeros', 'id=neq.00000000-0000-0000-0000-000000000000')
-    .then(function() {
+  sbDelete('pasajeros', 'id=gte.0')
+    .then(function(r) {
+      if (!r.ok) { throw new Error('delete failed'); }
       allPax = [];
       renderDashboard();
       renderPaxList();
@@ -4569,7 +4571,7 @@ function confirmDeleteAll() {
       addLog('TODOS os passageiros apagados por ' + currentAdmin);
       showToast('Todos os passageiros foram apagados.');
     })
-    .catch(function() { showToast('Erro ao apagar.'); });
+    .catch(function() { showToast('❌ Erro ao apagar. Nada foi apagado.'); });
 }
 
 /* ═══════════════════════════════════════════
