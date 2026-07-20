@@ -1677,7 +1677,13 @@ function iniciarNovoEvento() {
     showToast('Senha incorreta. Operação cancelada.');
     return;
   }
-  sbDelete('pasajeros', 'id=gte.0')
+  sbGet('pasajeros', 'select=id')
+    .then(function(r) { return r.ok ? r.json() : Promise.reject(new Error('fetch failed')); })
+    .then(function(rows) {
+      if (!rows.length) return { ok: true };
+      var ids = rows.map(function(row) { return row.id; }).join(',');
+      return sbDelete('pasajeros', 'id=in.(' + ids + ')');
+    })
     .then(function(r) {
       if (!r.ok) { throw new Error('delete failed'); }
       allPax = [];
@@ -4561,7 +4567,13 @@ function confirmDeleteAll() {
     showToast('Senha incorreta. Operação cancelada.');
     return;
   }
-  sbDelete('pasajeros', 'id=gte.0')
+  sbGet('pasajeros', 'select=id')
+    .then(function(r) { return r.ok ? r.json() : Promise.reject(new Error('fetch failed')); })
+    .then(function(rows) {
+      if (!rows.length) return { ok: true };
+      var ids = rows.map(function(row) { return row.id; }).join(',');
+      return sbDelete('pasajeros', 'id=in.(' + ids + ')');
+    })
     .then(function(r) {
       if (!r.ok) { throw new Error('delete failed'); }
       allPax = [];
