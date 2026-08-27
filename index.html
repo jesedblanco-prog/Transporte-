@@ -310,6 +310,7 @@
   .icon-btn{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; border:1px solid var(--hairline-2); background:var(--surface-2); flex:none; cursor:pointer; }
   .icon-btn.whats{ color:var(--st-good); }
   .icon-btn.call{ color:var(--brand); }
+  .icon-btn.danger{ color:var(--st-bad, #d64545); }
   .icon-btn svg{ width:16px; height:16px; }
 
   .bot-line{ display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--hairline); font-size:0.82rem; }
@@ -1102,6 +1103,17 @@
     }
   }
 
+  async function dbDeleteMeetingPoint(id){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    try{
+      var res = await supa.from("meeting_points").delete().eq("id", id);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
+  }
+
   async function dbInsertNotification(n){
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
     try{
@@ -1248,7 +1260,13 @@
     "Alterações salvas — já visíveis para passageiros e encarregados.":"Cambios guardados — ya visibles para pasajeros y encargados.",
     "Pré-visualizar tela:":"Vista previa de pantalla:",
     "Login":"Inicio de sesión", "Cadastro":"Registro", "Portal do Passageiro":"Portal del Pasajero",
-    "Painel do Encarregado":"Panel del Encargado", "ERP Administrativo":"ERP Administrativo"
+    "Painel do Encarregado":"Panel del Encargado", "ERP Administrativo":"ERP Administrativo",
+    "Excluir":"Eliminar", "Eliminar":"Eliminar", "Excluir cadastro":"Eliminar inscripción",
+    "Excluir ponto de encontro":"Eliminar punto de encuentro",
+    "Deseja realmente excluir o ponto de encontro":"¿Desea realmente eliminar el punto de encuentro",
+    "Não foi possível excluir: ":"No fue posible eliminar: ",
+    "Pontos cadastrados no sistema":"Puntos registrados en el sistema",
+    "Ver no mapa":"Ver en el mapa"
   };
   function t(s){
     if(STATE.lang === "es" && STRINGS_ES.hasOwnProperty(s)) return STRINGS_ES[s];
@@ -1740,7 +1758,8 @@
         return '<div class="day-panel" data-day-panel="'+d+'" style="'+(i===0?'':'display:none;')+'">'+cards+'</div>';
       }).join('');
       var realPoints = (DATA.meetingPoints||[]).map(function(mp){
-        return '<div class="encontro-card"><span class="encontro-time">—</span><div class="encontro-body"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+'</span></div><a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+(mp.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((mp.address||mp.name)+" Itatiba SP")))+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>';
+        return '<div class="encontro-card"><span class="encontro-time">—</span><div class="encontro-body"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+'</span></div><a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+(mp.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((mp.address||mp.name)+" Itatiba SP")))+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a>'+
+          '<button type="button" class="icon-btn danger del-ponto" data-id="'+mp.id+'" data-name="'+mp.name.replace(/"/g,'&quot;')+'" title="'+t("Eliminar")+'"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7m2 0v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7h10Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
       }).join('');
       var realBlock = realPoints ? ('<div class="card-pad" style="padding-top:0;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600;margin:14px 0 8px;">'+t("Pontos cadastrados no sistema")+'</div>'+realPoints+'</div>') : '';
       return '<div class="card card-pad">'+
@@ -1767,6 +1786,16 @@
           rerenderViews();
         });
       }
+      root.querySelectorAll(".del-ponto").forEach(function(btn){
+        btn.addEventListener("click", async function(){
+          var id = btn.getAttribute("data-id"), name = btn.getAttribute("data-name");
+          var ok = await jvConfirm(t("Deseja realmente excluir o ponto de encontro")+' "'+name+'"?', {title:t("Excluir ponto de encontro"), danger:true, okLabel:t("Excluir")});
+          if(!ok) return;
+          var res = await dbDeleteMeetingPoint(id);
+          if(res.error){ await jvAlert(t("Não foi possível excluir: ") + res.error.message); return; }
+          rerenderViews();
+        });
+      });
     }
   };
 
