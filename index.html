@@ -1081,14 +1081,29 @@
   }
 
   /* ---- pede nome, endereço e (opcional) link exato do Google Maps para um ponto de encontro ---- */
+  /* aceita tanto um link real (https://maps.google.com/... ou https://goo.gl/maps/...) quanto texto solto
+     (endereço digitado por engano no campo de link) — nesse caso transforma em uma busca válida do Google Maps,
+     em vez de salvar um texto que quebraria o botão "Ver no mapa". */
+  function normalizeMapsUrl(raw, fallbackQuery){
+    var v = (raw||"").trim();
+    if(!v) v = (fallbackQuery||"").trim();
+    if(!v) return "";
+    if(/^https?:\/\//i.test(v)) return v;
+    return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(v);
+  }
+  function mapsUrlFor(mp){
+    if(!mp) return "#";
+    return normalizeMapsUrl(mp.maps_url, (mp.address||mp.name||"") + " Itatiba SP");
+  }
   async function promptMeetingPointFields(defaults){
     defaults = defaults || {};
     var name = await jvPrompt(t("Nome do ponto de encontro:"), defaults.name || "", {title:t("Ponto de encontro")});
     if(!name) return null;
     var address = await jvPrompt(t("Endereço (rua, número, bairro):"), defaults.address || "", {title:t("Ponto de encontro")}) || "";
-    var mapsUrl = await jvPrompt(t("Link exato do Google Maps (opcional, mas recomendado para marcar o ponto certo — abra o local no Google Maps, toque em Compartilhar e cole o link aqui):"), defaults.maps_url || "", {title:t("Ponto de encontro")}) || "";
+    var mapsUrlRaw = await jvPrompt(t("Link exato do Google Maps (opcional, mas recomendado para marcar o ponto certo — abra o local no Google Maps, toque em Compartilhar e cole o link aqui. Se colar apenas o endereço, também funciona.):"), defaults.maps_url || "", {title:t("Ponto de encontro")}) || "";
     var dayLabel = await jvPrompt(t("Dia (opcional, ex: 17 jul):"), defaults.day_label || "", {title:t("Ponto de encontro")}) || "";
-    return {name:name, address:address, maps_url:mapsUrl, day_label:dayLabel};
+    var maps_url = normalizeMapsUrl(mapsUrlRaw, address || name);
+    return {name:name, address:address, maps_url:maps_url, day_label:dayLabel};
   }
 
   async function dbUpdateMeetingPoint(id, patch){
@@ -2003,7 +2018,7 @@
     render:function(){
       var pts = DATA.meetingPoints || [];
       var realPoints = pts.map(function(mp){
-        return '<div class="encontro-card"><span class="encontro-time">—</span><div class="encontro-body"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+(mp.day_label?(' · '+mp.day_label):'')+'</span></div><a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+(mp.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((mp.address||mp.name)+" Itatiba SP")))+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a>'+
+        return '<div class="encontro-card"><span class="encontro-time">—</span><div class="encontro-body"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+(mp.day_label?(' · '+mp.day_label):'')+'</span></div><a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+mapsUrlFor(mp)+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a>'+
           '<button type="button" class="icon-btn danger del-ponto" data-id="'+mp.id+'" data-name="'+mp.name.replace(/"/g,'&quot;')+'" title="'+t("Eliminar")+'"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7m2 0v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7h10Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
       }).join('');
       var body = realPoints || ('<p class="muted" style="font-size:.85rem;margin:8px 0 0;">'+t("Nenhum ponto de encontro cadastrado ainda. Clique em \"Adicionar ponto\" para começar.")+'</p>');
@@ -2929,7 +2944,7 @@
       cards[0].querySelector(".sub").textContent = vis.ponto ? (mp ? mp.name : t("Ponto de encontro ainda não atribuído")) : "";
       var mapLink = cards[0].querySelector("a.actionbtn");
       if(mapLink){
-        if(vis.ponto){ mapLink.href = mp ? (mp.maps_url || ("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent((mp.address||mp.name)+" Itatiba SP"))) : "#"; mapLink.hidden = false; }
+        if(vis.ponto){ mapLink.href = mapsUrlFor(mp); mapLink.hidden = false; }
         else mapLink.hidden = true;
       }
     }
@@ -3415,7 +3430,7 @@
     var pts = DATA.meetingPoints || [];
     var body = pts.length ? pts.map(function(mp){
       return '<div class="encontro-card"><span class="encontro-time">—</span><div class="encontro-body"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+(mp.day_label?(' · '+mp.day_label):'')+'</span></div>'+
-        '<a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+(mp.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((mp.address||mp.name)+" Itatiba SP")))+'" style="margin-left:6px;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>';
+        '<a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+mapsUrlFor(mp)+'" style="margin-left:6px;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>';
     }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum ponto de encontro cadastrado ainda.")+'</p>');
     card.innerHTML = '<p style="margin:0 0 12px;color:var(--ink-soft);font-size:.85rem;">'+t("Pontos de encontro cadastrados pela administração.")+'</p>'+body;
   }
