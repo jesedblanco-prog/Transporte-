@@ -1435,7 +1435,13 @@
     "Código de acesso inválido. Verifique com a administração.":"Código de acceso inválido. Verifica con la administración.",
     "Encarregado cadastrado. Código de acesso":"Encargado registrado. Código de acceso",
     "Código de acesso para este encarregado (entregue este código a ele):":"Código de acceso para este encargado (entrégaselo a él):",
-    "Telefone (WhatsApp, opcional):":"Teléfono (WhatsApp, opcional):"
+    "Telefone (WhatsApp, opcional):":"Teléfono (WhatsApp, opcional):",
+    "Limpar filtros":"Limpiar filtros",
+    "Digite o número do ônibus para filtrar (disponíveis":"Ingresa el número del autobús para filtrar (disponibles",
+    "Deixe em branco para limpar o filtro.":"Déjalo en blanco para quitar el filtro.",
+    "Nenhum ponto de encontro cadastrado ainda.":"Ningún punto de encuentro registrado todavía.",
+    "Digite o número do ponto de encontro para filtrar":"Ingresa el número del punto de encuentro para filtrar",
+    "Opção inválida.":"Opción inválida."
   };
   function t(s){
     if(STATE.lang === "es" && STRINGS_ES.hasOwnProperty(s)) return STRINGS_ES[s];
@@ -1690,10 +1696,16 @@
 
   /* ---- PASSAGEIROS ---- */
   var PAY_LABEL = {pendente:["warning","Pendente"], parcial:["neutral","Abono"], pago:["good","Pago"]};
+  var paxFilterBus = "", paxFilterPonto = "";
   views.passageiros = {
     title:"Passageiros",
     render:function(){
-      var regs = DATA.registrations || [];
+      var regsAll = DATA.registrations || [];
+      var regs = regsAll.filter(function(r){
+        if(paxFilterBus && String(r.bus_number||"") !== paxFilterBus) return false;
+        if(paxFilterPonto && String(r.meeting_point_id||"") !== paxFilterPonto) return false;
+        return true;
+      });
       var hasReal = DATA.loaded;
       var totalPax = hasReal ? regs.reduce(function(a,r){ return a + (r.people_count||1); }, 0) : 612;
       var checkins = hasReal ? regs.filter(function(r){ return r.checked_in; }).length : 0;
@@ -1727,11 +1739,12 @@
         '<div class="card">'+
           '<div class="card-head"><h3>'+t("Lista de passageiros")+'</h3><span class="muted">'+(hasReal ? regs.length : 0)+' '+t("registros")+(hasReal?'':' · '+t("dados de exemplo, aguardando cadastros reais"))+'</span></div>'+
           '<div class="card-pad">'+
-            '<div class="actions-row" style="margin-bottom:14px;">'+
+            '<div class="actions-row" style="margin-bottom:14px;flex-wrap:wrap;">'+
               '<button type="button" class="actionbtn primary" data-goto="cadastro">'+t("Nova inscrição")+'</button>'+
-              '<button type="button" class="actionbtn">'+t("Filtrar por ônibus")+'</button>'+
-              '<button type="button" class="actionbtn">'+t("Filtrar por ponto de encontro")+'</button>'+
-              '<button type="button" class="actionbtn">'+t("Exportar lista")+'</button>'+
+              '<button type="button" class="actionbtn'+(paxFilterBus?' primary':'')+'" id="paxFilterBusBtn">'+t("Filtrar por ônibus")+(paxFilterBus?(': '+paxFilterBus):'')+'</button>'+
+              '<button type="button" class="actionbtn'+(paxFilterPonto?' primary':'')+'" id="paxFilterPontoBtn">'+t("Filtrar por ponto de encontro")+'</button>'+
+              (paxFilterBus||paxFilterPonto ? '<button type="button" class="actionbtn" id="paxFilterClearBtn">'+t("Limpar filtros")+'</button>' : '')+
+              '<button type="button" class="actionbtn" id="paxExportBtn">'+t("Exportar lista")+'</button>'+
             '</div>'+
             '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Documento")+'</th><th>'+t("Grupo")+'</th><th>'+t("Ônibus")+'</th><th>'+t("Ponto de encontro")+'</th><th>'+t("Pagamento")+'</th><th></th></tr></thead><tbody>'+
               bodyRows+
@@ -1776,6 +1789,71 @@
           rerenderViews();
         });
       });
+      var busBtn = root.querySelector("#paxFilterBusBtn");
+      if(busBtn){
+        busBtn.addEventListener("click", async function(){
+          var buses = [];
+          (DATA.registrations||[]).forEach(function(r){ if(r.bus_number && buses.indexOf(String(r.bus_number))===-1) buses.push(String(r.bus_number)); });
+          if(!buses.length){ await jvAlert(t("Nenhum ônibus atribuído ainda.")); return; }
+          var msg = t("Digite o número do ônibus para filtrar (disponíveis")+": "+buses.join(", ")+"). "+t("Deixe em branco para limpar o filtro.");
+          var val = await jvPrompt(msg, paxFilterBus, {title:t("Filtrar por ônibus")});
+          if(val === null) return;
+          paxFilterBus = val.trim();
+          rerenderViews();
+        });
+      }
+      var pontoBtn = root.querySelector("#paxFilterPontoBtn");
+      if(pontoBtn){
+        pontoBtn.addEventListener("click", async function(){
+          var pts = DATA.meetingPoints || [];
+          if(!pts.length){ await jvAlert(t("Nenhum ponto de encontro cadastrado ainda.")); return; }
+          var options = pts.map(function(p,i){ return (i+1)+" — "+p.name; }).join("\n");
+          var val = await jvPrompt(t("Digite o número do ponto de encontro para filtrar")+":\n"+options+"\n\n"+t("Deixe em branco para limpar o filtro."), "", {title:t("Filtrar por ponto de encontro")});
+          if(val === null) return;
+          val = val.trim();
+          if(!val){ paxFilterPonto = ""; rerenderViews(); return; }
+          var idx = parseInt(val,10) - 1;
+          if(isNaN(idx) || !pts[idx]){ await jvAlert(t("Opção inválida.")); return; }
+          paxFilterPonto = pts[idx].id;
+          rerenderViews();
+        });
+      }
+      var clearBtn = root.querySelector("#paxFilterClearBtn");
+      if(clearBtn){
+        clearBtn.addEventListener("click", function(){ paxFilterBus = ""; paxFilterPonto = ""; rerenderViews(); });
+      }
+      var exportBtn = root.querySelector("#paxExportBtn");
+      if(exportBtn){
+        exportBtn.addEventListener("click", function(){
+          var regsAll = DATA.registrations || [];
+          var regs = regsAll.filter(function(r){
+            if(paxFilterBus && String(r.bus_number||"") !== paxFilterBus) return false;
+            if(paxFilterPonto && String(r.meeting_point_id||"") !== paxFilterPonto) return false;
+            return true;
+          });
+          var header = [t("Nome"), t("Documento"), t("Ônibus"), t("Ponto de encontro"), t("Pagamento")];
+          var rows = [];
+          regs.forEach(function(r){
+            var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+            var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
+            (r.passengers||[{full_name:r.titular_name, doc_number:r.doc_number}]).forEach(function(p){
+              rows.push([p.full_name, p.doc_number||"", r.bus_number||"", mp?mp.name:"", t(pay[1])]);
+            });
+          });
+          if(window.XLSX){
+            var ws = XLSX.utils.aoa_to_sheet([header].concat(rows));
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Passageiros");
+            XLSX.writeFile(wb, "passageiros-jardim-do-vale.xlsx");
+          } else {
+            var csv = [header].concat(rows).map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(","); }).join("\n");
+            var blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a"); a.href = url; a.download = "passageiros-jardim-do-vale.csv";
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+          }
+        });
+      }
     }
   };
 
