@@ -496,6 +496,41 @@
     .panel-stats{ grid-template-columns:repeat(3,1fr); gap:6px; }
     .previewbar{ padding:8px 12px; }
   }
+
+  /* ---- premium modal (replaces native alert/confirm/prompt) ---- */
+  .jv-modal-overlay{
+    position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+    background:rgba(10,14,24,0.55); backdrop-filter:blur(3px); padding:20px;
+  }
+  .jv-modal-box{
+    width:100%; max-width:440px; background:var(--surface); color:var(--ink);
+    border:1px solid var(--hairline-2); border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.35);
+    padding:24px 24px 20px; font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    animation:jvModalIn .16s ease-out;
+  }
+  @keyframes jvModalIn{ from{ opacity:0; transform:translateY(6px) scale(.98);} to{ opacity:1; transform:none; } }
+  .jv-modal-icon{
+    width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    background:var(--brand-soft); color:var(--brand); margin-bottom:14px;
+  }
+  .jv-modal-icon svg{ width:20px; height:20px; }
+  .jv-modal-box h3{
+    font-family:'Sora',system-ui,sans-serif; font-size:1.05rem; font-weight:700; margin:0 0 8px; color:var(--ink);
+  }
+  .jv-modal-box p{ margin:0 0 16px; font-size:.9rem; line-height:1.55; color:var(--ink-soft); white-space:pre-line; }
+  .jv-modal-box input{
+    width:100%; box-sizing:border-box; padding:11px 13px; border-radius:10px; border:1px solid var(--hairline-2);
+    background:var(--bg); color:var(--ink); font-size:.9rem; margin-bottom:18px; font-family:inherit;
+  }
+  .jv-modal-box input:focus{ outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
+  .jv-modal-actions{ display:flex; justify-content:flex-end; gap:10px; }
+  .jv-modal-actions button{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif; font-weight:700; font-size:.86rem;
+    padding:9px 18px; border-radius:10px; cursor:pointer; border:1px solid var(--hairline-2);
+    background:var(--surface-2); color:var(--ink);
+  }
+  .jv-modal-actions button.jv-primary{ background:var(--brand); border-color:var(--brand); color:var(--brand-ink); }
+  .jv-modal-actions button.jv-danger{ background:var(--st-critical); border-color:var(--st-critical); color:#fff; }
 </style>
 
 <div class="previewbar">
@@ -673,6 +708,13 @@
       <div class="success-banner" id="cadastroSuccess" style="flex-direction:column;align-items:flex-start;gap:4px;">
         <div style="display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px;flex:none;"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="m8 12.3 2.5 2.5L16.2 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Cadastro enviado!</span></div>
         <span id="cadastroSummaryText" style="font-weight:500;font-size:.85rem;"></span>
+      </div>
+      <div id="proofUploadBox" hidden style="margin-top:14px;border:1px solid var(--hairline);border-radius:11px;padding:14px;background:var(--surface-2);">
+        <label style="display:block;margin-bottom:8px;font-weight:600;font-size:.85rem;">Enviar comprovante de pagamento (quem se cadastrou é responsável por enviar o comprovante do grupo)</label>
+        <input type="file" id="proofFileInput" accept="image/*,application/pdf" style="margin-bottom:10px;">
+        <div class="actions-row"><button type="button" class="actionbtn primary" id="proofUploadBtn">Enviar comprovante</button></div>
+        <p id="proofOk" hidden style="color:var(--st-good);font-size:.8rem;margin:8px 0 0;">Comprovante enviado com sucesso.</p>
+        <p id="proofErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:8px 0 0;"></p>
       </div>
     </div>
   </div>
@@ -870,6 +912,19 @@
   </div>
 </div>
 
+<div class="jv-modal-overlay" id="jvModalOverlay" hidden>
+  <div class="jv-modal-box" role="dialog" aria-modal="true">
+    <div class="jv-modal-icon" id="jvModalIcon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5m0 3.2h.01M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h3 id="jvModalTitle"></h3>
+    <p id="jvModalMsg"></p>
+    <input type="text" id="jvModalInput" hidden>
+    <div class="jv-modal-actions">
+      <button type="button" class="jv-cancel" id="jvModalCancel"></button>
+      <button type="button" class="jv-primary" id="jvModalOk"></button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.1/dist/jspdf.plugin.autotable.min.js"></script>
@@ -921,7 +976,12 @@
       if(!notifRes.error) DATA.notifications = notifRes.data || [];
 
       var cfgRes = await supa.from("event_config").select("*").eq("id",1).single();
-      if(!cfgRes.error) DATA.eventConfig = cfgRes.data;
+      if(!cfgRes.error){
+        DATA.eventConfig = cfgRes.data;
+        if(DATA.eventConfig && DATA.eventConfig.price_per_person && typeof PRICE_PER_PERSON !== "undefined"){
+          PRICE_PER_PERSON = Number(DATA.eventConfig.price_per_person);
+        }
+      }
 
       DATA.loaded = true;
       return true;
@@ -931,50 +991,126 @@
     }
   }
 
+  function toTitleCase(str){
+    return (str||"").trim().replace(/\s+/g," ").toLowerCase().replace(/(^|\s|-)([a-zà-ÿ])/g, function(m,sep,ch){ return sep+ch.toUpperCase(); });
+  }
+
+  /* ---- premium modal (replaces native alert/confirm/prompt for a consistent SaaS/ERP look, PT+ES) ---- */
+  var ICON_INFO = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5m0 3.2h.01M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ICON_WARN = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3.5 21.5 20h-19L12 3.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9.5v5m0 2.6h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  var ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4.2L18.8 9.4a2 2 0 0 0 0-2.8l-1.4-1.4a2 2 0 0 0-2.8 0L4 15.8V20Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+  function jvModal(opts){
+    return new Promise(function(resolve){
+      var overlay = document.getElementById("jvModalOverlay");
+      var iconEl = document.getElementById("jvModalIcon");
+      var titleEl = document.getElementById("jvModalTitle");
+      var msgEl = document.getElementById("jvModalMsg");
+      var inputEl = document.getElementById("jvModalInput");
+      var cancelBtn = document.getElementById("jvModalCancel");
+      var okBtn = document.getElementById("jvModalOk");
+      var isPrompt = opts.type === "prompt";
+      var isConfirm = opts.type === "confirm";
+      var isDanger = !!opts.danger;
+
+      titleEl.textContent = opts.title || (isDanger ? t("Atenção") : t("Aviso"));
+      msgEl.textContent = opts.message || "";
+      msgEl.hidden = !opts.message;
+      iconEl.innerHTML = isDanger ? ICON_WARN : (isPrompt ? ICON_EDIT : ICON_INFO);
+      iconEl.style.background = isDanger ? "var(--st-critical)" : "var(--brand-soft)";
+      iconEl.style.color = isDanger ? "#fff" : "var(--brand)";
+
+      inputEl.hidden = !isPrompt;
+      if(isPrompt){ inputEl.value = opts.defaultValue || ""; inputEl.placeholder = opts.placeholder || ""; }
+
+      cancelBtn.hidden = (opts.type === "alert");
+      cancelBtn.textContent = t("Cancelar");
+      okBtn.textContent = t(opts.okLabel || (isDanger ? "Confirmar" : "OK"));
+      okBtn.className = isDanger ? "jv-danger" : "jv-primary";
+
+      overlay.hidden = false;
+      setTimeout(function(){ if(isPrompt){ inputEl.focus(); inputEl.select(); } else okBtn.focus(); }, 30);
+
+      function cleanup(){
+        overlay.hidden = true;
+        okBtn.removeEventListener("click", onOk);
+        cancelBtn.removeEventListener("click", onCancel);
+        inputEl.removeEventListener("keydown", onKey);
+        overlay.removeEventListener("keydown", onOverlayKey);
+      }
+      function onOk(){ cleanup(); resolve(isPrompt ? inputEl.value : true); }
+      function onCancel(){ cleanup(); resolve(isPrompt ? null : false); }
+      function onKey(e){ if(e.key==="Enter"){ e.preventDefault(); onOk(); } }
+      function onOverlayKey(e){ if(e.key==="Escape") onCancel(); }
+      okBtn.addEventListener("click", onOk);
+      cancelBtn.addEventListener("click", onCancel);
+      inputEl.addEventListener("keydown", onKey);
+      overlay.addEventListener("keydown", onOverlayKey);
+    });
+  }
+  function jvAlert(message, opts){ return jvModal(Object.assign({type:"alert", message:message}, opts||{})); }
+  function jvConfirm(message, opts){ return jvModal(Object.assign({type:"confirm", message:message}, opts||{})); }
+  function jvPrompt(message, defaultValue, opts){ return jvModal(Object.assign({type:"prompt", message:message, defaultValue:defaultValue}, opts||{})); }
+
   async function dbInsertRegistration(reg, companionNames){
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
-    var insertRes = await supa.from("registrations").insert({
-      titular_name: reg.titularName,
-      phone: reg.phone || "",
-      doc_type: reg.docType || null,
-      doc_number: reg.docNumber || null,
-      lang: STATE.lang,
-      payment_method: reg.paymentMethod || null,
-      people_count: reg.people,
-      total_amount: reg.total,
-      payment_status: "pendente"
-    }).select().single();
-    if(insertRes.error) return {error:insertRes.error};
-    var regRow = insertRes.data;
-    var passengerRows = [{ registration_id: regRow.id, full_name: reg.titularName, doc_type: reg.docType || null, doc_number: reg.docNumber || null, is_titular:true }];
-    (companionNames||[]).forEach(function(name){
-      passengerRows.push({ registration_id: regRow.id, full_name: name, is_titular:false });
-    });
-    var paxRes = await supa.from("passengers").insert(passengerRows);
-    if(paxRes.error) return {error:paxRes.error};
-    await loadAllData();
-    return {data:regRow};
+    try{
+      var insertRes = await supa.from("registrations").insert({
+        titular_name: toTitleCase(reg.titularName),
+        phone: reg.phone || "",
+        doc_type: reg.docType || null,
+        doc_number: reg.docNumber || null,
+        lang: STATE.lang,
+        payment_method: reg.paymentMethod || null,
+        people_count: reg.people,
+        total_amount: reg.total,
+        payment_status: "pendente"
+      }).select().single();
+      if(insertRes.error) return {error:insertRes.error};
+      var regRow = insertRes.data;
+      var passengerRows = [{ registration_id: regRow.id, full_name: toTitleCase(reg.titularName), doc_type: reg.docType || null, doc_number: reg.docNumber || null, is_titular:true }];
+      (companionNames||[]).forEach(function(name){
+        passengerRows.push({ registration_id: regRow.id, full_name: toTitleCase(name), is_titular:false });
+      });
+      var paxRes = await supa.from("passengers").insert(passengerRows);
+      if(paxRes.error) return {error:paxRes.error};
+      await loadAllData();
+      return {data:regRow};
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
   }
 
   async function dbUpdateRegistration(id, patch){
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
-    var res = await supa.from("registrations").update(patch).eq("id", id);
-    if(!res.error) await loadAllData();
-    return res;
+    try{
+      var res = await supa.from("registrations").update(patch).eq("id", id);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
   }
 
   async function dbInsertMeetingPoint(mp){
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
-    var res = await supa.from("meeting_points").insert(mp);
-    if(!res.error) await loadAllData();
-    return res;
+    try{
+      var res = await supa.from("meeting_points").insert(mp);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
   }
 
   async function dbInsertNotification(n){
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
-    var res = await supa.from("notifications").insert(n);
-    if(!res.error) await loadAllData();
-    return res;
+    try{
+      var res = await supa.from("notifications").insert(n);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
   }
 
   /* ================= APP STATE (event branding + language) ================= */
@@ -1213,6 +1349,8 @@
       if(typeof renderDocOptions === "function") renderDocOptions();
       if(typeof renderPaymentMethods === "function") renderPaymentMethods();
       if(typeof renderCompanions === "function") renderCompanions();
+      if(typeof rerenderViews === "function") rerenderViews();
+      if(typeof renderEnc === "function") renderEnc();
     });
   });
 
@@ -1300,13 +1438,21 @@
   views.dashboard = {
     title:"Dashboard",
     render:function(){
+      var regs = DATA.registrations || [];
+      var hasReal = DATA.loaded && regs.length > 0;
+      var totalPax = hasReal ? regs.reduce(function(a,r){ return a+(r.people_count||1); },0) : 612;
+      var pagos = hasReal ? regs.filter(function(r){ return r.payment_status==="pago"; }).length : 533;
+      var pctPagos = hasReal ? (regs.length ? Math.round(pagos/regs.length*100) : 0) : 87;
+      var pendentes = hasReal ? regs.filter(function(r){ return r.payment_status!=="pago"; }).reduce(function(a,r){ return a+(r.people_count||1); },0) : 79;
+      var lembretesCount = (DATA.notifications||[]).length;
+      var pontosCount = (DATA.meetingPoints||[]).length;
       var metrics = [
-        { label:"Inscritos", value:"612", of:"de 640 vagas", delta:"+18 hoje", trend:"up", spark:[420,455,480,510,540,560,580,598,605,612], color:"var(--c-1)" },
-        { label:"Pagamentos confirmados", value:"87%", of:"533 de 612", delta:"+4% na semana", trend:"up", spark:[62,66,69,71,75,78,80,83,85,87], color:"var(--st-good)" },
-        { label:"Pendentes / atrasados", value:"79", of:"12 atrasados", delta:"-6 esta semana", trend:"down", spark:[110,104,101,96,92,90,88,84,81,79], color:"var(--st-warning)" },
-        { label:"Ônibus confirmados", value:"14 / 16", of:"87,5% da frota", delta:"2 aguardando", trend:"flat", spark:[9,10,10,11,12,12,13,13,14,14], color:"var(--c-3)" },
-        { label:"Lembretes enviados", value:"1.284", of:"WhatsApp · 24h: 96", delta:"+96 hoje", trend:"up", spark:[820,900,960,1010,1080,1120,1160,1210,1250,1284], color:"var(--c-7)" },
-        { label:"Pontos de encontro", value:"9", of:"3 por dia do evento", delta:"todos confirmados", trend:"flat", spark:[9,9,9,9,9,9,9,9,9,9], color:"var(--c-4)" }
+        { label:t("Inscritos"), value:String(totalPax), of:t("total de pessoas cadastradas"), delta:hasReal?"":"+18 "+t("hoje"), trend:"up", spark:[420,455,480,510,540,560,580,598,605,totalPax||612], color:"var(--c-1)" },
+        { label:t("Pagamentos confirmados"), value:pctPagos+"%", of:pagos+" "+t("de")+" "+(hasReal?regs.length:612), delta:hasReal?"":"+4% "+t("na semana"), trend:"up", spark:[62,66,69,71,75,78,80,83,85,pctPagos||87], color:"var(--st-good)" },
+        { label:t("Pendentes / atrasados"), value:String(pendentes), of:t("aguardando confirmação"), delta:hasReal?"":"-6 "+t("esta semana"), trend:"down", spark:[110,104,101,96,92,90,88,84,81,pendentes||79], color:"var(--st-warning)" },
+        { label:t("Ônibus confirmados"), value:"14 / 16", of:"87,5% "+t("da frota"), delta:"2 "+t("aguardando"), trend:"flat", spark:[9,10,10,11,12,12,13,13,14,14], color:"var(--c-3)" },
+        { label:t("Lembretes enviados"), value:hasReal?String(lembretesCount):"1.284", of:"WhatsApp", delta:hasReal?"":"+96 "+t("hoje"), trend:"up", spark:[820,900,960,1010,1080,1120,1160,1210,1250,hasReal?(lembretesCount||1):1284], color:"var(--c-7)" },
+        { label:t("Pontos de encontro"), value:hasReal?String(pontosCount):"9", of:t("cadastrados no sistema"), delta:hasReal?"":t("todos confirmados"), trend:"flat", spark:[9,9,9,9,9,9,9,9,9,pontosCount||9], color:"var(--c-4)" }
       ];
       var mHtml = metrics.map(function(m){
         var arrow = m.trend==="up"?"▲":(m.trend==="down"?"▼":"＝");
@@ -1368,7 +1514,9 @@
         var docLabel = r.doc_type ? (r.doc_type + " " + (r.doc_number||"")) : "—";
         var payCell = '<span class="pill pay-pill '+pay[0]+'" data-reg="'+r.id+'" data-status="'+r.payment_status+'" style="cursor:pointer;" title="'+t("Clique para alterar o status")+'"><i class="dotp"></i>'+t(pay[1])+'</span>';
         var delCell = '<button type="button" class="icon-btn del-reg" data-reg="'+r.id+'" data-name="'+r.titular_name+'" title="'+t("Excluir cadastro")+'" style="color:var(--st-critical);"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5a1 1 0 0 0 1 .95h6a1 1 0 0 0 1-.95L17 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
-        return '<tr><td>'+r.titular_name+'</td><td class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+docLabel+'</td><td>'+grupo+'</td><td class="tabular">—</td><td>'+pontoCell+'</td><td>'+payCell+'</td><td>'+delCell+'</td></tr>';
+        var companions = (r.passengers||[]).filter(function(p){ return !p.is_titular; });
+        var nameCell = '<div>'+r.titular_name+(companions.length ? ('<div style="font-size:.72rem;color:var(--ink-mute);font-weight:500;margin-top:2px;">+ '+companions.map(function(c){ return c.full_name; }).join(", ")+'</div>') : '')+'</div>';
+        return '<tr><td>'+nameCell+'</td><td class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+docLabel+'</td><td>'+grupo+'</td><td class="tabular">—</td><td>'+pontoCell+'</td><td>'+payCell+'</td><td>'+delCell+'</td></tr>';
       }).join('') : (function(){
         function row(n,doc,grupo,b,p,type,label){
           return '<tr><td>'+n+'</td><td class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+doc+'</td><td>'+grupo+'</td><td class="tabular">'+b+'</td><td>'+(p||('<select class="assign-ponto-demo" style="font-size:.78rem;padding:5px 8px;border-radius:7px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink-mute);"><option>'+t("Atribuir ponto…")+'</option></select>'))+'</td><td><span class="pill '+type+'"><i class="dotp"></i>'+t(label)+'</span></td><td></td></tr>';
@@ -1387,21 +1535,9 @@
           '<div class="card-pad">'+
             '<div class="actions-row" style="margin-bottom:14px;">'+
               '<button type="button" class="actionbtn primary" data-goto="cadastro">'+t("Nova inscrição")+'</button>'+
-              '<button type="button" class="actionbtn" id="addManualBtn">'+t("Adicionar manualmente")+'</button>'+
               '<button type="button" class="actionbtn">'+t("Filtrar por ônibus")+'</button>'+
               '<button type="button" class="actionbtn">'+t("Filtrar por ponto de encontro")+'</button>'+
               '<button type="button" class="actionbtn">'+t("Exportar lista")+'</button>'+
-            '</div>'+
-            '<div id="manualAddForm" hidden style="border:1px solid var(--hairline);border-radius:11px;padding:14px;margin-bottom:14px;background:var(--surface-2);">'+
-              '<div class="form-grid">'+
-                '<div class="field"><label>'+t("Nome completo")+'</label><input type="text" id="maNome"></div>'+
-                '<div class="field"><label>'+t("Telefone")+'</label><input type="text" id="maTelefone"></div>'+
-                '<div class="field"><label>'+t("Documento")+'</label><input type="text" id="maDoc"></div>'+
-                '<div class="field"><label>'+t("Nº de pessoas")+'</label><input type="number" min="1" value="1" id="maPeople"></div>'+
-                '<div class="field"><label>'+t("Status de pagamento")+'</label><select id="maStatus"><option value="pendente">'+t("Pendente")+'</option><option value="parcial">'+t("Abono")+'</option><option value="pago">'+t("Pago")+'</option></select></div>'+
-              '</div>'+
-              '<div class="actions-row" style="margin-top:10px;"><button type="button" class="actionbtn primary" id="maSubmit">'+t("Salvar cadastro")+'</button><button type="button" class="actionbtn" id="maCancel">'+t("Cancelar")+'</button></div>'+
-              '<p id="maErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:8px 0 0;"></p>'+
             '</div>'+
             '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Documento")+'</th><th>'+t("Grupo")+'</th><th>'+t("Ônibus")+'</th><th>'+t("Ponto de encontro")+'</th><th>'+t("Pagamento")+'</th><th></th></tr></thead><tbody>'+
               bodyRows+
@@ -1415,7 +1551,7 @@
           if(!sel.value) return;
           var regId = sel.getAttribute("data-reg");
           var res = await dbUpdateRegistration(regId, {meeting_point_id: sel.value});
-          if(res.error){ alert(t("Não foi possível salvar: ") + res.error.message); return; }
+          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
           rerenderViews();
         });
       });
@@ -1426,7 +1562,7 @@
           var next = order[(order.indexOf(cur)+1) % order.length];
           var regId = pill.getAttribute("data-reg");
           var res = await dbUpdateRegistration(regId, {payment_status: next});
-          if(res.error){ alert(t("Não foi possível salvar: ") + res.error.message); return; }
+          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
           rerenderViews();
         });
       });
@@ -1434,11 +1570,11 @@
         btn.addEventListener("click", async function(){
           var regId = btn.getAttribute("data-reg");
           var name = btn.getAttribute("data-name");
-          if(!confirm(t("Excluir o cadastro de ") + name + t("? Esta ação não pode ser desfeita."))) return;
-          var reason = prompt(t("Motivo da exclusão (opcional, fica registrado para consulta futura):")) || "";
-          if(!dbOk()){ alert(t("Banco de dados não conectado.")); return; }
+          if(!await jvConfirm(t("Excluir o cadastro de ") + name + t("? Esta ação não pode ser desfeita."), {title:t("Excluir cadastro"), danger:true, okLabel:t("Excluir")})) return;
+          var reason = await jvPrompt(t("Motivo da exclusão (opcional, fica registrado para consulta futura):"), "", {title:t("Motivo (opcional)")}) || "";
+          if(!dbOk()){ await jvAlert(t("Banco de dados não conectado.")); return; }
           var delRes = await supa.from("registrations").delete().eq("id", regId);
-          if(delRes.error){ alert(t("Não foi possível excluir: ") + delRes.error.message); return; }
+          if(delRes.error){ await jvAlert(t("Não foi possível excluir: ") + delRes.error.message); return; }
           try{
             await supa.from("audit_log").insert({action:"delete_registration", target_name:name, reason:reason});
           }catch(e){ /* tabela de auditoria ainda não criada — exclusão já foi feita normalmente */ }
@@ -1446,41 +1582,6 @@
           rerenderViews();
         });
       });
-      var addManualBtn = root.querySelector("#addManualBtn");
-      var manualForm = root.querySelector("#manualAddForm");
-      var maCancel = root.querySelector("#maCancel");
-      if(addManualBtn && manualForm){
-        addManualBtn.addEventListener("click", function(){ manualForm.hidden = !manualForm.hidden; });
-      }
-      if(maCancel && manualForm){
-        maCancel.addEventListener("click", function(){ manualForm.hidden = true; });
-      }
-      var maSubmit = root.querySelector("#maSubmit");
-      if(maSubmit){
-        maSubmit.addEventListener("click", async function(){
-          var nome = (root.querySelector("#maNome")||{}).value || "";
-          var errBox = root.querySelector("#maErr");
-          if(errBox) errBox.hidden = true;
-          if(!isFullName(nome)){
-            if(errBox){ errBox.textContent = t("Informe nome e sobrenome."); errBox.hidden = false; }
-            return;
-          }
-          var telefone = (root.querySelector("#maTelefone")||{}).value || "";
-          var doc = (root.querySelector("#maDoc")||{}).value || "";
-          var people = +((root.querySelector("#maPeople")||{}).value) || 1;
-          var status = (root.querySelector("#maStatus")||{}).value || "pendente";
-          if(!dbOk()){ if(errBox){ errBox.textContent = t("Banco de dados não conectado."); errBox.hidden = false; } return; }
-          var insertRes = await supa.from("registrations").insert({
-            titular_name: nome.trim(), phone: telefone, doc_number: doc || null,
-            lang: STATE.lang, people_count: people, total_amount: PRICE_PER_PERSON * people,
-            payment_status: status
-          }).select().single();
-          if(insertRes.error){ if(errBox){ errBox.textContent = insertRes.error.message; errBox.hidden = false; } return; }
-          await supa.from("passengers").insert({registration_id: insertRes.data.id, full_name: nome.trim(), is_titular:true});
-          await loadAllData();
-          rerenderViews();
-        });
-      }
     }
   };
 
@@ -1510,7 +1611,8 @@
           '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Valor")+'</th><th>'+t("Status")+'</th><th></th></tr></thead><tbody>'+
             (hasReal ? regs.map(function(r){
               var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
-              return '<tr><td>'+r.titular_name+'</td><td class="tabular">'+money(formatBRL(Number(r.total_amount||0)))+'</td><td><span class="pill '+pay[0]+'"><i class="dotp"></i>'+t(pay[1])+'</span></td><td><button type="button" class="actionbtn ghost gen-receipt" data-reg="'+r.id+'" style="font-size:.74rem;padding:5px 9px;">'+t("Comprovante PDF")+'</button></td></tr>';
+              var proofLink = r.payment_proof_url ? ('<a class="actionbtn ghost" href="'+r.payment_proof_url+'" target="_blank" rel="noopener" style="font-size:.74rem;padding:5px 9px;">'+t("Ver comprovante enviado")+'</a>') : ('<span style="font-size:.72rem;color:var(--ink-mute);">'+t("Nenhum enviado")+'</span>');
+              return '<tr><td>'+r.titular_name+'</td><td class="tabular">'+money(formatBRL(Number(r.total_amount||0)))+'</td><td><span class="pill '+pay[0]+'"><i class="dotp"></i>'+t(pay[1])+'</span></td><td style="display:flex;gap:6px;flex-wrap:wrap;"><button type="button" class="actionbtn ghost gen-receipt" data-reg="'+r.id+'" style="font-size:.74rem;padding:5px 9px;">'+t("Comprovante PDF")+'</button>'+proofLink+'</td></tr>';
             }).join('') : '<tr><td colspan="4" style="color:var(--ink-mute);">'+t("Sem cadastros ainda")+'</td></tr>')+
           '</tbody></table></div>'+
           '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn">'+t("Enviar cobrança via WhatsApp")+'</button></div>'+
@@ -1524,11 +1626,11 @@
     },
     after:function(root){
       root.querySelectorAll(".gen-receipt").forEach(function(btn){
-        btn.addEventListener("click", function(){
+        btn.addEventListener("click", async function(){
           var regId = btn.getAttribute("data-reg");
           var reg = (DATA.registrations||[]).find(function(r){ return r.id === regId; });
           if(!reg) return;
-          if(!(window.jspdf && window.jspdf.jsPDF)){ alert(t("Gerador de PDF indisponível (verifique a conexão com a internet).")); return; }
+          if(!(window.jspdf && window.jspdf.jsPDF)){ await jvAlert(t("Gerador de PDF indisponível (verifique a conexão com a internet).")); return; }
           var doc = new window.jspdf.jsPDF();
           doc.setFillColor(47,95,216); doc.rect(0,0,210,28,"F");
           doc.setTextColor(255,255,255); doc.setFontSize(16); doc.text(STATE.eventName, 14, 14);
@@ -1583,12 +1685,12 @@
       var btn = root.querySelector("#sendReminderBtn");
       if(btn){
         btn.addEventListener("click", async function(){
-          var title = prompt(t("Título do lembrete:"), t("Aviso"));
+          var title = await jvPrompt(t("Título do lembrete:"), t("Aviso"), {title:t("Novo lembrete")});
           if(title === null) return;
-          var message = prompt(t("Mensagem para os passageiros e encarregados:")) || "";
+          var message = await jvPrompt(t("Mensagem para os passageiros e encarregados:"), "", {title:t("Novo lembrete")}) || "";
           if(!message) return;
           var res = await dbInsertNotification({title:title || t("Aviso"), message:message, target:"todos"});
-          if(res.error){ alert(t("Não foi possível enviar: ") + res.error.message); }
+          if(res.error){ await jvAlert(t("Não foi possível enviar: ") + res.error.message); }
           playNotificationSound();
           var portalCard = document.querySelector("#screen-passenger .portal-card:last-child");
           if(portalCard){
@@ -1657,11 +1759,11 @@
       var addBtn = root.querySelector("#addPontoBtn");
       if(addBtn){
         addBtn.addEventListener("click", async function(){
-          var name = prompt(t("Nome do ponto de encontro:"));
+          var name = await jvPrompt(t("Nome do ponto de encontro:"), "", {title:t("Novo ponto de encontro")});
           if(!name) return;
-          var address = prompt(t("Endereço (para o Google Maps):")) || "";
+          var address = await jvPrompt(t("Endereço (para o Google Maps):"), "", {title:t("Novo ponto de encontro")}) || "";
           var res = await dbInsertMeetingPoint({name:name, address:address});
-          if(res.error){ alert(t("Não foi possível salvar: ") + res.error.message); return; }
+          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
           rerenderViews();
         });
       }
@@ -1832,8 +1934,8 @@
       }
       var pdfBtn = root.querySelector("#repPdfBtn");
       if(pdfBtn){
-        pdfBtn.addEventListener("click", function(){
-          if(!(window.jspdf && window.jspdf.jsPDF)){ alert(t("Gerador de PDF indisponível (verifique a conexão com a internet).")); return; }
+        pdfBtn.addEventListener("click", async function(){
+          if(!(window.jspdf && window.jspdf.jsPDF)){ await jvAlert(t("Gerador de PDF indisponível (verifique a conexão com a internet).")); return; }
           var doc = new window.jspdf.jsPDF();
           doc.setFontSize(16); doc.text(STATE.eventName + " — " + t("Relatório de passageiros"), 14, 18);
           doc.setFontSize(10); doc.text(eventDateLabel(), 14, 25);
@@ -2005,6 +2107,7 @@
             '<div class="field"><label>Duração</label><select id="cfgDuration"><option value="multi"'+(STATE.singleDay?'':' selected')+'>Vários dias</option><option value="single"'+(STATE.singleDay?' selected':'')+'>Somente 1 dia</option></select></div>'+
             '<div class="field"><label id="cfgStartLabel">Data de início</label><input type="text" id="cfgStart" value="'+STATE.dateStart+'"></div>'+
             '<div class="field" id="cfgEndWrap" style="'+(STATE.singleDay?'display:none;':'')+'"><label>Data de término</label><input type="text" id="cfgEnd" value="'+STATE.dateEnd+'"></div>'+
+            '<div class="field"><label>'+t("Valor por passageiro (R$)")+'</label><input type="number" min="0" step="0.01" id="cfgPrice" value="'+PRICE_PER_PERSON+'"></div>'+
           '</div>'+
           '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" id="cfgSaveEvent">Salvar alterações</button></div>'+
           '<div class="success-banner" id="cfgSaveSuccess"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="m8 12.3 2.5 2.5L16.2 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Alterações salvas — já visíveis para passageiros e encarregados.</div>'+
@@ -2126,10 +2229,12 @@
           var nameInput = root.querySelector("#cfgEventName");
           var startInput = root.querySelector("#cfgStart");
           var endInput = root.querySelector("#cfgEnd");
+          var priceInput = root.querySelector("#cfgPrice");
           if(nameInput) STATE.eventName = nameInput.value || STATE.eventName;
           if(startInput) STATE.dateStart = startInput.value || STATE.dateStart;
           if(durationSel) STATE.singleDay = durationSel.value === "single";
           if(endInput) STATE.dateEnd = endInput.value || STATE.dateEnd;
+          if(priceInput && +priceInput.value > 0) PRICE_PER_PERSON = +priceInput.value;
           persistState();
           updateEventBranding();
           if(dbOk()){
@@ -2138,10 +2243,13 @@
                 event_name: STATE.eventName,
                 date_start: brToIso(STATE.dateStart),
                 date_end: brToIso(STATE.dateEnd),
-                single_day: STATE.singleDay
+                single_day: STATE.singleDay,
+                price_per_person: PRICE_PER_PERSON
               }).eq("id",1);
+              await loadAllData();
             }catch(e){}
           }
+          if(typeof updateTotal === "function") updateTotal();
           var s = root.querySelector("#cfgSaveSuccess");
           if(s) s.classList.add("show");
         });
@@ -2175,7 +2283,7 @@
           var errBox = root.querySelector("#resetErr");
           if(errBox) errBox.hidden = true;
           if(!dbOk()){ if(errBox){ errBox.textContent = t("Banco de dados não conectado."); errBox.hidden = false; } return; }
-          var confirmTxt = prompt(t('Isto vai apagar TODOS os passageiros, pagamentos, pontos de encontro e avisos do evento atual (um backup será baixado automaticamente antes). Para confirmar, digite REINICIAR:'));
+          var confirmTxt = await jvPrompt(t('Isto vai apagar TODOS os passageiros, pagamentos, pontos de encontro e avisos do evento atual (um backup será baixado automaticamente antes). Para confirmar, digite REINICIAR:'), "", {title:t("Reiniciar sistema"), danger:true, okLabel:t("Confirmar")});
           if(confirmTxt !== "REINICIAR") return;
 
           await loadAllData();
@@ -2195,9 +2303,9 @@
             if(errBox){ errBox.textContent = t("Erro ao reiniciar: ") + e.message; errBox.hidden = false; return; }
           }
 
-          var newName = prompt(t("Nome do novo evento:"), STATE.eventName) || STATE.eventName;
-          var newStart = prompt(t("Data de início (DD/MM/AAAA):"), STATE.dateStart) || STATE.dateStart;
-          var newEnd = prompt(t("Data de término (DD/MM/AAAA):"), STATE.dateEnd) || STATE.dateEnd;
+          var newName = await jvPrompt(t("Nome do novo evento:"), STATE.eventName, {title:t("Novo evento")}) || STATE.eventName;
+          var newStart = await jvPrompt(t("Data de início (DD/MM/AAAA):"), STATE.dateStart, {title:t("Novo evento")}) || STATE.dateStart;
+          var newEnd = await jvPrompt(t("Data de término (DD/MM/AAAA):"), STATE.dateEnd, {title:t("Novo evento")}) || STATE.dateEnd;
           STATE.eventName = newName; STATE.dateStart = newStart; STATE.dateEnd = newEnd;
           persistState(); updateEventBranding();
           try{
@@ -2206,7 +2314,7 @@
             }).eq("id",1);
           }catch(e){}
 
-          alert(t("Sistema reiniciado para o novo evento."));
+          await jvAlert(t("Sistema reiniciado para o novo evento."));
           await loadAllData();
           rerenderViews();
         });
@@ -2563,6 +2671,37 @@
           : (t("Grupo de") + " " + people + " " + t("pessoas") + ": " + names.join(", ") + " · " + t("Total") + ": " + total + " · " + t("o ponto de encontro será enviado pelo WhatsApp assim que for atribuído."));
       }
       if(banner) banner.classList.add("show");
+      lastRegistrationId = result.data ? result.data.id : null;
+      var proofBox = document.getElementById("proofUploadBox");
+      if(proofBox && lastRegistrationId) proofBox.hidden = false;
+    });
+  }
+
+  var lastRegistrationId = null;
+  var proofUploadBtn = document.getElementById("proofUploadBtn");
+  if(proofUploadBtn){
+    proofUploadBtn.addEventListener("click", async function(){
+      var fileInput = document.getElementById("proofFileInput");
+      var okBox = document.getElementById("proofOk"), errBox = document.getElementById("proofErr");
+      if(okBox) okBox.hidden = true; if(errBox) errBox.hidden = true;
+      var file = fileInput && fileInput.files && fileInput.files[0];
+      if(!file){ if(errBox){ errBox.textContent = t("Selecione um arquivo primeiro."); errBox.hidden = false; } return; }
+      if(!dbOk() || !lastRegistrationId){ if(errBox){ errBox.textContent = t("Não foi possível enviar agora."); errBox.hidden = false; } return; }
+      proofUploadBtn.disabled = true;
+      var oldTxt = proofUploadBtn.textContent; proofUploadBtn.textContent = t("Enviando…");
+      try{
+        var path = lastRegistrationId + "-" + Date.now() + "-" + file.name.replace(/[^a-zA-Z0-9.\-_]/g,"_");
+        var upRes = await supa.storage.from("comprovantes").upload(path, file);
+        if(upRes.error) throw upRes.error;
+        var pub = supa.storage.from("comprovantes").getPublicUrl(path);
+        var url = pub && pub.data ? pub.data.publicUrl : null;
+        var updRes = await supa.from("registrations").update({payment_proof_url:url}).eq("id", lastRegistrationId);
+        if(updRes.error) throw updRes.error;
+        if(okBox) okBox.hidden = false;
+      }catch(e){
+        if(errBox){ errBox.textContent = (e && e.message) || t("Erro ao enviar."); errBox.hidden = false; }
+      }
+      proofUploadBtn.disabled = false; proofUploadBtn.textContent = oldTxt;
     });
   }
 
@@ -2598,7 +2737,7 @@
           var regId = btn.getAttribute("data-reg");
           var reg = DATA.registrations.find(function(r){ return r.id === regId; });
           var res = await dbUpdateRegistration(regId, {checked_in: !(reg && reg.checked_in)});
-          if(res.error){ alert(t("Não foi possível salvar: ") + res.error.message); return; }
+          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
           renderEnc();
         });
       });
