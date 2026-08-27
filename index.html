@@ -449,7 +449,6 @@
   .chip-check{ display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:999px; border:1px solid var(--hairline-2); background:var(--surface); cursor:pointer; font-size:0.83rem; font-weight:600; color:var(--ink-soft); }
   .chip-check.on{ background:var(--brand-soft); border-color:var(--brand); color:var(--brand); }
   .radio-row{ display:flex; gap:10px; flex-wrap:wrap; }
-  .upload-box{ border:1.5px dashed var(--hairline-2); border-radius:11px; padding:20px; text-align:center; color:var(--ink-mute); font-size:0.82rem; cursor:pointer; }
   .success-banner{ display:none; align-items:center; gap:10px; background:color-mix(in oklab, var(--st-good) 14%, transparent); color:var(--st-good); border-radius:11px; padding:12px 16px; font-weight:600; font-size:0.86rem; margin-top:16px; }
   .success-banner.show{ display:flex; }
   .success-banner svg{ width:18px; height:18px; flex:none; }
@@ -729,17 +728,12 @@
         <div class="field" style="margin-bottom:12px;"><label>Forma de pagamento</label>
           <div class="radio-row" id="paymentMethods"></div>
         </div>
-        <div class="grid cols-2" style="margin-bottom:12px;">
-          <div class="card-pad" style="background:var(--surface-2);border:1px solid var(--hairline);border-radius:11px;">
-            <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600;margin-bottom:4px;">Total do grupo</div>
-            <div id="valorBreakdown" class="tabular" style="font-size:.82rem;color:var(--ink-soft);margin-bottom:2px;">R$ 85,00 × 1 pessoa</div>
-            <div id="valorTotal" class="tabular" style="font-size:1.3rem;font-weight:700;">R$ 85,00</div>
-          </div>
-          <div class="field"><label>Comprovante (opcional agora)</label>
-            <div class="upload-box">Toque para anexar comprovante</div>
-          </div>
+        <div class="card-pad" style="background:var(--surface-2);border:1px solid var(--hairline);border-radius:11px;margin-bottom:12px;">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600;margin-bottom:4px;">Total do grupo</div>
+          <div id="valorBreakdown" class="tabular" style="font-size:.82rem;color:var(--ink-soft);margin-bottom:2px;">R$ 85,00 × 1 pessoa</div>
+          <div id="valorTotal" class="tabular" style="font-size:1.3rem;font-weight:700;">R$ 85,00</div>
         </div>
-        <p class="i18n-note" style="margin:0;font-size:.8rem;color:var(--ink-soft);">Quem faz esta inscrição é o responsável por enviar o comprovante do pagamento de todo o grupo.</p>
+        <p class="i18n-note" style="margin:0;font-size:.8rem;color:var(--ink-soft);">Quem faz esta inscrição é o responsável por enviar o comprovante do pagamento de todo o grupo. Você poderá anexá-lo logo após concluir o cadastro.</p>
       </div>
 
       <div class="form-section" style="margin-bottom:8px;">
@@ -1399,7 +1393,7 @@
     "Responsável (se menor de idade)":"Responsable (si es menor de edad)",
     "Nome do responsável":"Nombre del responsable", "Telefone do responsável":"Teléfono del responsable",
     "Forma de pagamento":"Forma de pago", "Dinheiro no embarque":"Efectivo al abordar", "Transferência":"Transferencia",
-    "Comprovante (opcional agora)":"Comprobante (opcional por ahora)", "Toque para anexar comprovante":"Toca para adjuntar comprobante",
+    "Comprovante (opcional agora)":"Comprobante (opcional por ahora)",
     "Contato de emergência":"Contacto de emergencia", "Telefone":"Teléfono",
     "Li e aceito o regulamento do congresso e as condições de transporte.":"Leí y acepto el reglamento del congreso y las condiciones de transporte.",
     "Cadastro enviado! Você receberá a confirmação pelo WhatsApp.":"¡Registro enviado! Recibirás la confirmación por WhatsApp.",
