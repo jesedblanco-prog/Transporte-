@@ -214,7 +214,8 @@
 
   .topbar{
     position:sticky; top:0; z-index:20; background:color-mix(in oklab, var(--bg) 90%, transparent);
-    backdrop-filter:blur(10px); border-bottom:1px solid var(--hairline);
+    backdrop-filter:blur(10px); border-bottom:2px solid transparent;
+    border-image:linear-gradient(90deg, var(--brand), var(--brand-2), var(--c-3)) 1;
   }
   .topbar-inner{ display:flex; align-items:center; gap:14px; padding:14px 24px; flex-wrap:wrap; }
   .burger{ display:none; width:36px; height:36px; border-radius:9px; border:1px solid var(--hairline-2); background:var(--surface); align-items:center; justify-content:center; cursor:pointer; flex:none; }
@@ -234,6 +235,14 @@
   .icon-toolbtn{ width:36px; height:36px; border-radius:9px; border:1px solid var(--hairline-2); background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; flex:none; }
   .icon-toolbtn svg{ width:16px; height:16px; }
   .icon-toolbtn .ping{ position:absolute; top:-3px; right:-3px; width:9px; height:9px; border-radius:50%; background:var(--st-critical); border:2px solid var(--bg); }
+  .notif-wrap{ position:relative; flex:none; }
+  .notif-dropdown{ position:absolute; top:calc(100% + 8px); right:0; width:min(340px, 90vw); max-height:380px; overflow-y:auto; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; box-shadow:var(--shadow-lg); z-index:85; }
+  .notif-dropdown .notif-item{ padding:11px 14px; border-bottom:1px solid var(--hairline); }
+  .notif-dropdown .notif-item:last-child{ border-bottom:none; }
+  .notif-dropdown .notif-item .ntitle{ font-weight:700; font-size:.83rem; }
+  .notif-dropdown .notif-item .nmsg{ font-size:.78rem; color:var(--ink-soft); margin-top:2px; }
+  .notif-dropdown .notif-item .ntime{ font-size:.7rem; color:var(--ink-mute); margin-top:4px; }
+  .notif-dropdown .notif-empty{ padding:20px 14px; text-align:center; color:var(--ink-mute); font-size:.82rem; }
 
   .theme-toggle{ display:flex; align-items:center; gap:2px; background:var(--surface); border:1px solid var(--hairline); border-radius:999px; padding:3px; flex:none; }
   .theme-toggle button{ border:0; background:transparent; border-radius:999px; width:28px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-mute); }
@@ -263,7 +272,7 @@
   .grid.split-58{ grid-template-columns:1.3fr 1fr; }
 
   .metrics{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:18px; }
-  .metric{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:14px 15px 12px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .metric{ background:var(--surface); border:1px solid var(--hairline); border-left:3px solid var(--brand); border-radius:14px; padding:14px 15px 12px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:8px; min-width:0; }
   .metric .label{ font-size:0.66rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-mute); font-weight:600; }
   .metric .value{ font-size:1.44rem; font-weight:600; letter-spacing:-0.01em; }
   .metric .delta{ font-size:0.71rem; font-weight:600; }
@@ -290,6 +299,11 @@
   .pill.critical{ background:color-mix(in oklab, var(--st-critical) 14%, transparent); color:var(--st-critical); }
   .pill.neutral{ background:var(--plane); color:var(--ink-soft); }
   .pill .dotp{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+  .pay-select{ font-size:0.76rem; font-weight:700; padding:5px 26px 5px 11px; border-radius:999px; cursor:pointer; appearance:none; -webkit-appearance:none; background-repeat:no-repeat; background-position:right 9px center; background-size:9px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='m6 9 6 6 6-6' stroke='%238b8fa3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+  .pay-select.status-pago{ background-color:color-mix(in oklab, var(--st-good) 14%, transparent); color:var(--st-good); border:1.5px solid color-mix(in oklab, var(--st-good) 45%, transparent); }
+  .pay-select.status-pendente{ background-color:color-mix(in oklab, var(--st-warning) 18%, transparent); color:var(--st-warning); border:1.5px solid color-mix(in oklab, var(--st-warning) 45%, transparent); }
+  .pay-select.status-parcial{ background-color:var(--plane); color:var(--ink-soft); border:1.5px solid var(--hairline-2); }
 
   .avatar{ width:30px; height:30px; border-radius:50%; background:var(--plane); display:flex; align-items:center; justify-content:center; font-size:0.68rem; font-weight:700; color:var(--ink-soft); flex:none; }
 
@@ -463,12 +477,15 @@
   .wa-input .snd svg{ width:14px; height:14px; }
 
   /* ---- floating help widget (passenger portal) ---- */
-  .help-fab{ position:fixed; bottom:22px; right:22px; width:56px; height:56px; border-radius:50%; background:#25d366; color:#fff; border:0; box-shadow:var(--shadow-lg); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:70; }
-  .help-fab svg{ width:27px; height:27px; }
-  .help-panel{ position:fixed; bottom:88px; right:22px; width:min(320px, calc(100vw - 32px)); background:#e5ded4; border-radius:14px; overflow:hidden; box-shadow:var(--shadow-lg); z-index:70; }
+  .help-fab{ position:fixed; bottom:22px; right:22px; width:60px; height:60px; border-radius:50%; background:#25d366; color:#fff; border:0; box-shadow:var(--shadow-lg); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:70; }
+  .help-fab svg{ width:29px; height:29px; }
+  .help-backdrop{ position:fixed; inset:0; background:rgba(8,14,12,0.5); z-index:79; }
+  .help-panel{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(440px, calc(100vw - 28px)); max-height:min(600px, calc(100vh - 60px)); display:flex; flex-direction:column; background:#e5ded4; border-radius:16px; overflow:hidden; box-shadow:var(--shadow-lg); z-index:80; }
+  .help-panel .wa-body{ flex:1; min-height:260px; max-height:none; padding:16px 14px; }
+  .help-panel .wa-bubble{ font-size:0.92rem; max-width:88%; }
   .help-quick{ display:flex; flex-wrap:wrap; gap:6px; padding:10px; background:#f0f0f0; }
-  .help-quick button{ border:1px solid rgba(0,0,0,0.12); background:#fff; color:#075e54; border-radius:999px; padding:6px 11px; font-size:0.74rem; font-weight:600; cursor:pointer; }
-  @media (max-width:620px){ .help-fab{ bottom:16px; right:16px; } .help-panel{ bottom:80px; right:16px; } }
+  .help-quick button{ border:1px solid rgba(0,0,0,0.12); background:#fff; color:#075e54; border-radius:999px; padding:7px 12px; font-size:0.8rem; font-weight:600; cursor:pointer; }
+  @media (max-width:620px){ .help-fab{ bottom:16px; right:16px; } .help-panel{ width:calc(100vw - 20px); max-height:min(560px, calc(100vh - 40px)); } }
 
   /* ---- QR / whatsapp automation settings ---- */
   .connect-toggle{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
@@ -501,6 +518,7 @@
     .searchbar{ display:none; }
   }
   @media (max-width:620px){
+    html{ font-size:17.5px; }
     .metrics{ grid-template-columns:repeat(2,1fr); }
     .content{ padding:16px 14px 48px; }
     .grid.cols-3,.grid.cols-4{ grid-template-columns:1fr; }
@@ -508,6 +526,13 @@
     .form-grid{ grid-template-columns:1fr; }
     .panel-stats{ grid-template-columns:repeat(3,1fr); gap:6px; }
     .previewbar{ padding:8px 12px; }
+    .table-scroll table.data{ font-size:0.92rem; }
+    .actionbtn{ padding:9px 14px; }
+    .topbar-inner{ padding:12px 14px; gap:10px; }
+    .topbar-inner .theme-toggle:nth-of-type(1){ order:5; }
+  }
+  @media (max-width:400px){
+    .topbar-inner .theme-toggle{ display:none; }
   }
 
   /* ---- premium modal (replaces native alert/confirm/prompt) ---- */
@@ -760,6 +785,7 @@
   <button type="button" class="help-fab" id="helpFab" aria-label="Ajuda via WhatsApp">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3Zm0 1.8a7.2 7.2 0 0 1 6.2 10.9l-.24.4.68 2.5-2.55-.67-.4.24A7.2 7.2 0 1 1 12 4.8Zm-2.7 3.5c-.2 0-.5 0-.7.3-.25.3-.9.9-.9 2.1s.9 2.5 1 2.6c.15.2 1.8 2.8 4.4 3.8 2.2.85 2.6.68 3.1.6.5-.05 1.6-.65 1.8-1.3.2-.6.2-1.15.15-1.25-.05-.1-.2-.17-.4-.3-.2-.1-1.2-.6-1.4-.65-.2-.1-.3-.15-.45.1-.15.2-.5.65-.6.78-.1.13-.2.15-.4.05-.2-.1-.85-.3-1.6-1-.6-.5-1-1.2-1.15-1.4-.1-.2 0-.3.1-.45.1-.1.2-.25.3-.4.1-.1.15-.2.2-.35.05-.15 0-.3 0-.4-.05-.1-.45-1.1-.6-1.5-.15-.4-.35-.35-.5-.35Z"/></svg>
   </button>
+  <div class="help-backdrop" id="helpBackdrop" hidden></div>
   <div class="help-panel" id="helpPanel" hidden>
     <div class="wa-head" style="border-radius:14px 14px 0 0;">
       <div class="av"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 5.5h14a1.6 1.6 0 0 1 1.6 1.6v8.2A1.6 1.6 0 0 1 19 16.9H10l-4.4 3.4v-3.4H5a1.6 1.6 0 0 1-1.6-1.6V7.1A1.6 1.6 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="8.3" cy="11.1" r="1" fill="currentColor"/><circle cx="12" cy="11.1" r="1" fill="currentColor"/><circle cx="15.7" cy="11.1" r="1" fill="currentColor"/></svg></div>
@@ -884,7 +910,10 @@
           <input type="text" placeholder="Buscar passageiro, ônibus, relatório…">
           <kbd>/</kbd>
         </div>
-        <button class="icon-toolbtn" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none"><path d="M6 10.5a6 6 0 1 1 12 0c0 3.4 1 4.8 1.6 5.4H4.4C5 15.3 6 13.9 6 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 18.8a2.4 2.4 0 0 0 4.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ping"></span></button>
+        <div class="notif-wrap">
+          <button class="icon-toolbtn" id="notifBellBtn" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none"><path d="M6 10.5a6 6 0 1 1 12 0c0 3.4 1 4.8 1.6 5.4H4.4C5 15.3 6 13.9 6 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 18.8a2.4 2.4 0 0 0 4.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ping" id="notifPing" hidden></span></button>
+          <div class="notif-dropdown" id="notifDropdown" hidden></div>
+        </div>
         <div class="theme-toggle" role="group" aria-label="Idioma">
           <button type="button" data-lang-btn="pt" class="active">PT</button>
           <button type="button" data-lang-btn="es">ES</button>
@@ -1046,6 +1075,17 @@
   async function dbInsertRegistration(reg, companionNames){
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
     try{
+      var dupPhone = (reg.phone||"").replace(/\D/g,"");
+      var dupDoc = (reg.docNumber||"").replace(/\D/g,"");
+      if(dupPhone && dupDoc){
+        await loadAllData();
+        var existingDup = (DATA.registrations||[]).find(function(r){
+          return (r.phone||"").replace(/\D/g,"") === dupPhone && (r.doc_number||"").replace(/\D/g,"") === dupDoc;
+        });
+        if(existingDup){
+          return {error:{message:"Já existe um cadastro com este telefone e documento, em nome de "+existingDup.titular_name+". Se você já se inscreveu, use a opção \"Já sou cadastrado\" na tela inicial em vez de se cadastrar de novo."}, duplicate:true};
+        }
+      }
       var insertRes = await supa.from("registrations").insert({
         titular_name: toTitleCase(reg.titularName),
         phone: reg.phone || "",
@@ -1725,6 +1765,30 @@
 
   /* ---- PASSAGEIROS ---- */
   var PAY_LABEL = {pendente:["warning","Pendente"], parcial:["neutral","Abono"], pago:["good","Pago"]};
+  function paySelectHTML(r){
+    var cur = r.payment_status || "pendente";
+    return '<select class="pay-select status-'+cur+'" data-reg="'+r.id+'" title="'+t("Alterar status de pagamento")+'">'+
+      ["pendente","parcial","pago"].map(function(s){
+        return '<option value="'+s+'"'+(s===cur?' selected':'')+'>'+t((PAY_LABEL[s]||PAY_LABEL.pendente)[1])+'</option>';
+      }).join('')+'</select>';
+  }
+  async function handlePaySelectChange(sel){
+    var regId = sel.getAttribute("data-reg");
+    var next = sel.value;
+    var reg = (DATA.registrations||[]).find(function(r){ return String(r.id)===String(regId); });
+    var prevStatus = reg ? (reg.payment_status||"pendente") : "pendente";
+    if(next === "pago" && reg){
+      var warn = reg.payment_proof_url ? "" : (" ⚠️ "+t("Nenhum comprovante foi enviado por este passageiro ainda."));
+      var confirmMsg = t("Confirmar que o valor total de ")+money(formatBRL(Number(reg.total_amount||0)))+t(" foi recebido de ")+reg.titular_name+"?"+warn;
+      var ok = await jvConfirm(confirmMsg, {title:t("Confirmar pagamento")});
+      if(!ok){ sel.value = prevStatus; sel.className = "pay-select status-"+prevStatus; return; }
+    }
+    sel.disabled = true;
+    var res = await dbUpdateRegistration(regId, {payment_status: next});
+    sel.disabled = false;
+    if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); sel.value = prevStatus; sel.className = "pay-select status-"+prevStatus; return; }
+    rerenderViews();
+  }
   var paxFilterBus = "", paxFilterPonto = "";
   views.passageiros = {
     title:"Passageiros",
@@ -1745,9 +1809,8 @@
         var grupo = (r.people_count>1) ? ("Titular (+"+(r.people_count-1)+")") : "—";
         var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
         var pontoCell = mp ? mp.name : ('<select class="assign-ponto" data-reg="'+r.id+'" style="font-size:.78rem;padding:5px 8px;border-radius:7px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink-mute);"><option value="">'+t("Atribuir ponto…")+'</option>'+mpOptions+'</select>');
-        var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
         var docLabel = r.doc_type ? (r.doc_type + " " + (r.doc_number||"")) : "—";
-        var payCell = '<span class="pill pay-pill '+pay[0]+'" data-reg="'+r.id+'" data-status="'+r.payment_status+'" style="cursor:pointer;" title="'+t("Clique para alterar o status")+'"><i class="dotp"></i>'+t(pay[1])+'</span>';
+        var payCell = paySelectHTML(r);
         var delCell = '<button type="button" class="icon-btn del-reg" data-reg="'+r.id+'" data-name="'+r.titular_name+'" title="'+t("Excluir cadastro")+'" style="color:var(--st-critical);"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5a1 1 0 0 0 1 .95h6a1 1 0 0 0 1-.95L17 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
         var companions = (r.passengers||[]).filter(function(p){ return !p.is_titular; });
         var nameCell = '<div>'+r.titular_name+(companions.length ? ('<div style="font-size:.72rem;color:var(--ink-mute);font-weight:500;margin-top:2px;">+ '+companions.map(function(c){ return c.full_name; }).join(", ")+'</div>') : '')+'</div>';
@@ -1791,16 +1854,8 @@
           rerenderViews();
         });
       });
-      root.querySelectorAll(".pay-pill").forEach(function(pill){
-        pill.addEventListener("click", async function(){
-          var order = ["pendente","parcial","pago"];
-          var cur = pill.getAttribute("data-status") || "pendente";
-          var next = order[(order.indexOf(cur)+1) % order.length];
-          var regId = pill.getAttribute("data-reg");
-          var res = await dbUpdateRegistration(regId, {payment_status: next});
-          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
-          rerenderViews();
-        });
+      root.querySelectorAll(".pay-select").forEach(function(sel){
+        sel.addEventListener("change", function(){ handlePaySelectChange(sel); });
       });
       root.querySelectorAll(".del-reg").forEach(function(btn){
         btn.addEventListener("click", async function(){
@@ -1909,10 +1964,9 @@
         '<div class="card"><div class="card-head"><h3>'+t("Comprovantes de pagamento")+'</h3><span class="muted">'+(hasReal?regs.length:0)+' '+t("registros")+'</span></div><div class="card-pad">'+
           '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Valor")+'</th><th>'+t("Status")+'</th><th></th></tr></thead><tbody>'+
             (hasReal ? regs.map(function(r){
-              var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
               var proofLink = r.payment_proof_url ? ('<a class="actionbtn ghost" href="'+r.payment_proof_url+'" target="_blank" rel="noopener" style="font-size:.74rem;padding:5px 9px;">'+t("Ver comprovante enviado")+'</a>') : ('<span style="font-size:.72rem;color:var(--ink-mute);">'+t("Nenhum enviado")+'</span>');
               var waBtn = (r.phone && r.payment_status!=="pago") ? ('<button type="button" class="actionbtn ghost send-charge" data-phone="'+r.phone.replace(/\D/g,'')+'" data-name="'+r.titular_name.replace(/"/g,'&quot;')+'" data-total="'+money(formatBRL(Number(r.total_amount||0)))+'" style="font-size:.74rem;padding:5px 9px;">'+t("Cobrar via WhatsApp")+'</button>') : '';
-              return '<tr><td>'+r.titular_name+'</td><td class="tabular">'+money(formatBRL(Number(r.total_amount||0)))+'</td><td><span class="pill '+pay[0]+'"><i class="dotp"></i>'+t(pay[1])+'</span></td><td style="display:flex;gap:6px;flex-wrap:wrap;"><button type="button" class="actionbtn ghost gen-receipt" data-reg="'+r.id+'" style="font-size:.74rem;padding:5px 9px;">'+t("Comprovante PDF")+'</button>'+proofLink+waBtn+'</td></tr>';
+              return '<tr><td>'+r.titular_name+'</td><td class="tabular">'+money(formatBRL(Number(r.total_amount||0)))+'</td><td>'+paySelectHTML(r)+'</td><td style="display:flex;gap:6px;flex-wrap:wrap;"><button type="button" class="actionbtn ghost gen-receipt" data-reg="'+r.id+'" style="font-size:.74rem;padding:5px 9px;">'+t("Comprovante PDF")+'</button>'+proofLink+waBtn+'</td></tr>';
             }).join('') : '<tr><td colspan="4" style="color:var(--ink-mute);">'+t("Sem cadastros ainda")+'</td></tr>')+
           '</tbody></table></div>'+
           '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">O status só passa para "Pago" quando o administrador confirma que o valor total foi recebido — mesmo que o passageiro já tenha feito um abono. Use o botão "Cobrar via WhatsApp" em cada linha para enviar uma cobrança individual.</p>'+
@@ -1926,6 +1980,9 @@
       '</div>';
     },
     after:function(root){
+      root.querySelectorAll(".pay-select").forEach(function(sel){
+        sel.addEventListener("change", function(){ handlePaySelectChange(sel); });
+      });
       root.querySelectorAll(".send-charge").forEach(function(btn){
         btn.addEventListener("click", function(){
           var phone = btn.getAttribute("data-phone");
@@ -2690,19 +2747,27 @@
           if(priceInput && +priceInput.value > 0) PRICE_PER_PERSON = +priceInput.value;
           persistState();
           updateEventBranding();
+          var cfgSaveOk = true, cfgSaveErrMsg = "";
           if(dbOk()){
             try{
-              await supa.from("event_config").update({
+              var cfgSaveRes = await supa.from("event_config").update({
                 event_name: STATE.eventName,
                 date_start: brToIso(STATE.dateStart),
                 date_end: brToIso(STATE.dateEnd),
                 single_day: STATE.singleDay,
                 price_per_person: PRICE_PER_PERSON
               }).eq("id",1);
+              if(cfgSaveRes.error){ cfgSaveOk = false; cfgSaveErrMsg = cfgSaveRes.error.message; }
               await loadAllData();
-            }catch(e){}
+            }catch(e){ cfgSaveOk = false; cfgSaveErrMsg = (e && e.message) || String(e); }
+          } else {
+            cfgSaveOk = false; cfgSaveErrMsg = t("Banco de dados não conectado.");
           }
           if(typeof updateTotal === "function") updateTotal();
+          if(!cfgSaveOk){
+            await jvAlert(t("Não foi possível salvar no banco de dados: ") + cfgSaveErrMsg + t(" As telas de passageiros e administração continuam com o valor antigo até isso ser corrigido."));
+            return;
+          }
           var s = root.querySelector("#cfgSaveSuccess");
           if(s) s.classList.add("show");
         });
@@ -3236,12 +3301,14 @@
       }
       if(banner) banner.classList.add("show");
       lastRegistrationId = result.data ? result.data.id : null;
+      lastRegistrationName = result.data ? result.data.titular_name : names[0];
       var proofBox = document.getElementById("proofUploadBox");
       if(proofBox && lastRegistrationId) proofBox.hidden = false;
     });
   }
 
   var lastRegistrationId = null;
+  var lastRegistrationName = "";
   var proofUploadBtn = document.getElementById("proofUploadBtn");
   if(proofUploadBtn){
     proofUploadBtn.addEventListener("click", async function(){
@@ -3261,6 +3328,13 @@
         var url = pub && pub.data ? pub.data.publicUrl : null;
         var updRes = await supa.from("registrations").update({payment_proof_url:url}).eq("id", lastRegistrationId);
         if(updRes.error) throw updRes.error;
+        try{
+          await supa.from("notifications").insert({
+            title: t("Novo comprovante de pagamento"),
+            message: (lastRegistrationName || t("Um passageiro")) + " " + t("enviou o comprovante de pagamento. Confira em Pagamentos."),
+            target: "admin"
+          });
+        }catch(e2){ /* não bloqueia o envio do passageiro se a notificação falhar */ }
         if(okBox) okBox.hidden = false;
       }catch(e){
         if(errBox){ errBox.textContent = (e && e.message) || t("Erro ao enviar."); errBox.hidden = false; }
@@ -3466,39 +3540,63 @@
   renderEncPontos();
   renderEncAvisos();
 
-  /* ---- floating help widget ---- */
+  /* ---- floating help widget (respostas reais, ligadas ao cadastro do passageiro logado) ---- */
   var helpFab = document.getElementById("helpFab");
   var helpPanel = document.getElementById("helpPanel");
+  var helpBackdrop = document.getElementById("helpBackdrop");
   var helpClose = document.getElementById("helpClose");
   var helpBody = document.getElementById("helpBody");
-  var helpAnswers = {
-    onibus: "Você está no Ônibus 02, com saída às 05:30 do Salão do Reino — Jardim do Vale.",
-    pagamento: "Seu pagamento de R$ 85,00 já está confirmado (Pix, 02/07/2026). Nada pendente por aqui!",
-    ponto: "Seu ponto de encontro é o Salão do Reino — Jardim do Vale, às 05:30.",
-    cadastro: "Claro! Vou te levar para a tela de cadastro para você (ou um familiar) se inscrever."
-  };
+  function computeHelpAnswers(){
+    var reg = currentPassengerReg;
+    if(!reg){
+      return {
+        onibus: t("Assim que você fizer login com seu telefone e documento, essa informação aparece aqui."),
+        pagamento: t("Faça login para acompanhar o status do seu pagamento aqui."),
+        ponto: t("Seu ponto de encontro aparece aqui assim que você fizer login."),
+        cadastro: t("Claro! Vou te levar para a tela de cadastro para você (ou um familiar) se inscrever.")
+      };
+    }
+    var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === reg.meeting_point_id; });
+    var pay = PAY_LABEL[reg.payment_status] || PAY_LABEL.pendente;
+    return {
+      onibus: reg.bus_number ? (t("Você está no Ônibus ")+reg.bus_number+(mp?(", saindo de "+mp.name):"")+".") : t("Seu ônibus ainda não foi atribuído pela administração."),
+      pagamento: t("Seu pagamento está: ")+t(pay[1])+" — "+money(formatBRL(Number(reg.total_amount||0)))+(reg.payment_method?(" ("+reg.payment_method+")"):"")+".",
+      ponto: mp ? (mp.name+(mp.address?(" — "+mp.address):"")+".") : t("Seu ponto de encontro ainda não foi atribuído pela administração."),
+      cadastro: t("Claro! Vou te levar para a tela de cadastro para você (ou um familiar) se inscrever.")
+    };
+  }
+  function openHelpPanel(){
+    helpPanel.hidden = false;
+    if(helpBackdrop) helpBackdrop.hidden = false;
+    if(!helpBody.hasChildNodes()){
+      var b = document.createElement("div");
+      b.className = "wa-bubble in";
+      b.textContent = "Olá! Posso ajudar com horários, pagamento, ponto de encontro ou um novo cadastro. Escolha uma opção abaixo 👇";
+      helpBody.appendChild(b);
+    }
+  }
+  function closeHelpPanel(){
+    helpPanel.hidden = true;
+    if(helpBackdrop) helpBackdrop.hidden = true;
+  }
   if(helpFab){
     helpFab.addEventListener("click", function(){
-      helpPanel.hidden = !helpPanel.hidden;
-      if(!helpPanel.hidden && !helpBody.hasChildNodes()){
-        var b = document.createElement("div");
-        b.className = "wa-bubble in";
-        b.textContent = "Olá! Posso ajudar com horários, pagamento, ponto de encontro ou um novo cadastro. Escolha uma opção abaixo 👇";
-        helpBody.appendChild(b);
-      }
+      if(helpPanel.hidden) openHelpPanel(); else closeHelpPanel();
     });
   }
-  if(helpClose){ helpClose.addEventListener("click", function(){ helpPanel.hidden = true; }); }
+  if(helpClose){ helpClose.addEventListener("click", closeHelpPanel); }
+  if(helpBackdrop){ helpBackdrop.addEventListener("click", closeHelpPanel); }
   document.querySelectorAll("#helpQuick [data-q]").forEach(function(btn){
     btn.addEventListener("click", function(){
       var key = btn.getAttribute("data-q");
       var out = document.createElement("div"); out.className = "wa-bubble out"; out.textContent = btn.textContent;
       helpBody.appendChild(out);
-      var reply = document.createElement("div"); reply.className = "wa-bubble in"; reply.textContent = helpAnswers[key] || "Já vou verificar isso para você.";
+      var answers = computeHelpAnswers();
+      var reply = document.createElement("div"); reply.className = "wa-bubble in"; reply.textContent = answers[key] || t("Já vou verificar isso para você.");
       helpBody.appendChild(reply);
       helpBody.scrollTop = helpBody.scrollHeight;
       if(key === "cadastro"){
-        setTimeout(function(){ helpPanel.hidden = true; goScreen("cadastro"); }, 900);
+        setTimeout(function(){ closeHelpPanel(); goScreen("cadastro"); }, 900);
       }
     });
   });
@@ -3518,6 +3616,38 @@
     var pagoEl = document.getElementById("navPagoCount");
     if(paxEl){ paxEl.textContent = String(totalPax); paxEl.hidden = totalPax === 0; }
     if(pagoEl){ pagoEl.textContent = String(pendCount); pagoEl.hidden = pendCount === 0; }
+  }
+
+  function renderNotifDropdown(){
+    var dd = document.getElementById("notifDropdown");
+    var ping = document.getElementById("notifPing");
+    if(!dd) return;
+    var notifs = (DATA.notifications||[]).slice(0,15);
+    var lastSeen = 0;
+    try{ lastSeen = Number(localStorage.getItem("jv-notif-seen")||0); }catch(e){}
+    var unread = notifs.filter(function(n){ return n.created_at && new Date(n.created_at).getTime() > lastSeen; }).length;
+    if(ping) ping.hidden = unread === 0;
+    dd.innerHTML = notifs.length ? notifs.map(function(n){
+      var when = n.created_at ? new Date(n.created_at).toLocaleString(STATE.lang==="es"?"es-AR":"pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "";
+      return '<div class="notif-item"><div class="ntitle">'+n.title+'</div>'+(n.message?('<div class="nmsg">'+n.message+'</div>'):'')+'<div class="ntime">'+when+'</div></div>';
+    }).join('') : '<div class="notif-empty">'+t("Nenhuma notificação ainda.")+'</div>';
+  }
+  var notifBellBtn = document.getElementById("notifBellBtn");
+  if(notifBellBtn){
+    notifBellBtn.addEventListener("click", function(e){
+      e.stopPropagation();
+      var dd = document.getElementById("notifDropdown");
+      if(!dd) return;
+      var willShow = dd.hidden;
+      document.querySelectorAll(".notif-dropdown").forEach(function(x){ x.hidden = true; });
+      dd.hidden = !willShow;
+      if(willShow){
+        renderNotifDropdown();
+        try{ localStorage.setItem("jv-notif-seen", String(Date.now())); }catch(e2){}
+        var ping = document.getElementById("notifPing"); if(ping) ping.hidden = true;
+      }
+    });
+    document.addEventListener("click", function(){ var dd=document.getElementById("notifDropdown"); if(dd) dd.hidden = true; });
   }
 
   function initials(name){
@@ -3569,6 +3699,21 @@
     renderEncPontos();
     renderEncAvisos();
     updateSidebarCounts();
+    if(currentPassengerReg){
+      var updatedReg = (DATA.registrations||[]).find(function(r){ return String(r.id) === String(currentPassengerReg.id); });
+      if(updatedReg){ currentPassengerReg = updatedReg; renderPassengerPortal(updatedReg); }
+    }
+    if(typeof renderNotifDropdown === "function"){
+      var ping = document.getElementById("notifPing");
+      var dd = document.getElementById("notifDropdown");
+      if(ping && dd && dd.hidden){
+        var notifs = (DATA.notifications||[]);
+        var lastSeen = 0;
+        try{ lastSeen = Number(localStorage.getItem("jv-notif-seen")||0); }catch(e){}
+        var unread = notifs.filter(function(n){ return n.created_at && new Date(n.created_at).getTime() > lastSeen; }).length;
+        ping.hidden = unread === 0;
+      }
+    }
   }
   loadAllData().then(function(ok){ if(ok) rerenderViews(); });
   refreshAdminIdentity().then(function(){ rerenderViews(); });
