@@ -602,9 +602,15 @@
 <!-- ===================== LOGIN ===================== -->
 <section class="screen screen-plain" id="screen-login">
   <div class="login-wrap">
-    <div class="theme-toggle" role="group" aria-label="Idioma" style="margin:0 0 14px;width:fit-content;">
-      <button type="button" data-lang-btn="pt" class="active">PT</button>
-      <button type="button" data-lang-btn="es">ES</button>
+    <div style="display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap;">
+      <div class="theme-toggle" role="group" aria-label="Idioma" style="width:fit-content;">
+        <button type="button" data-lang-btn="pt" class="active">PT</button>
+        <button type="button" data-lang-btn="es">ES</button>
+      </div>
+      <div class="theme-toggle" role="group" aria-label="Tema" style="width:fit-content;">
+        <button type="button" data-theme-btn="light" aria-label="Tema claro"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <button type="button" data-theme-btn="dark" aria-label="Tema escuro"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+      </div>
     </div>
     <div class="login-brand">
       <div class="glyph"><svg viewBox="0 0 24 24" fill="none"><path d="M5 14.5V7.2C5 6 6 5 7.2 5h9.6C18 5 19 6 19 7.2v7.3" stroke="currentColor" stroke-width="1.7"/><path d="M5 14.5h14M5 14.5l-1 2.3M19 14.5l1 2.3M8 17.3v1M16 17.3v1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.3" cy="11.6" r="1" fill="currentColor"/><circle cx="15.7" cy="11.6" r="1" fill="currentColor"/><path d="M6.6 8h10.8" stroke="currentColor" stroke-width="1.7"/><path d="M2.3 19.6 6 16l3 3 4-4.6 3.5 3.6 3.2-2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg></div>
@@ -660,7 +666,13 @@
 <!-- ===================== CADASTRO ===================== -->
 <section class="screen screen-plain" id="screen-cadastro" hidden>
   <div style="width:100%;max-width:760px;">
-    <div class="backlink" data-goto="login"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Voltar ao login</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+      <div class="backlink" data-goto="login" style="margin-bottom:0;"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Voltar ao login</span></div>
+      <div class="theme-toggle" role="group" aria-label="Tema">
+        <button type="button" data-theme-btn="light" aria-label="Tema claro"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <button type="button" data-theme-btn="dark" aria-label="Tema escuro"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
     <h1 style="margin-bottom:4px;">Cadastro de passageiro</h1>
     <p style="margin:0 0 20px;color:var(--ink-soft);font-size:0.9rem;">Preencha todos os dados solicitados para garantir sua vaga no ônibus.</p>
 
@@ -768,7 +780,13 @@
 <!-- ===================== PORTAL DO PASSAGEIRO ===================== -->
 <section class="screen screen-plain" id="screen-passenger" hidden>
   <div class="portal-wrap">
-    <div class="backlink" data-goto="login"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sair</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+      <div class="backlink" data-goto="login" style="margin-bottom:0;"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sair</span></div>
+      <div class="theme-toggle" role="group" aria-label="Tema">
+        <button type="button" data-theme-btn="light" aria-label="Tema claro"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <button type="button" data-theme-btn="dark" aria-label="Tema escuro"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
     <div class="portal-head">
       <div class="av">MF</div>
       <div><h2>Olá, Marcos 👋</h2><span id="portalEventSub">Jardim do Vale · Inscrição confirmada</span></div>
@@ -839,7 +857,13 @@
 <!-- ===================== PAINEL DO ENCARREGADO ===================== -->
 <section class="screen screen-plain" id="screen-encarregado" hidden>
   <div class="panel-wrap">
-    <div class="backlink" data-goto="login"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sair</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+      <div class="backlink" data-goto="login" style="margin-bottom:0;"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sair</span></div>
+      <div class="theme-toggle" role="group" aria-label="Tema">
+        <button type="button" data-theme-btn="light" aria-label="Tema claro"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <button type="button" data-theme-btn="dark" aria-label="Tema escuro"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
     <div class="portal-head">
       <div class="av" id="encAvatar">--</div>
       <div><h2 id="encHeaderName">Encarregado</h2><span id="encarregadoEventSub">Encarregado</span></div>
@@ -1124,6 +1148,9 @@
           return {error:{message:"Já existe um cadastro com este telefone e documento, em nome de "+existingDup.titular_name+". Se você já se inscreveu, use a opção \"Já sou cadastrado\" na tela inicial em vez de se cadastrar de novo."}, duplicate:true};
         }
       }
+      var companionDaysList = reg.companionDaysList || [];
+      var allDaysUnion = (reg.daysSelected||[]).slice();
+      companionDaysList.forEach(function(dias){ (dias||[]).forEach(function(d){ if(allDaysUnion.indexOf(d)===-1) allDaysUnion.push(d); }); });
       var insertRes = await supa.from("registrations").insert({
         titular_name: toTitleCase(reg.titularName),
         phone: reg.phone || "",
@@ -1134,7 +1161,7 @@
         people_count: reg.people,
         total_amount: reg.total,
         payment_status: "pendente",
-        days_selected: (reg.daysSelected && reg.daysSelected.length) ? reg.daysSelected.join(", ") : null
+        days_selected: allDaysUnion.length ? allDaysUnion.join(", ") : null
       }).select().single();
       if(insertRes.error && /days_selected/i.test(insertRes.error.message||"")){
         /* a coluna days_selected ainda não existe no banco (falta rodar o SQL) —
@@ -1153,11 +1180,20 @@
       }
       if(insertRes.error) return {error:insertRes.error};
       var regRow = insertRes.data;
-      var passengerRows = [{ registration_id: regRow.id, full_name: toTitleCase(reg.titularName), doc_type: reg.docType || null, doc_number: reg.docNumber || null, is_titular:true }];
-      (companionNames||[]).forEach(function(name){
-        passengerRows.push({ registration_id: regRow.id, full_name: toTitleCase(name), is_titular:false });
+      var titularDiasTxt = (reg.daysSelected && reg.daysSelected.length) ? reg.daysSelected.join(", ") : null;
+      var passengerRows = [{ registration_id: regRow.id, full_name: toTitleCase(reg.titularName), doc_type: reg.docType || null, doc_number: reg.docNumber || null, is_titular:true, days_selected: titularDiasTxt }];
+      (companionNames||[]).forEach(function(name, idx){
+        var dias = companionDaysList[idx] || [];
+        passengerRows.push({ registration_id: regRow.id, full_name: toTitleCase(name), is_titular:false, days_selected: dias.length ? dias.join(", ") : null });
       });
       var paxRes = await supa.from("passengers").insert(passengerRows);
+      if(paxRes.error && /days_selected/i.test(paxRes.error.message||"")){
+        /* a coluna days_selected ainda não existe na tabela passengers — insere sem ela */
+        var passengerRowsNoDays = passengerRows.map(function(p){
+          var copy = Object.assign({}, p); delete copy.days_selected; return copy;
+        });
+        paxRes = await supa.from("passengers").insert(passengerRowsNoDays);
+      }
       if(paxRes.error) return {error:paxRes.error};
       await loadAllData();
       return {data:regRow};
@@ -1329,6 +1365,8 @@
     "Deseja sair do sistema?":"¿Deseas salir del sistema?", "Faça login novamente para enviar o comprovante.":"Inicia sesión de nuevo para enviar el comprobante.",
     "Já recebemos um comprovante seu — envie outro se precisar corrigir":"Ya recibimos tu comprobante — envía otro si necesitas corregirlo.",
     "Enviar comprovante de pagamento":"Enviar comprobante de pago", "Comprovante enviado! A administração foi avisada.":"¡Comprobante enviado! Se avisó a la administración.",
+    "Meus dias de participação":"Mis días de participación", "Titular":"Titular", "Acompanhante":"Acompañante",
+    " por pessoa/dia":" por persona/día",
     "Copiar link de acesso":"Copiar enlace de acceso", "Abrir Portal do Passageiro":"Abrir Portal del Pasajero",
     "Ver tela de cadastro":"Ver pantalla de registro", "Abrir Painel do Encarregado":"Abrir Panel del Encargado",
     "Convidar administrador":"Invitar administrador", "Marcar todos presentes":"Marcar todos presentes",
@@ -3126,6 +3164,17 @@
         if(vis.ponto){ mapLink.href = mapsUrlFor(mp); mapLink.hidden = false; }
         else mapLink.hidden = true;
       }
+      var diasEl = cards[0].querySelector(".dias-participacao");
+      if(!diasEl){
+        diasEl = document.createElement("div");
+        diasEl.className = "dias-participacao";
+        diasEl.style.cssText = "margin-top:8px;font-size:.78rem;color:var(--ink-soft);";
+        cards[0].appendChild(diasEl);
+      }
+      var titularPax = (reg.passengers||[]).find(function(p){ return p.is_titular; });
+      var meusDias = (titularPax && titularPax.days_selected) ? titularPax.days_selected : (reg.days_selected || "");
+      diasEl.textContent = meusDias ? (t("Meus dias de participação")+": "+meusDias) : "";
+      diasEl.hidden = !meusDias;
     }
     if(cards[1]){
       cards[1].hidden = !vis.pagamento;
@@ -3229,8 +3278,12 @@
       });
     });
   }
+  var DIAS_CONGRESSO = ["17 de julho", "18 de julho", "19 de julho"];
+  function diaChipsHTML(cls){
+    return DIAS_CONGRESSO.map(function(d){ return '<span class="chip-check on '+cls+'" data-dia="'+d+'">'+d+'</span>'; }).join('');
+  }
   function companionBlock(idx){
-    return '<div class="form-section" style="border:1px solid var(--hairline);border-radius:11px;padding:14px;margin-top:10px;background:var(--surface-2);">'+
+    return '<div class="form-section companion-block" style="border:1px solid var(--hairline);border-radius:11px;padding:14px;margin-top:10px;background:var(--surface-2);">'+
       '<h4 style="font-size:.86rem;margin-bottom:10px;">Acompanhante '+idx+'</h4>'+
       '<div class="form-grid">'+
         '<div class="field span2"><label>Nome completo</label><input type="text" class="companion-nome" placeholder="Nome e sobrenome">'+
@@ -3238,6 +3291,7 @@
         '<div class="field"><label>Tipo de documento</label><select class="companion-doctype"></select></div>'+
         '<div class="field"><label>Número do documento</label><input type="text" class="companion-docnum" placeholder="000.000.000-00"></div>'+
         '<div class="field span2"><label>Telefone (opcional)</label><input type="text" placeholder="(11) 90000-0000"></div>'+
+        '<div class="field span2"><label>Dias de participação deste acompanhante</label><div class="radio-row companion-dias">'+diaChipsHTML("companion-dia")+'</div></div>'+
       '</div>'+
     '</div>';
   }
@@ -3252,7 +3306,21 @@
     container.querySelectorAll(".companion-doctype").forEach(function(sel){
       sel.innerHTML = opts.map(function(o){ return '<option value="'+o[0]+'">'+o[1]+'</option>'; }).join("");
     });
+    container.querySelectorAll(".companion-dia").forEach(function(chip){
+      chip.addEventListener("click", function(){
+        var row = chip.closest(".companion-dias");
+        var onCount = row.querySelectorAll(".companion-dia.on").length;
+        if(chip.classList.contains("on") && onCount <= 1) return; /* precisa ficar com pelo menos 1 dia marcado */
+        chip.classList.toggle("on");
+        updateTotal();
+      });
+    });
     updateTotal();
+  }
+  function getCompanionDias(block){
+    var arr = [];
+    block.querySelectorAll(".companion-dia.on").forEach(function(el){ arr.push(el.getAttribute("data-dia")); });
+    return arr;
   }
   function getSelectedDias(){
     var els = document.querySelectorAll(".cadastro-dia.on");
@@ -3261,13 +3329,17 @@
     return arr;
   }
   function updateTotal(){
-    var count = +(document.getElementById("companionCount") || {}).value || 0;
-    var people = count + 1;
-    var dias = getSelectedDias().length || 1;
-    var total = PRICE_PER_PERSON * people * dias;
+    var titularDias = getSelectedDias().length || 1;
+    var total = PRICE_PER_PERSON * titularDias;
+    var parts = [t("Titular")+": "+titularDias+(titularDias===1?" dia":" dias")];
+    document.querySelectorAll(".companion-block").forEach(function(block, i){
+      var cd = getCompanionDias(block).length || 1;
+      total += PRICE_PER_PERSON * cd;
+      parts.push(t("Acompanhante")+" "+(i+1)+": "+cd+(cd===1?" dia":" dias"));
+    });
     var bd = document.getElementById("valorBreakdown");
     var tot = document.getElementById("valorTotal");
-    if(bd) bd.textContent = money(formatBRL(PRICE_PER_PERSON)) + " × " + people + (people===1 ? " pessoa" : " pessoas") + " × " + dias + (dias===1 ? " dia" : " dias");
+    if(bd) bd.textContent = money(formatBRL(PRICE_PER_PERSON)) + t(" por pessoa/dia")+" · "+parts.join(" · ");
     if(tot) tot.textContent = money(formatBRL(total));
   }
   document.querySelectorAll(".cadastro-dia").forEach(function(chip){
@@ -3287,7 +3359,7 @@
   /* ---- cadastro chips + submit ---- */
   document.querySelectorAll(".chip-check").forEach(function(chip){
     if(chip.closest("#paymentMethods")) return; /* payment method chips have their own exclusive-select handler in renderPaymentMethods() */
-    if(chip.classList.contains("cadastro-dia")) return; /* dias têm handler próprio acima, que recalcula o total */
+    if(chip.classList.contains("cadastro-dia") || chip.classList.contains("companion-dia")) return; /* dias têm handler próprio acima, que recalcula o total */
     chip.addEventListener("click", function(){ chip.classList.toggle("on"); });
   });
   /* ---- admin: forgot password ---- */
@@ -3378,6 +3450,7 @@
         nomeErr.hidden = true; if(nomeInput) nomeInput.style.borderColor = "";
       }
       var names = [nomeVal.trim() || "Titular"];
+      var companionDaysList = [];
       document.querySelectorAll(".companion-nome").forEach(function(inp){
         var err = inp.parentElement.querySelector(".companion-nome-err");
         if(!isFullName(inp.value)){
@@ -3385,6 +3458,8 @@
         } else {
           if(err) err.hidden = true; inp.style.borderColor = "";
           names.push(inp.value.trim());
+          var block = inp.closest(".companion-block");
+          companionDaysList.push(block ? getCompanionDias(block) : []);
         }
       });
       if(!ok) return;
@@ -3392,8 +3467,9 @@
       var count = +(document.getElementById("companionCount") || {}).value || 0;
       var people = count + 1;
       var diasSelecionados = getSelectedDias();
-      var diasCount = diasSelecionados.length || 1;
-      var totalNum = PRICE_PER_PERSON * people * diasCount;
+      var titularDiasCount = diasSelecionados.length || 1;
+      var totalNum = PRICE_PER_PERSON * titularDiasCount;
+      companionDaysList.forEach(function(dias){ totalNum += PRICE_PER_PERSON * (dias.length || 1); });
       var total = money(formatBRL(totalNum));
       var banner = document.getElementById("cadastroSuccess");
       var summary = document.getElementById("cadastroSummaryText");
@@ -3415,7 +3491,8 @@
         paymentMethod: payChip ? payChip.textContent : null,
         people: people,
         total: totalNum,
-        daysSelected: diasSelecionados
+        daysSelected: diasSelecionados,
+        companionDaysList: companionDaysList
       }, names.slice(1));
 
       cadastroBtn.disabled = false;
