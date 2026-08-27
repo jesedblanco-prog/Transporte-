@@ -243,6 +243,10 @@
   .notif-dropdown .notif-item .nmsg{ font-size:.78rem; color:var(--ink-soft); margin-top:2px; }
   .notif-dropdown .notif-item .ntime{ font-size:.7rem; color:var(--ink-mute); margin-top:4px; }
   .notif-dropdown .notif-empty{ padding:20px 14px; text-align:center; color:var(--ink-mute); font-size:.82rem; }
+  @media (max-width:620px){
+    .notif-backdrop{ position:fixed; inset:0; background:rgba(8,14,12,0.5); z-index:84; }
+    .notif-dropdown{ position:fixed; top:50%; left:50%; right:auto; transform:translate(-50%,-50%); width:min(360px, calc(100vw - 28px)); max-height:min(70vh, 480px); z-index:85; }
+  }
 
   .theme-toggle{ display:flex; align-items:center; gap:2px; background:var(--surface); border:1px solid var(--hairline); border-radius:999px; padding:3px; flex:none; }
   .theme-toggle button{ border:0; background:transparent; border-radius:999px; width:28px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-mute); }
@@ -292,6 +296,20 @@
   table.data td{ padding:9px 10px 9px 0; border-bottom:1px solid var(--hairline); vertical-align:middle; }
   table.data tr:last-child td{ border-bottom:0; }
   .table-scroll{ overflow-x:auto; }
+
+  /* ---- tabelas viram cartões empilhados no celular, sem precisar rolar para o lado ---- */
+  @media (max-width:700px){
+    table.data.responsive-cards, table.data.responsive-cards thead, table.data.responsive-cards tbody,
+    table.data.responsive-cards th, table.data.responsive-cards td, table.data.responsive-cards tr{ display:block; }
+    table.data.responsive-cards thead{ position:absolute; left:-9999px; }
+    table.data.responsive-cards tr{ margin-bottom:12px; border:1px solid var(--hairline); border-radius:12px; padding:4px 12px; background:var(--surface); }
+    table.data.responsive-cards tr.companion-row{ background:var(--surface-2); margin-top:-8px; margin-left:14px; border-top:0; border-top-left-radius:0; border-top-right-radius:0; }
+    table.data.responsive-cards td{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--hairline); text-align:right; }
+    table.data.responsive-cards tr:last-child td:last-child{ border-bottom:0; }
+    table.data.responsive-cards td::before{ content:attr(data-label); font-weight:700; color:var(--ink-mute); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.03em; text-align:left; flex:none; margin-right:10px; }
+    table.data.responsive-cards td:empty::before{ content:none; }
+    .table-scroll{ overflow-x:visible; }
+  }
 
   .pill{ display:inline-flex; align-items:center; gap:5px; font-size:0.73rem; font-weight:600; padding:3px 9px; border-radius:999px; white-space:nowrap; }
   .pill.good{ background:color-mix(in oklab, var(--st-good) 14%, transparent); color:var(--st-good); }
@@ -479,13 +497,15 @@
   /* ---- floating help widget (passenger portal) ---- */
   .help-fab{ position:fixed; bottom:22px; right:22px; width:60px; height:60px; border-radius:50%; background:#25d366; color:#fff; border:0; box-shadow:var(--shadow-lg); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:70; }
   .help-fab svg{ width:29px; height:29px; }
-  .help-backdrop{ position:fixed; inset:0; background:rgba(8,14,12,0.5); z-index:79; }
-  .help-panel{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(440px, calc(100vw - 28px)); max-height:min(600px, calc(100vh - 60px)); display:flex; flex-direction:column; background:#e5ded4; border-radius:16px; overflow:hidden; box-shadow:var(--shadow-lg); z-index:80; }
-  .help-panel .wa-body{ flex:1; min-height:260px; max-height:none; padding:16px 14px; }
-  .help-panel .wa-bubble{ font-size:0.92rem; max-width:88%; }
-  .help-quick{ display:flex; flex-wrap:wrap; gap:6px; padding:10px; background:#f0f0f0; }
-  .help-quick button{ border:1px solid rgba(0,0,0,0.12); background:#fff; color:#075e54; border-radius:999px; padding:7px 12px; font-size:0.8rem; font-weight:600; cursor:pointer; }
-  @media (max-width:620px){ .help-fab{ bottom:16px; right:16px; } .help-panel{ width:calc(100vw - 20px); max-height:min(560px, calc(100vh - 40px)); } }
+  .help-backdrop{ position:fixed; inset:0; background:rgba(8,14,12,0.55); z-index:79; }
+  .help-panel{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(360px, calc(100vw - 28px)); max-height:min(680px, calc(100vh - 40px)); display:flex; flex-direction:column; background:#0b141a; border-radius:34px; padding:12px; overflow:hidden; box-shadow:var(--shadow-lg); z-index:80; border:2px solid #222; }
+  .help-panel .wa-screen{ flex:1; display:flex; flex-direction:column; background:#e5ded4; border-radius:22px; overflow:hidden; min-height:0; }
+  .help-panel .wa-head{ border-radius:0; flex:none; }
+  .help-panel .wa-body{ flex:1; min-height:0; max-height:none; padding:16px 14px; overflow-y:auto; }
+  .help-panel .wa-bubble{ font-size:0.95rem; max-width:88%; }
+  .help-quick{ display:flex; flex-wrap:wrap; gap:6px; padding:10px; background:#f0f0f0; flex:none; }
+  .help-quick button{ border:1px solid rgba(0,0,0,0.12); background:#fff; color:#075e54; border-radius:999px; padding:8px 13px; font-size:0.84rem; font-weight:600; cursor:pointer; }
+  @media (max-width:620px){ .help-fab{ bottom:16px; right:16px; } .help-panel{ width:calc(100vw - 20px); max-height:calc(100vh - 30px); border-radius:26px; } }
 
   /* ---- QR / whatsapp automation settings ---- */
   .connect-toggle{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
@@ -517,8 +537,12 @@
     .grid.cols-2,.grid.split-58{ grid-template-columns:1fr; }
     .searchbar{ display:none; }
   }
+  @media (max-width:960px){
+    html{ font-size:18px; }
+  }
   @media (max-width:620px){
-    html{ font-size:17.5px; }
+    html{ font-size:19.5px; }
+    .role-tabs button{ font-size:0.72rem; padding:9px 3px; }
     .metrics{ grid-template-columns:repeat(2,1fr); }
     .content{ padding:16px 14px 48px; }
     .grid.cols-3,.grid.cols-4{ grid-template-columns:1fr; }
@@ -666,9 +690,10 @@
       <div class="form-section">
         <h4>2. Transporte</h4>
         <div class="field" style="margin-bottom:12px;"><label>Dias de participação</label>
-          <div class="radio-row">
-            <span class="chip-check on">17 de julho</span><span class="chip-check on">18 de julho</span><span class="chip-check on">19 de julho</span>
+          <div class="radio-row" id="cadastroDiasRow">
+            <span class="chip-check on cadastro-dia" data-dia="17 de julho">17 de julho</span><span class="chip-check on cadastro-dia" data-dia="18 de julho">18 de julho</span><span class="chip-check on cadastro-dia" data-dia="19 de julho">19 de julho</span>
           </div>
+          <p style="margin:6px 0 0;font-size:.78rem;color:var(--ink-soft);">O valor é calculado por pessoa × dia. Toque para marcar/desmarcar os dias em que vai participar.</p>
         </div>
         <div style="display:flex;align-items:center;gap:8px;background:var(--brand-soft);color:var(--brand);border-radius:10px;padding:10px 14px;font-size:.82rem;font-weight:600;">
           <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;flex:none;"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5M12 16.2v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -762,6 +787,13 @@
         <span class="v" data-money="R$ 85,00">R$ 85,00</span><span class="pill good"><i class="dotp"></i>Pago</span>
       </div>
       <div class="sub">Pago via Pix em 02/07/2026</div>
+      <div id="portalProofBox" hidden style="margin-top:10px;border-top:1px solid var(--hairline);padding-top:10px;">
+        <label style="display:block;margin-bottom:6px;font-weight:600;font-size:.82rem;">Enviar comprovante de pagamento</label>
+        <input type="file" id="portalProofFileInput" accept="image/*,application/pdf" style="font-size:.8rem;margin-bottom:8px;width:100%;">
+        <button type="button" class="actionbtn primary" id="portalProofUploadBtn" style="width:100%;justify-content:center;">Enviar comprovante</button>
+        <p id="portalProofOk" hidden style="margin:8px 0 0;font-size:.8rem;color:var(--st-good);font-weight:600;">Comprovante enviado! A administração foi avisada.</p>
+        <p id="portalProofErr" hidden style="margin:8px 0 0;font-size:.8rem;color:var(--st-critical);font-weight:600;"></p>
+      </div>
     </div>
 
     <div class="portal-card">
@@ -787,17 +819,19 @@
   </button>
   <div class="help-backdrop" id="helpBackdrop" hidden></div>
   <div class="help-panel" id="helpPanel" hidden>
-    <div class="wa-head" style="border-radius:14px 14px 0 0;">
-      <div class="av"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 5.5h14a1.6 1.6 0 0 1 1.6 1.6v8.2A1.6 1.6 0 0 1 19 16.9H10l-4.4 3.4v-3.4H5a1.6 1.6 0 0 1-1.6-1.6V7.1A1.6 1.6 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="8.3" cy="11.1" r="1" fill="currentColor"/><circle cx="12" cy="11.1" r="1" fill="currentColor"/><circle cx="15.7" cy="11.1" r="1" fill="currentColor"/></svg></div>
-      <div><div class="nm">Assistente Jardim do Vale</div><div class="st">tire suas dúvidas na hora</div></div>
-      <button type="button" id="helpClose" style="margin-left:auto;background:transparent;border:0;color:#fff;font-size:1.1rem;cursor:pointer;">✕</button>
-    </div>
-    <div class="wa-body" id="helpBody" style="min-height:180px;max-height:260px;"></div>
-    <div class="help-quick" id="helpQuick">
-      <button type="button" data-q="onibus">Meu ônibus</button>
-      <button type="button" data-q="pagamento">Pagamento</button>
-      <button type="button" data-q="ponto">Ponto de encontro</button>
-      <button type="button" data-q="cadastro">Quero me cadastrar</button>
+    <div class="wa-screen">
+      <div class="wa-head">
+        <div class="av"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 5.5h14a1.6 1.6 0 0 1 1.6 1.6v8.2A1.6 1.6 0 0 1 19 16.9H10l-4.4 3.4v-3.4H5a1.6 1.6 0 0 1-1.6-1.6V7.1A1.6 1.6 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="8.3" cy="11.1" r="1" fill="currentColor"/><circle cx="12" cy="11.1" r="1" fill="currentColor"/><circle cx="15.7" cy="11.1" r="1" fill="currentColor"/></svg></div>
+        <div><div class="nm">Assistente Jardim do Vale</div><div class="st">tire suas dúvidas na hora</div></div>
+        <button type="button" id="helpClose" style="margin-left:auto;background:transparent;border:0;color:#fff;font-size:1.1rem;cursor:pointer;">✕</button>
+      </div>
+      <div class="wa-body" id="helpBody"></div>
+      <div class="help-quick" id="helpQuick">
+        <button type="button" data-q="onibus">Meu ônibus</button>
+        <button type="button" data-q="pagamento">Pagamento</button>
+        <button type="button" data-q="ponto">Ponto de encontro</button>
+        <button type="button" data-q="cadastro">Quero me cadastrar</button>
+      </div>
     </div>
   </div>
 </section>
@@ -890,9 +924,12 @@
     </nav>
 
     <div class="side-foot">
-      <div class="side-user">
-        <div class="av" id="sideUserAvatar">--</div>
-        <div class="who"><div class="n" id="sideUserName">—</div><div class="r" id="sideUserRole">—</div></div>
+      <div class="side-user" id="sideUserLogout" title="Sair do sistema" style="justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          <div class="av" id="sideUserAvatar">--</div>
+          <div class="who"><div class="n" id="sideUserName">—</div><div class="r" id="sideUserRole">—</div></div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" style="width:17px;height:17px;flex:none;color:var(--side-ink-mute);"><path d="M9 4H6.5A1.5 1.5 0 0 0 5 5.5v13A1.5 1.5 0 0 0 6.5 20H9M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
   </aside>
@@ -912,6 +949,7 @@
         </div>
         <div class="notif-wrap">
           <button class="icon-toolbtn" id="notifBellBtn" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none"><path d="M6 10.5a6 6 0 1 1 12 0c0 3.4 1 4.8 1.6 5.4H4.4C5 15.3 6 13.9 6 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 18.8a2.4 2.4 0 0 0 4.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ping" id="notifPing" hidden></span></button>
+          <div class="notif-backdrop" id="notifBackdrop" hidden></div>
           <div class="notif-dropdown" id="notifDropdown" hidden></div>
         </div>
         <div class="theme-toggle" role="group" aria-label="Idioma">
@@ -1095,8 +1133,24 @@
         payment_method: reg.paymentMethod || null,
         people_count: reg.people,
         total_amount: reg.total,
-        payment_status: "pendente"
+        payment_status: "pendente",
+        days_selected: (reg.daysSelected && reg.daysSelected.length) ? reg.daysSelected.join(", ") : null
       }).select().single();
+      if(insertRes.error && /days_selected/i.test(insertRes.error.message||"")){
+        /* a coluna days_selected ainda não existe no banco (falta rodar o SQL) —
+           insere sem ela para não travar o cadastro; o total já vem calculado certo. */
+        insertRes = await supa.from("registrations").insert({
+          titular_name: toTitleCase(reg.titularName),
+          phone: reg.phone || "",
+          doc_type: reg.docType || null,
+          doc_number: reg.docNumber || null,
+          lang: STATE.lang,
+          payment_method: reg.paymentMethod || null,
+          people_count: reg.people,
+          total_amount: reg.total,
+          payment_status: "pendente"
+        }).select().single();
+      }
       if(insertRes.error) return {error:insertRes.error};
       var regRow = insertRes.data;
       var passengerRows = [{ registration_id: regRow.id, full_name: toTitleCase(reg.titularName), doc_type: reg.docType || null, doc_number: reg.docNumber || null, is_titular:true }];
@@ -1270,6 +1324,11 @@
     "Salvar alterações":"Guardar cambios", "Editar":"Editar", "Entrar":"Ingresar",
     "Cadastre-se aqui":"Regístrate aquí", "Voltar ao login":"Volver al inicio de sesión",
     "Sair":"Salir", "Concluir cadastro":"Finalizar registro", "Redefinir senha":"Restablecer contraseña",
+    "Titular do grupo":"Titular del grupo", "Acompanhante de":"Acompañante de", "mesmo do titular":"igual al titular",
+    "Pessoas inscritas":"Personas inscritas", "cadastros":"registros", "pessoas":"personas", "Ação":"Acción",
+    "Deseja sair do sistema?":"¿Deseas salir del sistema?", "Faça login novamente para enviar o comprovante.":"Inicia sesión de nuevo para enviar el comprobante.",
+    "Já recebemos um comprovante seu — envie outro se precisar corrigir":"Ya recibimos tu comprobante — envía otro si necesitas corregirlo.",
+    "Enviar comprovante de pagamento":"Enviar comprobante de pago", "Comprovante enviado! A administração foi avisada.":"¡Comprobante enviado! Se avisó a la administración.",
     "Copiar link de acesso":"Copiar enlace de acceso", "Abrir Portal do Passageiro":"Abrir Portal del Pasajero",
     "Ver tela de cadastro":"Ver pantalla de registro", "Abrir Painel do Encarregado":"Abrir Panel del Encargado",
     "Convidar administrador":"Invitar administrador", "Marcar todos presentes":"Marcar todos presentes",
@@ -1558,7 +1617,9 @@
     try{ localStorage.setItem("jv-theme", t || "system"); }catch(e){}
   }
   document.querySelectorAll("[data-theme-btn]").forEach(function(b){ b.addEventListener("click", function(){ applyTheme(b.getAttribute("data-theme-btn")); }); });
-  applyTheme(saved);
+  /* Sempre abre em modo claro por padrão (não copia o modo escuro do celular/computador);
+     cada pessoa pode trocar para escuro com o botão, e a escolha fica salva no aparelho dela. */
+  applyTheme(saved || "light");
 
   /* ================= I18N (PT base language, ES translations) ================= */
   var I18N_SELECTORS = [
@@ -1806,30 +1867,47 @@
       var mpOptions = (DATA.meetingPoints||[]).map(function(mp){ return '<option value="'+mp.id+'">'+mp.name+'</option>'; }).join('');
 
       var bodyRows = hasReal ? regs.map(function(r){
-        var grupo = (r.people_count>1) ? ("Titular (+"+(r.people_count-1)+")") : "—";
         var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
         var pontoCell = mp ? mp.name : ('<select class="assign-ponto" data-reg="'+r.id+'" style="font-size:.78rem;padding:5px 8px;border-radius:7px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink-mute);"><option value="">'+t("Atribuir ponto…")+'</option>'+mpOptions+'</select>');
-        var docLabel = r.doc_type ? (r.doc_type + " " + (r.doc_number||"")) : "—";
+        var busCell = r.bus_number || "—";
+        var companions = (r.passengers||[]).filter(function(p){ return !p.is_titular; });
+        var titularDoc = r.doc_type ? (r.doc_type + " " + (r.doc_number||"")) : "—";
+        var titularGrupo = companions.length ? (t("Titular do grupo")+' ('+t("+")+companions.length+')') : "—";
         var payCell = paySelectHTML(r);
         var delCell = '<button type="button" class="icon-btn del-reg" data-reg="'+r.id+'" data-name="'+r.titular_name+'" title="'+t("Excluir cadastro")+'" style="color:var(--st-critical);"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5a1 1 0 0 0 1 .95h6a1 1 0 0 0 1-.95L17 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
-        var companions = (r.passengers||[]).filter(function(p){ return !p.is_titular; });
-        var nameCell = '<div>'+r.titular_name+(companions.length ? ('<div style="font-size:.72rem;color:var(--ink-mute);font-weight:500;margin-top:2px;">+ '+companions.map(function(c){ return c.full_name; }).join(", ")+'</div>') : '')+'</div>';
-        return '<tr><td>'+nameCell+'</td><td class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+docLabel+'</td><td>'+grupo+'</td><td class="tabular">—</td><td>'+pontoCell+'</td><td>'+payCell+'</td><td>'+delCell+'</td></tr>';
+        var rows = '<tr><td data-label="'+t("Nome")+'"><strong>'+r.titular_name+'</strong></td>'+
+          '<td data-label="'+t("Documento")+'" class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+titularDoc+'</td>'+
+          '<td data-label="'+t("Grupo")+'">'+titularGrupo+'</td>'+
+          '<td data-label="'+t("Ônibus")+'" class="tabular">'+busCell+'</td>'+
+          '<td data-label="'+t("Ponto de encontro")+'">'+pontoCell+'</td>'+
+          '<td data-label="'+t("Pagamento")+'">'+payCell+'</td>'+
+          '<td data-label="'+t("Ação")+'">'+delCell+'</td></tr>';
+        companions.forEach(function(c){
+          var compDoc = c.doc_number ? ((c.doc_type||"")+" "+c.doc_number) : "—";
+          rows += '<tr class="companion-row"><td data-label="'+t("Nome")+'">'+c.full_name+'</td>'+
+            '<td data-label="'+t("Documento")+'" class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+compDoc+'</td>'+
+            '<td data-label="'+t("Grupo")+'" style="font-size:.78rem;color:var(--ink-mute);">'+t("Acompanhante de")+' '+r.titular_name+'</td>'+
+            '<td data-label="'+t("Ônibus")+'" class="tabular">'+busCell+'</td>'+
+            '<td data-label="'+t("Ponto de encontro")+'">'+(mp ? mp.name : '<span style="color:var(--ink-mute);font-size:.78rem;">'+t("mesmo do titular")+'</span>')+'</td>'+
+            '<td data-label="'+t("Pagamento")+'"><span style="font-size:.78rem;color:var(--ink-mute);">'+t("mesmo do titular")+'</span></td>'+
+            '<td data-label="'+t("Ação")+'"></td></tr>';
+        });
+        return rows;
       }).join('') : (function(){
         function row(n,doc,grupo,b,p,type,label){
-          return '<tr><td>'+n+'</td><td class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+doc+'</td><td>'+grupo+'</td><td class="tabular">'+b+'</td><td>'+(p||('<select class="assign-ponto-demo" style="font-size:.78rem;padding:5px 8px;border-radius:7px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink-mute);"><option>'+t("Atribuir ponto…")+'</option></select>'))+'</td><td><span class="pill '+type+'"><i class="dotp"></i>'+t(label)+'</span></td><td></td></tr>';
+          return '<tr><td data-label="'+t("Nome")+'">'+n+'</td><td data-label="'+t("Documento")+'" class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+doc+'</td><td data-label="'+t("Grupo")+'">'+grupo+'</td><td data-label="'+t("Ônibus")+'" class="tabular">'+b+'</td><td data-label="'+t("Ponto de encontro")+'">'+(p||('<select class="assign-ponto-demo" style="font-size:.78rem;padding:5px 8px;border-radius:7px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink-mute);"><option>'+t("Atribuir ponto…")+'</option></select>'))+'</td><td data-label="'+t("Pagamento")+'"><span class="pill '+type+'"><i class="dotp"></i>'+t(label)+'</span></td><td data-label="'+t("Ação")+'"></td></tr>';
         }
         return row("Marcos A. Ferreira","CPF 111.222.333-44","—","02","Salão do Reino — Jardim do Vale","good","Pago")+
-          row("Talita R. Souza","CPF 222.333.444-55","Titular (+2)","01","Salão do Reino — Jardim do Vale","good","Pago")+
+          row("Talita R. Souza","CPF 222.333.444-55","Titular do grupo (+2)","01","Salão do Reino — Jardim do Vale","good","Pago")+
           row("Cícero P. Lima","CPF 333.444.555-66","—","04",null,"warning","Pendente");
       })();
 
       return '<div class="grid cols-4" style="margin-bottom:16px;">'+
-          metricMini(t("Inscritos"), String(totalPax), "var(--c-1)")+metricMini(t("Vagas livres"), hasReal ? "—" : "28", "var(--c-3)")+
+          metricMini(t("Pessoas inscritas"), String(totalPax), "var(--c-1)")+metricMini(t("Vagas livres"), hasReal ? "—" : "28", "var(--c-3)")+
           metricMini(t("Check-in feito"), String(checkins), "var(--ink-mute)")+metricMini(t("Cancelamentos"), String(cancel), "var(--st-critical)")+
         '</div>'+
         '<div class="card">'+
-          '<div class="card-head"><h3>'+t("Lista de passageiros")+'</h3><span class="muted">'+(hasReal ? regs.length : 0)+' '+t("registros")+(hasReal?'':' · '+t("dados de exemplo, aguardando cadastros reais"))+'</span></div>'+
+          '<div class="card-head"><h3>'+t("Lista de passageiros")+'</h3><span class="muted">'+(hasReal ? regs.length : 0)+' '+t("cadastros")+(hasReal?(' ('+totalPax+' '+t("pessoas")+')'):' · '+t("dados de exemplo, aguardando cadastros reais"))+'</span></div>'+
           '<div class="card-pad">'+
             '<div class="actions-row" style="margin-bottom:14px;flex-wrap:wrap;">'+
               '<button type="button" class="actionbtn primary" data-goto="cadastro">'+t("Nova inscrição")+'</button>'+
@@ -1838,7 +1916,7 @@
               (paxFilterBus||paxFilterPonto ? '<button type="button" class="actionbtn" id="paxFilterClearBtn">'+t("Limpar filtros")+'</button>' : '')+
               '<button type="button" class="actionbtn" id="paxExportBtn">'+t("Exportar lista")+'</button>'+
             '</div>'+
-            '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Documento")+'</th><th>'+t("Grupo")+'</th><th>'+t("Ônibus")+'</th><th>'+t("Ponto de encontro")+'</th><th>'+t("Pagamento")+'</th><th></th></tr></thead><tbody>'+
+            '<div class="table-scroll"><table class="data responsive-cards"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Documento")+'</th><th>'+t("Grupo")+'</th><th>'+t("Ônibus")+'</th><th>'+t("Ponto de encontro")+'</th><th>'+t("Pagamento")+'</th><th></th></tr></thead><tbody>'+
               bodyRows+
             '</tbody></table></div>'+
           '</div>'+
@@ -1962,11 +2040,11 @@
         '</div>'+
         '<div class="grid split-58">'+
         '<div class="card"><div class="card-head"><h3>'+t("Comprovantes de pagamento")+'</h3><span class="muted">'+(hasReal?regs.length:0)+' '+t("registros")+'</span></div><div class="card-pad">'+
-          '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Valor")+'</th><th>'+t("Status")+'</th><th></th></tr></thead><tbody>'+
+          '<div class="table-scroll"><table class="data responsive-cards"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Valor")+'</th><th>'+t("Status")+'</th><th></th></tr></thead><tbody>'+
             (hasReal ? regs.map(function(r){
               var proofLink = r.payment_proof_url ? ('<a class="actionbtn ghost" href="'+r.payment_proof_url+'" target="_blank" rel="noopener" style="font-size:.74rem;padding:5px 9px;">'+t("Ver comprovante enviado")+'</a>') : ('<span style="font-size:.72rem;color:var(--ink-mute);">'+t("Nenhum enviado")+'</span>');
               var waBtn = (r.phone && r.payment_status!=="pago") ? ('<button type="button" class="actionbtn ghost send-charge" data-phone="'+r.phone.replace(/\D/g,'')+'" data-name="'+r.titular_name.replace(/"/g,'&quot;')+'" data-total="'+money(formatBRL(Number(r.total_amount||0)))+'" style="font-size:.74rem;padding:5px 9px;">'+t("Cobrar via WhatsApp")+'</button>') : '';
-              return '<tr><td>'+r.titular_name+'</td><td class="tabular">'+money(formatBRL(Number(r.total_amount||0)))+'</td><td>'+paySelectHTML(r)+'</td><td style="display:flex;gap:6px;flex-wrap:wrap;"><button type="button" class="actionbtn ghost gen-receipt" data-reg="'+r.id+'" style="font-size:.74rem;padding:5px 9px;">'+t("Comprovante PDF")+'</button>'+proofLink+waBtn+'</td></tr>';
+              return '<tr><td data-label="'+t("Nome")+'">'+r.titular_name+'</td><td data-label="'+t("Valor")+'" class="tabular">'+money(formatBRL(Number(r.total_amount||0)))+'</td><td data-label="'+t("Status")+'">'+paySelectHTML(r)+'</td><td data-label="" style="display:flex;gap:6px;flex-wrap:wrap;">'+'<button type="button" class="actionbtn ghost gen-receipt" data-reg="'+r.id+'" style="font-size:.74rem;padding:5px 9px;">'+t("Comprovante PDF")+'</button>'+proofLink+waBtn+'</td></tr>';
             }).join('') : '<tr><td colspan="4" style="color:var(--ink-mute);">'+t("Sem cadastros ainda")+'</td></tr>')+
           '</tbody></table></div>'+
           '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">O status só passa para "Pago" quando o administrador confirma que o valor total foi recebido — mesmo que o passageiro já tenha feito um abono. Use o botão "Cobrar via WhatsApp" em cada linha para enviar uma cobrança individual.</p>'+
@@ -2286,12 +2364,20 @@
   /* ---- relatório: agrupamento real por dia (usa o campo "Dia" cadastrado em cada ponto de encontro) ---- */
   function reportDayGroups(){
     var days = [];
+    (DATA.registrations||[]).forEach(function(r){
+      if(r.days_selected){
+        String(r.days_selected).split(",").map(function(s){ return s.trim(); }).filter(Boolean).forEach(function(d){
+          if(days.indexOf(d) === -1) days.push(d);
+        });
+      }
+    });
     (DATA.meetingPoints||[]).forEach(function(mp){ if(mp.day_label && days.indexOf(mp.day_label)===-1) days.push(mp.day_label); });
     return days;
   }
   function reportRegsForDay(day){
     return (DATA.registrations||[]).filter(function(r){
       if(!day) return true;
+      if(r.days_selected && String(r.days_selected).indexOf(day) !== -1) return true;
       var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
       return mp && mp.day_label === day;
     });
@@ -2964,7 +3050,21 @@
   });
   document.addEventListener("click", function(e){
     var t = e.target.closest("[data-goto]");
-    if(t){ goScreen(t.getAttribute("data-goto")); }
+    if(t){
+      var dest = t.getAttribute("data-goto");
+      if(dest === "login"){
+        /* ao sair (passageiro ou encarregado), limpa a sessão local para não
+           mostrar por engano os dados de quem usou o aparelho antes. */
+        if(typeof currentPassengerReg !== "undefined") currentPassengerReg = null;
+        if(typeof currentEncarregado !== "undefined") currentEncarregado = null;
+        ["passPhoneInput","passDocInput","encLoginCodeInput"].forEach(function(id){
+          var el = document.getElementById(id); if(el) el.value = "";
+        });
+        var passErr = document.getElementById("passLoginErr"); if(passErr) passErr.hidden = true;
+        var encErr = document.getElementById("encLoginErr"); if(encErr) encErr.hidden = true;
+      }
+      goScreen(dest);
+    }
   });
 
   /* ---- passenger login: identify by phone + document from their own registration ---- */
@@ -3035,6 +3135,15 @@
       if(pillEl){ pillEl.className = "pill "+pay[0]; pillEl.innerHTML = '<i class="dotp"></i>'+t(pay[1]); }
       var subEl = cards[1].querySelector(".sub");
       if(subEl) subEl.textContent = reg.payment_method ? (t("Forma de pagamento")+": "+reg.payment_method) : t("Forma de pagamento não informada");
+      var proofBox = cards[1].querySelector("#portalProofBox");
+      if(proofBox){
+        proofBox.hidden = (reg.payment_status === "pago");
+        var pOk = proofBox.querySelector("#portalProofOk"); if(pOk) pOk.hidden = true;
+        var pErr = proofBox.querySelector("#portalProofErr"); if(pErr) pErr.hidden = true;
+        var pFile = proofBox.querySelector("#portalProofFileInput"); if(pFile) pFile.value = "";
+        var pLabel = proofBox.querySelector("label");
+        if(pLabel) pLabel.textContent = reg.payment_proof_url ? t("Já recebemos um comprovante seu — envie outro se precisar corrigir") : t("Enviar comprovante de pagamento");
+      }
     }
     if(cards[2]){
       var enc = (DATA.encarregados||[]).find(function(e){ return e.bus_number && reg.bus_number && String(e.bus_number)===String(reg.bus_number); });
@@ -3145,15 +3254,30 @@
     });
     updateTotal();
   }
+  function getSelectedDias(){
+    var els = document.querySelectorAll(".cadastro-dia.on");
+    var arr = [];
+    els.forEach(function(el){ arr.push(el.getAttribute("data-dia")); });
+    return arr;
+  }
   function updateTotal(){
     var count = +(document.getElementById("companionCount") || {}).value || 0;
     var people = count + 1;
-    var total = PRICE_PER_PERSON * people;
+    var dias = getSelectedDias().length || 1;
+    var total = PRICE_PER_PERSON * people * dias;
     var bd = document.getElementById("valorBreakdown");
     var tot = document.getElementById("valorTotal");
-    if(bd) bd.textContent = money(formatBRL(PRICE_PER_PERSON)) + " × " + people + (people===1 ? " pessoa" : " pessoas");
+    if(bd) bd.textContent = money(formatBRL(PRICE_PER_PERSON)) + " × " + people + (people===1 ? " pessoa" : " pessoas") + " × " + dias + (dias===1 ? " dia" : " dias");
     if(tot) tot.textContent = money(formatBRL(total));
   }
+  document.querySelectorAll(".cadastro-dia").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      var onCount = document.querySelectorAll(".cadastro-dia.on").length;
+      if(chip.classList.contains("on") && onCount <= 1) return; /* precisa ficar com pelo menos 1 dia marcado */
+      chip.classList.toggle("on");
+      updateTotal();
+    });
+  });
   var companionCountEl = document.getElementById("companionCount");
   if(companionCountEl){ companionCountEl.addEventListener("change", renderCompanions); }
   renderDocOptions();
@@ -3163,6 +3287,7 @@
   /* ---- cadastro chips + submit ---- */
   document.querySelectorAll(".chip-check").forEach(function(chip){
     if(chip.closest("#paymentMethods")) return; /* payment method chips have their own exclusive-select handler in renderPaymentMethods() */
+    if(chip.classList.contains("cadastro-dia")) return; /* dias têm handler próprio acima, que recalcula o total */
     chip.addEventListener("click", function(){ chip.classList.toggle("on"); });
   });
   /* ---- admin: forgot password ---- */
@@ -3193,6 +3318,17 @@
     });
   }
 
+  var sideUserLogoutBtn = document.getElementById("sideUserLogout");
+  if(sideUserLogoutBtn){
+    sideUserLogoutBtn.addEventListener("click", async function(){
+      var ok = await jvConfirm(t("Deseja sair do sistema?"), {title:t("Sair"), okLabel:t("Sair")});
+      if(!ok) return;
+      if(dbOk() && supa.auth){ try{ await supa.auth.signOut(); }catch(e){} }
+      isAdminAuthed = false;
+      currentAdmin = null;
+      goScreen("login");
+    });
+  }
   var isAdminAuthed = false;
   var adminLoginBtn = document.getElementById("adminLoginBtn");
   if(adminLoginBtn){
@@ -3255,7 +3391,9 @@
 
       var count = +(document.getElementById("companionCount") || {}).value || 0;
       var people = count + 1;
-      var totalNum = PRICE_PER_PERSON * people;
+      var diasSelecionados = getSelectedDias();
+      var diasCount = diasSelecionados.length || 1;
+      var totalNum = PRICE_PER_PERSON * people * diasCount;
       var total = money(formatBRL(totalNum));
       var banner = document.getElementById("cadastroSuccess");
       var summary = document.getElementById("cadastroSummaryText");
@@ -3276,7 +3414,8 @@
         docNumber: docNumInput ? docNumInput.value.trim() : null,
         paymentMethod: payChip ? payChip.textContent : null,
         people: people,
-        total: totalNum
+        total: totalNum,
+        daysSelected: diasSelecionados
       }, names.slice(1));
 
       cadastroBtn.disabled = false;
@@ -3309,37 +3448,53 @@
 
   var lastRegistrationId = null;
   var lastRegistrationName = "";
+  async function uploadPaymentProof(regId, regName, fileInputId, okId, errId, btn){
+    var fileInput = document.getElementById(fileInputId);
+    var okBox = document.getElementById(okId), errBox = document.getElementById(errId);
+    if(okBox) okBox.hidden = true; if(errBox) errBox.hidden = true;
+    var file = fileInput && fileInput.files && fileInput.files[0];
+    if(!file){ if(errBox){ errBox.textContent = t("Selecione um arquivo primeiro."); errBox.hidden = false; } return; }
+    if(!dbOk() || !regId){ if(errBox){ errBox.textContent = t("Não foi possível enviar agora."); errBox.hidden = false; } return; }
+    if(btn) btn.disabled = true;
+    var oldTxt = btn ? btn.textContent : "";
+    if(btn) btn.textContent = t("Enviando…");
+    try{
+      var path = regId + "-" + Date.now() + "-" + file.name.replace(/[^a-zA-Z0-9.\-_]/g,"_");
+      var upRes = await supa.storage.from("comprovantes").upload(path, file);
+      if(upRes.error) throw upRes.error;
+      var pub = supa.storage.from("comprovantes").getPublicUrl(path);
+      var url = pub && pub.data ? pub.data.publicUrl : null;
+      var updRes = await supa.from("registrations").update({payment_proof_url:url}).eq("id", regId);
+      if(updRes.error) throw updRes.error;
+      try{
+        await supa.from("notifications").insert({
+          title: t("Novo comprovante de pagamento"),
+          message: (regName || t("Um passageiro")) + " " + t("enviou o comprovante de pagamento. Confira em Pagamentos."),
+          target: "admin"
+        });
+      }catch(e2){ /* não bloqueia o envio do passageiro se a notificação falhar */ }
+      await loadAllData();
+      if(currentPassengerReg && String(currentPassengerReg.id) === String(regId)){
+        var updated = (DATA.registrations||[]).find(function(r){ return String(r.id)===String(regId); });
+        if(updated){ currentPassengerReg = updated; renderPassengerPortal(updated); }
+      }
+      if(okBox) okBox.hidden = false;
+    }catch(e){
+      if(errBox){ errBox.textContent = (e && e.message) || t("Erro ao enviar."); errBox.hidden = false; }
+    }
+    if(btn){ btn.disabled = false; btn.textContent = oldTxt; }
+  }
   var proofUploadBtn = document.getElementById("proofUploadBtn");
   if(proofUploadBtn){
-    proofUploadBtn.addEventListener("click", async function(){
-      var fileInput = document.getElementById("proofFileInput");
-      var okBox = document.getElementById("proofOk"), errBox = document.getElementById("proofErr");
-      if(okBox) okBox.hidden = true; if(errBox) errBox.hidden = true;
-      var file = fileInput && fileInput.files && fileInput.files[0];
-      if(!file){ if(errBox){ errBox.textContent = t("Selecione um arquivo primeiro."); errBox.hidden = false; } return; }
-      if(!dbOk() || !lastRegistrationId){ if(errBox){ errBox.textContent = t("Não foi possível enviar agora."); errBox.hidden = false; } return; }
-      proofUploadBtn.disabled = true;
-      var oldTxt = proofUploadBtn.textContent; proofUploadBtn.textContent = t("Enviando…");
-      try{
-        var path = lastRegistrationId + "-" + Date.now() + "-" + file.name.replace(/[^a-zA-Z0-9.\-_]/g,"_");
-        var upRes = await supa.storage.from("comprovantes").upload(path, file);
-        if(upRes.error) throw upRes.error;
-        var pub = supa.storage.from("comprovantes").getPublicUrl(path);
-        var url = pub && pub.data ? pub.data.publicUrl : null;
-        var updRes = await supa.from("registrations").update({payment_proof_url:url}).eq("id", lastRegistrationId);
-        if(updRes.error) throw updRes.error;
-        try{
-          await supa.from("notifications").insert({
-            title: t("Novo comprovante de pagamento"),
-            message: (lastRegistrationName || t("Um passageiro")) + " " + t("enviou o comprovante de pagamento. Confira em Pagamentos."),
-            target: "admin"
-          });
-        }catch(e2){ /* não bloqueia o envio do passageiro se a notificação falhar */ }
-        if(okBox) okBox.hidden = false;
-      }catch(e){
-        if(errBox){ errBox.textContent = (e && e.message) || t("Erro ao enviar."); errBox.hidden = false; }
-      }
-      proofUploadBtn.disabled = false; proofUploadBtn.textContent = oldTxt;
+    proofUploadBtn.addEventListener("click", function(){
+      uploadPaymentProof(lastRegistrationId, lastRegistrationName, "proofFileInput", "proofOk", "proofErr", proofUploadBtn);
+    });
+  }
+  var portalProofUploadBtn = document.getElementById("portalProofUploadBtn");
+  if(portalProofUploadBtn){
+    portalProofUploadBtn.addEventListener("click", function(){
+      if(!currentPassengerReg){ jvAlert(t("Faça login novamente para enviar o comprovante.")); return; }
+      uploadPaymentProof(currentPassengerReg.id, currentPassengerReg.titular_name, "portalProofFileInput", "portalProofOk", "portalProofErr", portalProofUploadBtn);
     });
   }
 
@@ -3633,21 +3788,29 @@
     }).join('') : '<div class="notif-empty">'+t("Nenhuma notificação ainda.")+'</div>';
   }
   var notifBellBtn = document.getElementById("notifBellBtn");
+  function closeNotifDropdown(){
+    var dd = document.getElementById("notifDropdown"); if(dd) dd.hidden = true;
+    var bd = document.getElementById("notifBackdrop"); if(bd) bd.hidden = true;
+  }
   if(notifBellBtn){
     notifBellBtn.addEventListener("click", function(e){
       e.stopPropagation();
       var dd = document.getElementById("notifDropdown");
+      var bd = document.getElementById("notifBackdrop");
       if(!dd) return;
       var willShow = dd.hidden;
-      document.querySelectorAll(".notif-dropdown").forEach(function(x){ x.hidden = true; });
+      closeNotifDropdown();
       dd.hidden = !willShow;
+      if(bd) bd.hidden = !willShow;
       if(willShow){
         renderNotifDropdown();
         try{ localStorage.setItem("jv-notif-seen", String(Date.now())); }catch(e2){}
         var ping = document.getElementById("notifPing"); if(ping) ping.hidden = true;
       }
     });
-    document.addEventListener("click", function(){ var dd=document.getElementById("notifDropdown"); if(dd) dd.hidden = true; });
+    var notifBackdropEl = document.getElementById("notifBackdrop");
+    if(notifBackdropEl){ notifBackdropEl.addEventListener("click", closeNotifDropdown); }
+    document.addEventListener("click", closeNotifDropdown);
   }
 
   function initials(name){
