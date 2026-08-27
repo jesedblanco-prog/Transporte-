@@ -559,15 +559,16 @@
 
       <div class="login-panel" data-login-panel="admin">
         <div id="adminLoginForm">
-          <div class="field" style="margin-bottom:12px;"><label>E-mail</label><input type="text" value="wellington@jardimdovale.org"></div>
-          <div class="field" style="margin-bottom:10px;"><label>Senha</label><input type="password" value="••••••••"></div>
+          <div class="field" style="margin-bottom:12px;"><label>E-mail</label><input type="text" id="adminEmailInput" placeholder="seuemail@jardimdovale.org"></div>
+          <div class="field" style="margin-bottom:10px;"><label>Senha</label><input type="password" id="adminPasswordInput" placeholder="••••••••"></div>
           <div style="text-align:right;margin-bottom:16px;"><a id="forgotLink" style="font-size:.78rem;color:var(--brand);font-weight:700;cursor:pointer;">Esqueceu a senha?</a></div>
-          <button type="button" class="actionbtn primary full-btn" data-goto="erp">Entrar no painel administrativo</button>
+          <p id="adminLoginErr" hidden style="margin:0 0 12px;font-size:.8rem;color:var(--st-critical);font-weight:600;"></p>
+          <button type="button" class="actionbtn primary full-btn" id="adminLoginBtn">Entrar no painel administrativo</button>
           <div class="login-foot"><span>Uso exclusivo da coordenação de transporte.</span></div>
         </div>
         <div id="adminRecoverForm" hidden>
           <p class="i18n-note" style="margin:0 0 14px;font-size:.85rem;color:var(--ink-soft);">Informe o e-mail cadastrado. Enviaremos um link para você criar uma nova senha.</p>
-          <div class="field" style="margin-bottom:16px;"><label>E-mail</label><input type="text" placeholder="seuemail@jardimdovale.org"></div>
+          <div class="field" style="margin-bottom:16px;"><label>E-mail</label><input type="text" id="adminRecoverEmail" placeholder="seuemail@jardimdovale.org"></div>
           <button type="button" class="actionbtn primary full-btn" id="sendRecoverBtn">Enviar link de recuperação</button>
           <div class="success-banner" id="recoverSuccess" style="margin-top:14px;"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="m8 12.3 2.5 2.5L16.2 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Link enviado! Verifique seu e-mail para redefinir a senha.</div>
           <div class="login-foot"><a id="backToAdminLogin"><span>Voltar ao login</span></a></div>
@@ -602,7 +603,7 @@
           </div>
           <div class="field"><label>Tipo de documento</label><select id="cadastroDocType"></select></div>
           <div class="field"><label id="cadastroDocLabel">Número do documento</label><input type="text" id="cadastroDocNumber" placeholder="000.000.000-00"></div>
-          <div class="field"><label>Telefone / WhatsApp</label><input type="text" placeholder="(11) 90000-0000"></div>
+          <div class="field"><label>Telefone / WhatsApp</label><input type="text" id="cadastroTelefone" placeholder="(11) 90000-0000"></div>
           <div class="field span2"><label>E-mail (opcional)</label><input type="text" placeholder="nome@email.com"></div>
         </div>
       </div>
@@ -869,9 +870,112 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.1/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 (function(){
   "use strict";
+
+  /* ================= SUPABASE (banco de dados real) ================= */
+  var SUPABASE_URL = "https://jjvmtrieudoxjjlkqsng.supabase.co";
+  var SUPABASE_KEY = "sb_publishable_rl5OtnLInXXuCsZ0dN8kLg_fJD6TrN0";
+  var supa = null;
+  try{
+    if(window.supabase && window.supabase.createClient){
+      supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+  }catch(e){ console.warn("Supabase indisponível:", e); }
+
+  /* DATA: cache local dos dados vindos do Supabase, para renderizar as telas sem esperar toda hora */
+  var DATA = {
+    registrations: [],   // cada item: {..registration fields.., passengers:[...]}
+    meetingPoints: [],
+    encarregados: [],
+    notifications: [],
+    eventConfig: null,
+    loaded: false
+  };
+
+  function dbOk(){ return !!supa; }
+
+  function showDbError(msg){
+    console.error(msg);
+  }
+
+  async function loadAllData(){
+    if(!dbOk()) return false;
+    try{
+      var regsRes = await supa.from("registrations").select("*, passengers(*)").order("created_at", {ascending:false});
+      if(regsRes.error) throw regsRes.error;
+      DATA.registrations = regsRes.data || [];
+
+      var mpRes = await supa.from("meeting_points").select("*").order("created_at");
+      if(!mpRes.error) DATA.meetingPoints = mpRes.data || [];
+
+      var encRes = await supa.from("encarregados").select("*").order("created_at");
+      if(!encRes.error) DATA.encarregados = encRes.data || [];
+
+      var notifRes = await supa.from("notifications").select("*").order("created_at", {ascending:false}).limit(30);
+      if(!notifRes.error) DATA.notifications = notifRes.data || [];
+
+      var cfgRes = await supa.from("event_config").select("*").eq("id",1).single();
+      if(!cfgRes.error) DATA.eventConfig = cfgRes.data;
+
+      DATA.loaded = true;
+      return true;
+    }catch(e){
+      showDbError(e);
+      return false;
+    }
+  }
+
+  async function dbInsertRegistration(reg, companionNames){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    var insertRes = await supa.from("registrations").insert({
+      titular_name: reg.titularName,
+      phone: reg.phone || "",
+      doc_type: reg.docType || null,
+      doc_number: reg.docNumber || null,
+      lang: STATE.lang,
+      payment_method: reg.paymentMethod || null,
+      people_count: reg.people,
+      total_amount: reg.total,
+      payment_status: "pendente"
+    }).select().single();
+    if(insertRes.error) return {error:insertRes.error};
+    var regRow = insertRes.data;
+    var passengerRows = [{ registration_id: regRow.id, full_name: reg.titularName, doc_type: reg.docType || null, doc_number: reg.docNumber || null, is_titular:true }];
+    (companionNames||[]).forEach(function(name){
+      passengerRows.push({ registration_id: regRow.id, full_name: name, is_titular:false });
+    });
+    var paxRes = await supa.from("passengers").insert(passengerRows);
+    if(paxRes.error) return {error:paxRes.error};
+    await loadAllData();
+    return {data:regRow};
+  }
+
+  async function dbUpdateRegistration(id, patch){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    var res = await supa.from("registrations").update(patch).eq("id", id);
+    if(!res.error) await loadAllData();
+    return res;
+  }
+
+  async function dbInsertMeetingPoint(mp){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    var res = await supa.from("meeting_points").insert(mp);
+    if(!res.error) await loadAllData();
+    return res;
+  }
+
+  async function dbInsertNotification(n){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    var res = await supa.from("notifications").insert(n);
+    if(!res.error) await loadAllData();
+    return res;
+  }
 
   /* ================= APP STATE (event branding + language) ================= */
   var STATE = {
@@ -889,6 +993,11 @@
 
   function eventDateLabel(){
     return STATE.singleDay ? STATE.dateStart : (STATE.dateStart + "–" + STATE.dateEnd);
+  }
+  function brToIso(d){
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((d||"").trim());
+    if(!m) return null;
+    return m[3]+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0");
   }
 
   /* ---- i18n: PT is the base language (used as dictionary key); ES holds the translations ---- */
@@ -1240,52 +1349,138 @@
   };
 
   /* ---- PASSAGEIROS ---- */
+  var PAY_LABEL = {pendente:["warning","Pendente"], parcial:["neutral","Abono"], pago:["good","Pago"]};
   views.passageiros = {
     title:"Passageiros",
     render:function(){
+      var regs = DATA.registrations || [];
+      var hasReal = DATA.loaded && regs.length > 0;
+      var totalPax = hasReal ? regs.reduce(function(a,r){ return a + (r.people_count||1); }, 0) : 612;
+      var checkins = hasReal ? regs.filter(function(r){ return r.checked_in; }).length : 0;
+      var cancel = hasReal ? regs.filter(function(r){ return r.cancelled; }).length : 3;
+      var mpOptions = (DATA.meetingPoints||[]).map(function(mp){ return '<option value="'+mp.id+'">'+mp.name+'</option>'; }).join('');
+
+      var bodyRows = hasReal ? regs.map(function(r){
+        var grupo = (r.people_count>1) ? ("Titular (+"+(r.people_count-1)+")") : "—";
+        var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+        var pontoCell = mp ? mp.name : ('<select class="assign-ponto" data-reg="'+r.id+'" style="font-size:.78rem;padding:5px 8px;border-radius:7px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink-mute);"><option value="">'+t("Atribuir ponto…")+'</option>'+mpOptions+'</select>');
+        var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
+        var docLabel = r.doc_type ? (r.doc_type + " " + (r.doc_number||"")) : "—";
+        var payCell = '<span class="pill pay-pill '+pay[0]+'" data-reg="'+r.id+'" data-status="'+r.payment_status+'" style="cursor:pointer;" title="'+t("Clique para alterar o status")+'"><i class="dotp"></i>'+t(pay[1])+'</span>';
+        var delCell = '<button type="button" class="icon-btn del-reg" data-reg="'+r.id+'" data-name="'+r.titular_name+'" title="'+t("Excluir cadastro")+'" style="color:var(--st-critical);"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5a1 1 0 0 0 1 .95h6a1 1 0 0 0 1-.95L17 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+        return '<tr><td>'+r.titular_name+'</td><td class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+docLabel+'</td><td>'+grupo+'</td><td class="tabular">—</td><td>'+pontoCell+'</td><td>'+payCell+'</td><td>'+delCell+'</td></tr>';
+      }).join('') : (function(){
+        function row(n,doc,grupo,b,p,type,label){
+          return '<tr><td>'+n+'</td><td class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+doc+'</td><td>'+grupo+'</td><td class="tabular">'+b+'</td><td>'+(p||('<select class="assign-ponto-demo" style="font-size:.78rem;padding:5px 8px;border-radius:7px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink-mute);"><option>'+t("Atribuir ponto…")+'</option></select>'))+'</td><td><span class="pill '+type+'"><i class="dotp"></i>'+t(label)+'</span></td><td></td></tr>';
+        }
+        return row("Marcos A. Ferreira","CPF 111.222.333-44","—","02","Salão do Reino — Jardim do Vale","good","Pago")+
+          row("Talita R. Souza","CPF 222.333.444-55","Titular (+2)","01","Salão do Reino — Jardim do Vale","good","Pago")+
+          row("Cícero P. Lima","CPF 333.444.555-66","—","04",null,"warning","Pendente");
+      })();
+
       return '<div class="grid cols-4" style="margin-bottom:16px;">'+
-          metricMini("Inscritos", "612", "var(--c-1)")+metricMini("Vagas livres", "28", "var(--c-3)")+
-          metricMini("Check-in feito", "0", "var(--ink-mute)")+metricMini("Cancelamentos", "3", "var(--st-critical)")+
+          metricMini(t("Inscritos"), String(totalPax), "var(--c-1)")+metricMini(t("Vagas livres"), hasReal ? "—" : "28", "var(--c-3)")+
+          metricMini(t("Check-in feito"), String(checkins), "var(--ink-mute)")+metricMini(t("Cancelamentos"), String(cancel), "var(--st-critical)")+
         '</div>'+
         '<div class="card">'+
-          '<div class="card-head"><h3>Lista de passageiros</h3><span class="muted">612 registros</span></div>'+
+          '<div class="card-head"><h3>'+t("Lista de passageiros")+'</h3><span class="muted">'+(hasReal ? regs.length : 0)+' '+t("registros")+(hasReal?'':' · '+t("dados de exemplo, aguardando cadastros reais"))+'</span></div>'+
           '<div class="card-pad">'+
             '<div class="actions-row" style="margin-bottom:14px;">'+
-              '<button type="button" class="actionbtn primary">Nova inscrição</button>'+
-              '<button type="button" class="actionbtn">Filtrar por ônibus</button>'+
-              '<button type="button" class="actionbtn">Filtrar por ponto de encontro</button>'+
-              '<button type="button" class="actionbtn">Exportar lista</button>'+
+              '<button type="button" class="actionbtn primary" data-goto="cadastro">'+t("Nova inscrição")+'</button>'+
+              '<button type="button" class="actionbtn" id="addManualBtn">'+t("Adicionar manualmente")+'</button>'+
+              '<button type="button" class="actionbtn">'+t("Filtrar por ônibus")+'</button>'+
+              '<button type="button" class="actionbtn">'+t("Filtrar por ponto de encontro")+'</button>'+
+              '<button type="button" class="actionbtn">'+t("Exportar lista")+'</button>'+
             '</div>'+
-            '<div class="table-scroll"><table class="data"><thead><tr><th>Nome</th><th>Documento</th><th>Grupo</th><th>Ônibus</th><th>Ponto de encontro</th><th>Pagamento</th></tr></thead><tbody>'+
-              row("Marcos A. Ferreira","CPF 111.222.333-44","—","02","Salão do Reino — Jardim do Vale","good","Pago")+
-              row("Talita R. Souza","CPF 222.333.444-55","Titular (+2)","01","Salão do Reino — Jardim do Vale","good","Pago")+
-              row("Cícero P. Lima","CPF 333.444.555-66","—","04",null,"warning","Pendente")+
-              row("Ester M. Costa","CPF 444.555.666-77","—","03","Praça Central — Vale Novo","good","Pago")+
-              row("Renato C. Alves","CPF 555.666.777-88","—","01","Salão do Reino — Jardim do Vale","critical","Atrasado")+
-              row("Simone D. Rocha","CPF 666.777.888-99","—","02",null,"critical","Atrasado")+
-              row("Bruna K. Farias","CPF 777.888.999-00","—","01","Salão do Reino — Jardim do Vale","neutral","Abono")+
+            '<div id="manualAddForm" hidden style="border:1px solid var(--hairline);border-radius:11px;padding:14px;margin-bottom:14px;background:var(--surface-2);">'+
+              '<div class="form-grid">'+
+                '<div class="field"><label>'+t("Nome completo")+'</label><input type="text" id="maNome"></div>'+
+                '<div class="field"><label>'+t("Telefone")+'</label><input type="text" id="maTelefone"></div>'+
+                '<div class="field"><label>'+t("Documento")+'</label><input type="text" id="maDoc"></div>'+
+                '<div class="field"><label>'+t("Nº de pessoas")+'</label><input type="number" min="1" value="1" id="maPeople"></div>'+
+                '<div class="field"><label>'+t("Status de pagamento")+'</label><select id="maStatus"><option value="pendente">'+t("Pendente")+'</option><option value="parcial">'+t("Abono")+'</option><option value="pago">'+t("Pago")+'</option></select></div>'+
+              '</div>'+
+              '<div class="actions-row" style="margin-top:10px;"><button type="button" class="actionbtn primary" id="maSubmit">'+t("Salvar cadastro")+'</button><button type="button" class="actionbtn" id="maCancel">'+t("Cancelar")+'</button></div>'+
+              '<p id="maErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:8px 0 0;"></p>'+
+            '</div>'+
+            '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Documento")+'</th><th>'+t("Grupo")+'</th><th>'+t("Ônibus")+'</th><th>'+t("Ponto de encontro")+'</th><th>'+t("Pagamento")+'</th><th></th></tr></thead><tbody>'+
+              bodyRows+
             '</tbody></table></div>'+
           '</div>'+
         '</div>';
-      function row(n,doc,grupo,b,p,type,label){
-        var pontoCell = p
-          ? p
-          : '<select class="assign-ponto" style="font-size:.78rem;padding:5px 8px;border-radius:7px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink-mute);"><option value="">Atribuir ponto…</option><option>Salão do Reino — Jardim do Vale</option><option>Praça Central — Vale Novo</option><option>Posto Ipiranga, Av. Recanto</option></select>';
-        return '<tr><td>'+n+'</td><td class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+doc+'</td><td>'+grupo+'</td><td class="tabular">'+b+'</td><td>'+pontoCell+'</td><td><span class="pill '+type+'"><i class="dotp"></i>'+label+'</span></td></tr>';
-      }
     },
     after:function(root){
       root.querySelectorAll(".assign-ponto").forEach(function(sel){
-        sel.addEventListener("change", function(){
+        sel.addEventListener("change", async function(){
           if(!sel.value) return;
-          var td = sel.parentElement;
-          td.textContent = sel.value;
-          var note = document.createElement("div");
-          note.style.cssText = "font-size:.7rem;color:var(--st-good);margin-top:2px;font-weight:600;";
-          note.textContent = "✓ enviado ao passageiro e ao encarregado";
-          td.appendChild(note);
+          var regId = sel.getAttribute("data-reg");
+          var res = await dbUpdateRegistration(regId, {meeting_point_id: sel.value});
+          if(res.error){ alert(t("Não foi possível salvar: ") + res.error.message); return; }
+          rerenderViews();
         });
       });
+      root.querySelectorAll(".pay-pill").forEach(function(pill){
+        pill.addEventListener("click", async function(){
+          var order = ["pendente","parcial","pago"];
+          var cur = pill.getAttribute("data-status") || "pendente";
+          var next = order[(order.indexOf(cur)+1) % order.length];
+          var regId = pill.getAttribute("data-reg");
+          var res = await dbUpdateRegistration(regId, {payment_status: next});
+          if(res.error){ alert(t("Não foi possível salvar: ") + res.error.message); return; }
+          rerenderViews();
+        });
+      });
+      root.querySelectorAll(".del-reg").forEach(function(btn){
+        btn.addEventListener("click", async function(){
+          var regId = btn.getAttribute("data-reg");
+          var name = btn.getAttribute("data-name");
+          if(!confirm(t("Excluir o cadastro de ") + name + t("? Esta ação não pode ser desfeita."))) return;
+          var reason = prompt(t("Motivo da exclusão (opcional, fica registrado para consulta futura):")) || "";
+          if(!dbOk()){ alert(t("Banco de dados não conectado.")); return; }
+          var delRes = await supa.from("registrations").delete().eq("id", regId);
+          if(delRes.error){ alert(t("Não foi possível excluir: ") + delRes.error.message); return; }
+          try{
+            await supa.from("audit_log").insert({action:"delete_registration", target_name:name, reason:reason});
+          }catch(e){ /* tabela de auditoria ainda não criada — exclusão já foi feita normalmente */ }
+          await loadAllData();
+          rerenderViews();
+        });
+      });
+      var addManualBtn = root.querySelector("#addManualBtn");
+      var manualForm = root.querySelector("#manualAddForm");
+      var maCancel = root.querySelector("#maCancel");
+      if(addManualBtn && manualForm){
+        addManualBtn.addEventListener("click", function(){ manualForm.hidden = !manualForm.hidden; });
+      }
+      if(maCancel && manualForm){
+        maCancel.addEventListener("click", function(){ manualForm.hidden = true; });
+      }
+      var maSubmit = root.querySelector("#maSubmit");
+      if(maSubmit){
+        maSubmit.addEventListener("click", async function(){
+          var nome = (root.querySelector("#maNome")||{}).value || "";
+          var errBox = root.querySelector("#maErr");
+          if(errBox) errBox.hidden = true;
+          if(!isFullName(nome)){
+            if(errBox){ errBox.textContent = t("Informe nome e sobrenome."); errBox.hidden = false; }
+            return;
+          }
+          var telefone = (root.querySelector("#maTelefone")||{}).value || "";
+          var doc = (root.querySelector("#maDoc")||{}).value || "";
+          var people = +((root.querySelector("#maPeople")||{}).value) || 1;
+          var status = (root.querySelector("#maStatus")||{}).value || "pendente";
+          if(!dbOk()){ if(errBox){ errBox.textContent = t("Banco de dados não conectado."); errBox.hidden = false; } return; }
+          var insertRes = await supa.from("registrations").insert({
+            titular_name: nome.trim(), phone: telefone, doc_number: doc || null,
+            lang: STATE.lang, people_count: people, total_amount: PRICE_PER_PERSON * people,
+            payment_status: status
+          }).select().single();
+          if(insertRes.error){ if(errBox){ errBox.textContent = insertRes.error.message; errBox.hidden = false; } return; }
+          await supa.from("passengers").insert({registration_id: insertRes.data.id, full_name: nome.trim(), is_titular:true});
+          await loadAllData();
+          rerenderViews();
+        });
+      }
     }
   };
 
@@ -1293,26 +1488,32 @@
   views.pagamentos = {
     title:"Pagamentos",
     render:function(){
+      var regs = DATA.registrations || [];
+      var hasReal = DATA.loaded && regs.length > 0;
+      var totalEsperado, recebido, abono, falta;
+      if(hasReal){
+        totalEsperado = regs.reduce(function(a,r){ return a + Number(r.total_amount||0); }, 0);
+        recebido = regs.filter(function(r){ return r.payment_status==="pago"; }).reduce(function(a,r){ return a + Number(r.total_amount||0); }, 0);
+        abono = regs.filter(function(r){ return r.payment_status==="parcial"; }).reduce(function(a,r){ return a + Number(r.amount_paid||0); }, 0);
+        falta = totalEsperado - recebido - abono;
+      } else {
+        totalEsperado = 52020; recebido = 45305; abono = 900; falta = 5815;
+      }
       return '<div class="grid cols-4" style="margin-bottom:16px;">'+
-          '<div class="metric"><div class="label">Total esperado</div><div class="value tabular" data-money="R$ 52.020,00">R$ 52.020,00</div></div>'+
-          '<div class="metric"><div class="label">Recebido (pago completo)</div><div class="value tabular" style="color:var(--st-good)" data-money="R$ 45.305,00">R$ 45.305,00</div></div>'+
-          '<div class="metric"><div class="label">Em abono (parcial)</div><div class="value tabular" style="color:var(--brand)" data-money="R$ 900,00">R$ 900,00</div></div>'+
-          '<div class="metric"><div class="label">Falta receber</div><div class="value tabular" style="color:var(--st-warning)" data-money="R$ 5.815,00">R$ 5.815,00</div></div>'+
+          '<div class="metric"><div class="label">'+t("Total esperado")+'</div><div class="value tabular" data-money="'+money(formatBRL(totalEsperado))+'">'+money(formatBRL(totalEsperado))+'</div></div>'+
+          '<div class="metric"><div class="label">'+t("Recebido (pago completo)")+'</div><div class="value tabular" style="color:var(--st-good)" data-money="'+money(formatBRL(recebido))+'">'+money(formatBRL(recebido))+'</div></div>'+
+          '<div class="metric"><div class="label">'+t("Em abono (parcial)")+'</div><div class="value tabular" style="color:var(--brand)" data-money="'+money(formatBRL(abono))+'">'+money(formatBRL(abono))+'</div></div>'+
+          '<div class="metric"><div class="label">'+t("Falta receber")+'</div><div class="value tabular" style="color:var(--st-warning)" data-money="'+money(formatBRL(falta))+'">'+money(formatBRL(falta))+'</div></div>'+
         '</div>'+
         '<div class="grid split-58">'+
-        '<div class="card"><div class="card-head"><h3>Cobranças em atraso</h3><span class="muted">12 registros</span></div><div class="card-pad">'+
-          '<div class="table-scroll"><table class="data"><thead><tr><th>Nome</th><th>Valor</th><th>Status</th></tr></thead><tbody>'+
-            '<tr><td>Renato C. Alves</td><td class="tabular" data-money="R$ 85,00">R$ 85,00</td><td><span class="pill critical"><i class="dotp"></i>8 dias</span></td></tr>'+
-            '<tr><td>Simone D. Rocha</td><td class="tabular" data-money="R$ 85,00">R$ 85,00</td><td><span class="pill critical"><i class="dotp"></i>5 dias</span></td></tr>'+
-            '<tr><td>Aparecida N. Melo</td><td class="tabular" data-money="R$ 42,50">R$ 42,50</td><td><span class="pill warning"><i class="dotp"></i>2 dias</span></td></tr>'+
-            '<tr><td>Josué B. Andrade</td><td class="tabular" data-money="R$ 85,00">R$ 85,00</td><td><span class="pill warning"><i class="dotp"></i>1 dia</span></td></tr>'+
+        '<div class="card"><div class="card-head"><h3>'+t("Comprovantes de pagamento")+'</h3><span class="muted">'+(hasReal?regs.length:0)+' '+t("registros")+'</span></div><div class="card-pad">'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Nome")+'</th><th>'+t("Valor")+'</th><th>'+t("Status")+'</th><th></th></tr></thead><tbody>'+
+            (hasReal ? regs.map(function(r){
+              var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
+              return '<tr><td>'+r.titular_name+'</td><td class="tabular">'+money(formatBRL(Number(r.total_amount||0)))+'</td><td><span class="pill '+pay[0]+'"><i class="dotp"></i>'+t(pay[1])+'</span></td><td><button type="button" class="actionbtn ghost gen-receipt" data-reg="'+r.id+'" style="font-size:.74rem;padding:5px 9px;">'+t("Comprovante PDF")+'</button></td></tr>';
+            }).join('') : '<tr><td colspan="4" style="color:var(--ink-mute);">'+t("Sem cadastros ainda")+'</td></tr>')+
           '</tbody></table></div>'+
-          '<div style="margin-top:14px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600;margin-bottom:8px;">Com abono parcial</div>'+
-          '<div class="table-scroll"><table class="data"><thead><tr><th>Nome</th><th>Pago</th><th>Falta</th><th>Status</th></tr></thead><tbody>'+
-            '<tr><td>Bruna K. Farias</td><td class="tabular" data-money="R$ 30,00">R$ 30,00</td><td class="tabular" data-money="R$ 55,00">R$ 55,00</td><td><span class="pill neutral"><i class="dotp"></i>Abono</span></td></tr>'+
-            '<tr><td>Eliezer M. Sousa</td><td class="tabular" data-money="R$ 30,00">R$ 30,00</td><td class="tabular" data-money="R$ 55,00">R$ 55,00</td><td><span class="pill neutral"><i class="dotp"></i>Abono</span></td></tr>'+
-          '</tbody></table></div></div>'+
-          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary">Registrar pagamento</button><button type="button" class="actionbtn">Enviar cobrança via WhatsApp</button><button type="button" class="actionbtn">Enviar comprovante em PDF</button></div>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn">'+t("Enviar cobrança via WhatsApp")+'</button></div>'+
           '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">O status só passa para "Pago" quando o administrador confirma que o valor total foi recebido — mesmo que o passageiro já tenha feito um abono.</p>'+
         '</div></div>'+
         '<div class="card"><div class="card-head"><h3>Distribuição</h3></div><div class="card-pad" style="display:flex;gap:16px;align-items:center;">'+
@@ -1320,6 +1521,41 @@
           '<div class="legend" style="flex-direction:column;gap:8px;"><span><i style="background:var(--st-good)"></i>Pago — 533</span><span><i style="background:var(--brand)"></i>Abono — 30</span><span><i style="background:var(--st-warning)"></i>Pendente — 37</span><span><i style="background:var(--st-critical)"></i>Atrasado — 12</span></div>'+
         '</div></div>'+
       '</div>';
+    },
+    after:function(root){
+      root.querySelectorAll(".gen-receipt").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var regId = btn.getAttribute("data-reg");
+          var reg = (DATA.registrations||[]).find(function(r){ return r.id === regId; });
+          if(!reg) return;
+          if(!(window.jspdf && window.jspdf.jsPDF)){ alert(t("Gerador de PDF indisponível (verifique a conexão com a internet).")); return; }
+          var doc = new window.jspdf.jsPDF();
+          doc.setFillColor(47,95,216); doc.rect(0,0,210,28,"F");
+          doc.setTextColor(255,255,255); doc.setFontSize(16); doc.text(STATE.eventName, 14, 14);
+          doc.setFontSize(10); doc.text(t("Comprovante de pagamento"), 14, 21);
+          doc.setTextColor(20,20,20); doc.setFontSize(11);
+          var y = 40;
+          function line(label, value){ doc.setFont(undefined,"bold"); doc.text(label, 14, y); doc.setFont(undefined,"normal"); doc.text(String(value), 70, y); y += 8; }
+          line(t("Titular")+":", reg.titular_name);
+          line(t("Telefone")+":", reg.phone || "—");
+          line(t("Documento")+":", (reg.doc_type||"")+" "+(reg.doc_number||""));
+          line(t("Pessoas")+":", reg.people_count);
+          line(t("Forma de pagamento")+":", reg.payment_method || "—");
+          var pay = PAY_LABEL[reg.payment_status] || PAY_LABEL.pendente;
+          line(t("Status")+":", t(pay[1]));
+          y += 4;
+          (reg.passengers||[]).forEach(function(p){
+            doc.setFontSize(10); doc.text("• "+p.full_name+(p.is_titular?(" ("+t("titular")+")"):""), 18, y); y += 6;
+          });
+          y += 6;
+          doc.setFillColor(233,238,251); doc.rect(14, y-6, 182, 14, "F");
+          doc.setFont(undefined,"bold"); doc.setFontSize(13);
+          doc.text(t("Total")+": "+money(formatBRL(Number(reg.total_amount||0))), 18, y+3);
+          doc.setFont(undefined,"normal"); doc.setFontSize(8); doc.setTextColor(120,120,120);
+          doc.text(t("Gerado em")+" "+new Date().toLocaleString(), 14, 285);
+          doc.save("comprovante-"+reg.titular_name.replace(/\s+/g,"-").toLowerCase()+".pdf");
+        });
+      });
     }
   };
 
@@ -1346,7 +1582,13 @@
     after:function(root){
       var btn = root.querySelector("#sendReminderBtn");
       if(btn){
-        btn.addEventListener("click", function(){
+        btn.addEventListener("click", async function(){
+          var title = prompt(t("Título do lembrete:"), t("Aviso"));
+          if(title === null) return;
+          var message = prompt(t("Mensagem para os passageiros e encarregados:")) || "";
+          if(!message) return;
+          var res = await dbInsertNotification({title:title || t("Aviso"), message:message, target:"todos"});
+          if(res.error){ alert(t("Não foi possível enviar: ") + res.error.message); }
           playNotificationSound();
           var portalCard = document.querySelector("#screen-passenger .portal-card:last-child");
           if(portalCard){
@@ -1395,11 +1637,15 @@
         }).join('');
         return '<div class="day-panel" data-day-panel="'+d+'" style="'+(i===0?'':'display:none;')+'">'+cards+'</div>';
       }).join('');
+      var realPoints = (DATA.meetingPoints||[]).map(function(mp){
+        return '<div class="encontro-card"><span class="encontro-time">—</span><div class="encontro-body"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+'</span></div><a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+(mp.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((mp.address||mp.name)+" Itatiba SP")))+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>';
+      }).join('');
+      var realBlock = realPoints ? ('<div class="card-pad" style="padding-top:0;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600;margin:14px 0 8px;">'+t("Pontos cadastrados no sistema")+'</div>'+realPoints+'</div>') : '';
       return '<div class="card card-pad">'+
         '<div class="actions-row" style="justify-content:space-between;margin-bottom:14px;">'+
           '<div class="daytab-group" style="margin-bottom:0;">'+tabs+'</div>'+
-          '<button type="button" class="actionbtn primary">Adicionar ponto</button>'+
-        '</div>'+panels+'</div>';
+          '<button type="button" class="actionbtn primary" id="addPontoBtn">'+t("Adicionar ponto")+'</button>'+
+        '</div>'+panels+realBlock+'</div>';
     },
     after:function(root){
       var tabs = root.querySelectorAll(".daytab"), panels = root.querySelectorAll("[data-day-panel]");
@@ -1408,6 +1654,17 @@
         var day = tab.getAttribute("data-day");
         panels.forEach(function(p){ p.style.display = (p.getAttribute("data-day-panel")===day) ? "" : "none"; });
       }); });
+      var addBtn = root.querySelector("#addPontoBtn");
+      if(addBtn){
+        addBtn.addEventListener("click", async function(){
+          var name = prompt(t("Nome do ponto de encontro:"));
+          if(!name) return;
+          var address = prompt(t("Endereço (para o Google Maps):")) || "";
+          var res = await dbInsertMeetingPoint({name:name, address:address});
+          if(res.error){ alert(t("Não foi possível salvar: ") + res.error.message); return; }
+          rerenderViews();
+        });
+      }
     }
   };
 
@@ -1535,23 +1792,80 @@
   views.relatorios = {
     title:"Relatórios",
     render:function(){
+      var hasReal = DATA.loaded && DATA.registrations && DATA.registrations.length > 0;
       return '<div class="grid split-58">'+
-        '<div class="card"><div class="card-head"><h3>Gerar relatório</h3></div><div class="card-pad">'+
+        '<div class="card"><div class="card-head"><h3>'+t("Gerar relatório")+'</h3></div><div class="card-pad">'+
           '<div class="actions-row">'+
-            '<button type="button" class="actionbtn primary">PDF — 17 jul</button>'+
-            '<button type="button" class="actionbtn primary">PDF — 18 jul</button>'+
-            '<button type="button" class="actionbtn primary">PDF — 19 jul</button>'+
-            '<button type="button" class="actionbtn">Excel — consolidado</button>'+
+            '<button type="button" class="actionbtn primary" id="repPdfBtn">'+t("Baixar relatório em PDF")+'</button>'+
+            '<button type="button" class="actionbtn" id="repXlsBtn">'+t("Baixar relatório em Excel")+'</button>'+
           '</div>'+
+          '<p class="i18n-note" style="margin:12px 0 0;font-size:.78rem;color:var(--ink-mute);">'+t("O relatório reúne todos os passageiros cadastrados, agrupados por ponto de encontro, com status de pagamento.")+(hasReal?'':' · '+t("ainda não há cadastros reais — o arquivo sairá vazio"))+'</p>'+
         '</div></div>'+
-        '<div class="card"><div class="card-head"><h3>Últimas exportações</h3></div><div class="card-pad">'+
-          '<div class="table-scroll"><table class="data"><thead><tr><th>Arquivo</th><th>Formato</th><th>Gerado</th></tr></thead><tbody>'+
-            '<tr><td>Relatorio_17jul.pdf</td><td class="tabular">PDF</td><td>Hoje, 09:12</td></tr>'+
-            '<tr><td>Pagamentos_consolidado.xlsx</td><td class="tabular">Excel</td><td>Ontem, 21:40</td></tr>'+
-            '<tr><td>Relatorio_18jul.pdf</td><td class="tabular">PDF</td><td>Ontem, 21:38</td></tr>'+
+        '<div class="card"><div class="card-head"><h3>'+t("Resumo atual")+'</h3></div><div class="card-pad">'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Ponto de encontro")+'</th><th>'+t("Passageiros")+'</th></tr></thead><tbody>'+
+            reportSummaryRows()+
           '</tbody></table></div>'+
         '</div></div>'+
       '</div>';
+      function reportSummaryRows(){
+        if(!hasReal) return '<tr><td colspan="2" style="color:var(--ink-mute);">'+t("Sem dados ainda")+'</td></tr>';
+        var byPoint = {};
+        DATA.registrations.forEach(function(r){
+          var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+          var label = mp ? mp.name : t("Sem ponto atribuído");
+          byPoint[label] = (byPoint[label]||0) + (r.people_count||1);
+        });
+        return Object.keys(byPoint).map(function(k){ return '<tr><td>'+k+'</td><td class="tabular">'+byPoint[k]+'</td></tr>'; }).join('');
+      }
+    },
+    after:function(root){
+      function buildRows(){
+        var rows = [];
+        (DATA.registrations||[]).forEach(function(r){
+          var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+          var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
+          (r.passengers||[{full_name:r.titular_name}]).forEach(function(p){
+            rows.push([p.full_name, r.doc_number||"", mp?mp.name:"—", t(pay[1]), formatBRL(Number(r.total_amount||0))]);
+          });
+        });
+        return rows;
+      }
+      var pdfBtn = root.querySelector("#repPdfBtn");
+      if(pdfBtn){
+        pdfBtn.addEventListener("click", function(){
+          if(!(window.jspdf && window.jspdf.jsPDF)){ alert(t("Gerador de PDF indisponível (verifique a conexão com a internet).")); return; }
+          var doc = new window.jspdf.jsPDF();
+          doc.setFontSize(16); doc.text(STATE.eventName + " — " + t("Relatório de passageiros"), 14, 18);
+          doc.setFontSize(10); doc.text(eventDateLabel(), 14, 25);
+          var rows = buildRows();
+          if(doc.autoTable){
+            doc.autoTable({ startY:32, head:[[t("Nome"), t("Documento"), t("Ponto de encontro"), t("Pagamento"), t("Valor")]], body: rows });
+          } else {
+            var y = 34;
+            rows.forEach(function(r){ doc.setFontSize(9); doc.text(r.join(" · "), 14, y); y += 6; });
+          }
+          doc.save("relatorio-jardim-do-vale.pdf");
+        });
+      }
+      var xlsBtn = root.querySelector("#repXlsBtn");
+      if(xlsBtn){
+        xlsBtn.addEventListener("click", function(){
+          var rows = buildRows();
+          var header = [t("Nome"), t("Documento"), t("Ponto de encontro"), t("Pagamento"), t("Valor")];
+          if(window.XLSX){
+            var ws = XLSX.utils.aoa_to_sheet([header].concat(rows));
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Passageiros");
+            XLSX.writeFile(wb, "relatorio-jardim-do-vale.xlsx");
+          } else {
+            var csv = [header].concat(rows).map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(","); }).join("\n");
+            var blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a"); a.href = url; a.download = "relatorio-jardim-do-vale.csv";
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+          }
+        });
+      }
     }
   };
 
@@ -1604,9 +1918,10 @@
         '</div></div>'+
         '<div>'+
           '<div class="card card-pad" style="margin-bottom:16px;">'+sectionLabel("Minha conta")+
-            '<div class="field" style="margin-bottom:12px;"><label>Senha atual</label><input type="password" placeholder="••••••••"></div>'+
-            '<div class="field" style="margin-bottom:12px;"><label>Nova senha</label><input type="password" placeholder="••••••••"></div>'+
-            '<button type="button" class="actionbtn primary">Alterar minha senha</button>'+
+            '<div class="field" style="margin-bottom:12px;"><label>Nova senha</label><input type="password" id="myNewPass" placeholder="••••••••"></div>'+
+            '<button type="button" class="actionbtn primary" id="myPassSaveBtn">Alterar minha senha</button>'+
+            '<p id="myPassOk" hidden style="color:var(--st-good);font-size:.8rem;margin:8px 0 0;">'+t("Senha atualizada com sucesso.")+'</p>'+
+            '<p id="myPassErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:8px 0 0;"></p>'+
           '</div>'+
           '<div class="card card-pad" style="margin-bottom:16px;">'+sectionLabel("Capacidade de encarregados")+
             '<div class="field" style="max-width:200px;"><label>Quantos encarregados este congresso vai usar?</label><input type="number" min="1" max="30" value="4"></div>'+
@@ -1619,6 +1934,21 @@
           '</div>'+
         '</div>'+
       '</div>';
+    },
+    after:function(root){
+      var btn = root.querySelector("#myPassSaveBtn");
+      if(btn){
+        btn.addEventListener("click", async function(){
+          var okBox = root.querySelector("#myPassOk"), errBox = root.querySelector("#myPassErr");
+          if(okBox) okBox.hidden = true; if(errBox) errBox.hidden = true;
+          var val = (root.querySelector("#myNewPass")||{}).value || "";
+          if(val.length < 6){ if(errBox){ errBox.textContent = t("A senha deve ter ao menos 6 caracteres."); errBox.hidden = false; } return; }
+          if(!dbOk()){ if(errBox){ errBox.textContent = t("Banco de dados não conectado."); errBox.hidden = false; } return; }
+          var res = await supa.auth.updateUser({password: val});
+          if(res.error){ if(errBox){ errBox.textContent = res.error.message; errBox.hidden = false; } return; }
+          if(okBox) okBox.hidden = false;
+        });
+      }
     }
   };
 
@@ -1723,6 +2053,15 @@
           '<div class="settings-row"><div class="txt"><strong>Modelo de relatório</strong><span>Layout usado em PDF/Excel</span></div><select><option>Padrão</option><option>Compacto</option></select></div>'+
         '</div>'+
       '</div>'+
+      '<div class="card card-pad" style="margin-top:16px;">'+sectionLabel("Backup e novo evento")+
+        '<p class="i18n-note" style="margin:0 0 14px;color:var(--ink-soft);font-size:.85rem;">Baixe uma cópia de todos os dados atuais (passageiros, pagamentos, pontos, avisos) antes de reiniciar o sistema para um novo congresso.</p>'+
+        '<div class="actions-row" style="margin-bottom:10px;">'+
+          '<button type="button" class="actionbtn" id="downloadBackupBtn">Baixar backup agora (JSON)</button>'+
+          '<button type="button" class="actionbtn" style="border-color:var(--st-critical);color:var(--st-critical);" id="resetEventBtn">Reiniciar sistema para novo evento</button>'+
+        '</div>'+
+        '<p id="backupOk" hidden style="color:var(--st-good);font-size:.8rem;margin:4px 0 0;">Backup baixado com sucesso.</p>'+
+        '<p id="resetErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:4px 0 0;"></p>'+
+      '</div>'+
       '<div class="card card-pad" style="margin-top:16px;">'+sectionLabel("Compartilhar & Código")+
         '<p class="i18n-note" style="margin:0 0 14px;color:var(--ink-soft);font-size:.85rem;">Compartilhe o link do sistema ou edite as configurações avançadas por código — protegido pela senha do administrador.</p>'+
         '<div id="codeGate" class="grid cols-2" style="align-items:end;">'+
@@ -1783,7 +2122,7 @@
       }
       var saveBtn = root.querySelector("#cfgSaveEvent");
       if(saveBtn){
-        saveBtn.addEventListener("click", function(){
+        saveBtn.addEventListener("click", async function(){
           var nameInput = root.querySelector("#cfgEventName");
           var startInput = root.querySelector("#cfgStart");
           var endInput = root.querySelector("#cfgEnd");
@@ -1793,8 +2132,83 @@
           if(endInput) STATE.dateEnd = endInput.value || STATE.dateEnd;
           persistState();
           updateEventBranding();
+          if(dbOk()){
+            try{
+              await supa.from("event_config").update({
+                event_name: STATE.eventName,
+                date_start: brToIso(STATE.dateStart),
+                date_end: brToIso(STATE.dateEnd),
+                single_day: STATE.singleDay
+              }).eq("id",1);
+            }catch(e){}
+          }
           var s = root.querySelector("#cfgSaveSuccess");
           if(s) s.classList.add("show");
+        });
+      }
+
+      /* ---- backup & reinício ---- */
+      var downloadBtn = root.querySelector("#downloadBackupBtn");
+      if(downloadBtn){
+        downloadBtn.addEventListener("click", async function(){
+          await loadAllData();
+          var payload = {
+            exported_at: new Date().toISOString(),
+            event_config: DATA.eventConfig,
+            registrations: DATA.registrations,
+            meeting_points: DATA.meetingPoints,
+            encarregados: DATA.encarregados,
+            notifications: DATA.notifications
+          };
+          var blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url; a.download = "backup-jardim-do-vale-" + (new Date().toISOString().slice(0,10)) + ".json";
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          var ok = root.querySelector("#backupOk"); if(ok) ok.hidden = false;
+        });
+      }
+      var resetBtn = root.querySelector("#resetEventBtn");
+      if(resetBtn){
+        resetBtn.addEventListener("click", async function(){
+          var errBox = root.querySelector("#resetErr");
+          if(errBox) errBox.hidden = true;
+          if(!dbOk()){ if(errBox){ errBox.textContent = t("Banco de dados não conectado."); errBox.hidden = false; } return; }
+          var confirmTxt = prompt(t('Isto vai apagar TODOS os passageiros, pagamentos, pontos de encontro e avisos do evento atual (um backup será baixado automaticamente antes). Para confirmar, digite REINICIAR:'));
+          if(confirmTxt !== "REINICIAR") return;
+
+          await loadAllData();
+          var payload = { exported_at:new Date().toISOString(), event_config:DATA.eventConfig, registrations:DATA.registrations, meeting_points:DATA.meetingPoints, encarregados:DATA.encarregados, notifications:DATA.notifications };
+          var blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url; a.download = "backup-antes-de-reiniciar-" + (new Date().toISOString().slice(0,10)) + ".json";
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          try{
+            await supa.from("notifications").delete().neq("id","00000000-0000-0000-0000-000000000000");
+            await supa.from("registrations").delete().neq("id","00000000-0000-0000-0000-000000000000");
+            await supa.from("meeting_points").delete().neq("id","00000000-0000-0000-0000-000000000000");
+          }catch(e){
+            if(errBox){ errBox.textContent = t("Erro ao reiniciar: ") + e.message; errBox.hidden = false; return; }
+          }
+
+          var newName = prompt(t("Nome do novo evento:"), STATE.eventName) || STATE.eventName;
+          var newStart = prompt(t("Data de início (DD/MM/AAAA):"), STATE.dateStart) || STATE.dateStart;
+          var newEnd = prompt(t("Data de término (DD/MM/AAAA):"), STATE.dateEnd) || STATE.dateEnd;
+          STATE.eventName = newName; STATE.dateStart = newStart; STATE.dateEnd = newEnd;
+          persistState(); updateEventBranding();
+          try{
+            await supa.from("event_config").update({
+              event_name:newName, date_start:brToIso(newStart), date_end:brToIso(newEnd)
+            }).eq("id",1);
+          }catch(e){}
+
+          alert(t("Sistema reiniciado para o novo evento."));
+          await loadAllData();
+          rerenderViews();
         });
       }
 
@@ -2032,8 +2446,47 @@
     });
   }
   if(sendRecoverBtn){
-    sendRecoverBtn.addEventListener("click", function(){
+    sendRecoverBtn.addEventListener("click", async function(){
+      var emailInput = document.getElementById("adminRecoverEmail");
+      var email = emailInput ? emailInput.value.trim() : "";
+      if(dbOk() && email){
+        try{ await supa.auth.resetPasswordForEmail(email); }catch(e){}
+      }
       var s = document.getElementById("recoverSuccess"); if(s) s.classList.add("show");
+    });
+  }
+
+  var isAdminAuthed = false;
+  var adminLoginBtn = document.getElementById("adminLoginBtn");
+  if(adminLoginBtn){
+    adminLoginBtn.addEventListener("click", async function(){
+      var emailInput = document.getElementById("adminEmailInput");
+      var passInput = document.getElementById("adminPasswordInput");
+      var errBox = document.getElementById("adminLoginErr");
+      var email = emailInput ? emailInput.value.trim() : "";
+      var pass = passInput ? passInput.value : "";
+      if(errBox) errBox.hidden = true;
+      if(!dbOk()){
+        if(errBox){ errBox.textContent = t("Banco de dados não conectado."); errBox.hidden = false; }
+        return;
+      }
+      if(!email || !pass){
+        if(errBox){ errBox.textContent = t("Informe e-mail e senha."); errBox.hidden = false; }
+        return;
+      }
+      adminLoginBtn.disabled = true;
+      var oldTxt = adminLoginBtn.textContent;
+      adminLoginBtn.textContent = t("Entrando…");
+      var res = await supa.auth.signInWithPassword({email:email, password:pass});
+      adminLoginBtn.disabled = false;
+      adminLoginBtn.textContent = oldTxt;
+      if(res.error){
+        if(errBox){ errBox.textContent = t("E-mail ou senha inválidos."); errBox.hidden = false; }
+        return;
+      }
+      isAdminAuthed = true;
+      goScreen("erp");
+      loadAllData().then(function(ok){ if(ok) rerenderViews(); });
     });
   }
 
@@ -2041,7 +2494,7 @@
 
   var cadastroBtn = document.getElementById("cadastroSubmit");
   if(cadastroBtn){
-    cadastroBtn.addEventListener("click", function(){
+    cadastroBtn.addEventListener("click", async function(){
       var ok = true;
       var nomeInput = document.getElementById("cadastroNome");
       var nomeErr = document.getElementById("cadastroNomeErr");
@@ -2065,9 +2518,45 @@
 
       var count = +(document.getElementById("companionCount") || {}).value || 0;
       var people = count + 1;
-      var total = money(formatBRL(PRICE_PER_PERSON * people));
+      var totalNum = PRICE_PER_PERSON * people;
+      var total = money(formatBRL(totalNum));
       var banner = document.getElementById("cadastroSuccess");
       var summary = document.getElementById("cadastroSummaryText");
+      var docTypeSel = document.getElementById("cadastroDocType");
+      var docNumInput = document.getElementById("cadastroDocNumber");
+      var phoneInput = document.getElementById("cadastroTelefone");
+      var payWrap = document.getElementById("paymentMethods");
+      var payChip = payWrap ? payWrap.querySelector(".chip-check.on") : null;
+
+      cadastroBtn.disabled = true;
+      var oldLabel = cadastroBtn.textContent;
+      cadastroBtn.textContent = t("Enviando…");
+
+      var result = await dbInsertRegistration({
+        titularName: names[0],
+        phone: phoneInput ? phoneInput.value.trim() : "",
+        docType: docTypeSel ? docTypeSel.value : null,
+        docNumber: docNumInput ? docNumInput.value.trim() : null,
+        paymentMethod: payChip ? payChip.textContent : null,
+        people: people,
+        total: totalNum
+      }, names.slice(1));
+
+      cadastroBtn.disabled = false;
+      cadastroBtn.textContent = oldLabel;
+
+      if(result.error){
+        var errBox = document.getElementById("cadastroDbError");
+        if(!errBox){
+          errBox = document.createElement("p");
+          errBox.id = "cadastroDbError";
+          errBox.style.cssText = "margin:10px 0 0;font-size:.8rem;color:var(--st-critical);font-weight:600;";
+          cadastroBtn.parentElement.appendChild(errBox);
+        }
+        errBox.textContent = t("Não foi possível salvar seu cadastro agora (") + (result.error.message || t("erro de conexão")) + t("). Tente novamente em instantes.");
+        return;
+      }
+
       if(summary){
         summary.textContent = (people === 1)
           ? (t("Inscrição individual") + " · " + names[0] + " · " + total + " · " + t("o ponto de encontro será enviado pelo WhatsApp assim que for atribuído."))
@@ -2079,32 +2568,55 @@
 
   /* ---- encarregado checklist ---- */
   var encList = document.getElementById("encarregadoList");
-  if(encList){
-    var encPax = [
-      {name:"Marcos A. Ferreira", sub:"Ônibus 02 · Pago", on:true},
-      {name:"Talita R. Souza", sub:"Ônibus 02 · Pago", on:true},
-      {name:"Renato C. Alves", sub:"Ônibus 01 · Atrasado", on:false},
-      {name:"Simone D. Rocha", sub:"Ônibus 02 · Atrasado", on:false},
-      {name:"Ester M. Costa", sub:"Ônibus 01 · Pago", on:false},
-      {name:"Josué B. Andrade", sub:"Ônibus 02 · Pendente", on:false},
-      {name:"Aparecida N. Melo", sub:"Ônibus 01 · Pendente", on:true}
-    ];
-    var checkSvg = '<svg viewBox="0 0 24 24" fill="none" style="width:12px;height:12px;"><path d="m5 12.5 4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    function renderEnc(){
-      encList.innerHTML = encPax.map(function(p,i){
-        return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'" data-idx="'+i+'">'+(p.on?checkSvg:'')+'</button>'+
+  var encPaxDemo = [
+    {name:"Marcos A. Ferreira", sub:"Ônibus 02 · Pago", on:true},
+    {name:"Talita R. Souza", sub:"Ônibus 02 · Pago", on:true},
+    {name:"Renato C. Alves", sub:"Ônibus 01 · Atrasado", on:false},
+    {name:"Simone D. Rocha", sub:"Ônibus 02 · Atrasado", on:false},
+    {name:"Ester M. Costa", sub:"Ônibus 01 · Pago", on:false},
+    {name:"Josué B. Andrade", sub:"Ônibus 02 · Pendente", on:false},
+    {name:"Aparecida N. Melo", sub:"Ônibus 01 · Pendente", on:true}
+  ];
+  var checkSvg = '<svg viewBox="0 0 24 24" fill="none" style="width:12px;height:12px;"><path d="m5 12.5 4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function renderEnc(){
+    if(!encList) return;
+    var hasReal = DATA.loaded && DATA.registrations && DATA.registrations.length > 0;
+    if(hasReal){
+      var rows = [];
+      DATA.registrations.forEach(function(r){
+        var payLbl = t((PAY_LABEL[r.payment_status]||PAY_LABEL.pendente)[1]);
+        (r.passengers||[{full_name:r.titular_name, id:r.id}]).forEach(function(p){
+          rows.push({name:p.full_name, sub:payLbl, on:!!r.checked_in, regId:r.id});
+        });
+      });
+      encList.innerHTML = rows.map(function(p,i){
+        return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'" data-reg="'+p.regId+'">'+(p.on?checkSvg:'')+'</button>'+
           '<div style="flex:1;min-width:0;"><div class="nm">'+p.name+'</div><div class="sub">'+p.sub+'</div></div></div>';
       }).join('');
       encList.querySelectorAll(".cb").forEach(function(btn){
-        btn.addEventListener("click", function(){
-          var idx = +btn.getAttribute("data-idx");
-          encPax[idx].on = !encPax[idx].on;
+        btn.addEventListener("click", async function(){
+          var regId = btn.getAttribute("data-reg");
+          var reg = DATA.registrations.find(function(r){ return r.id === regId; });
+          var res = await dbUpdateRegistration(regId, {checked_in: !(reg && reg.checked_in)});
+          if(res.error){ alert(t("Não foi possível salvar: ") + res.error.message); return; }
           renderEnc();
         });
       });
+      return;
     }
-    renderEnc();
+    encList.innerHTML = encPaxDemo.map(function(p,i){
+      return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'" data-idx="'+i+'">'+(p.on?checkSvg:'')+'</button>'+
+        '<div style="flex:1;min-width:0;"><div class="nm">'+p.name+'</div><div class="sub">'+p.sub+'</div></div></div>';
+    }).join('');
+    encList.querySelectorAll(".cb").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var idx = +btn.getAttribute("data-idx");
+        encPaxDemo[idx].on = !encPaxDemo[idx].on;
+        renderEnc();
+      });
+    });
   }
+  if(encList) renderEnc();
 
   /* ---- floating help widget ---- */
   var helpFab = document.getElementById("helpFab");
@@ -2147,6 +2659,27 @@
 
   markI18n();
   applyI18n();
+
+  /* ---- carrega dados reais do Supabase e re-renderiza as telas já montadas ---- */
+  function rerenderViews(){
+    Object.keys(views).forEach(function(k){
+      var sec = document.getElementById("view-"+k);
+      if(!sec) return;
+      sec.innerHTML = views[k].render();
+      if(views[k].after) views[k].after(sec);
+    });
+    renderEnc();
+  }
+  loadAllData().then(function(ok){ if(ok) rerenderViews(); });
+  if(dbOk() && supa.channel){
+    try{
+      supa.channel("jv-live")
+        .on("postgres_changes", {event:"*", schema:"public"}, function(){
+          loadAllData().then(function(ok){ if(ok) rerenderViews(); });
+        })
+        .subscribe();
+    }catch(e){}
+  }
 
 })();
 </script>
