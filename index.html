@@ -862,12 +862,11 @@
       <button class="nav-item active" data-view="dashboard" title="Dashboard"><span class="ic">${ICON_HOME}</span><span class="lbl">Dashboard</span></button>
 
       <div class="side-group-label">Operação</div>
-      <button class="nav-item" data-view="passageiros" title="Passageiros"><span class="ic">${ICON_USERS}</span><span class="lbl">Passageiros</span><span class="cnt">612</span></button>
-      <button class="nav-item" data-view="pagamentos" title="Pagamentos"><span class="ic">${ICON_CARD}</span><span class="lbl">Pagamentos</span><span class="cnt warn">12</span></button>
+      <button class="nav-item" data-view="passageiros" title="Passageiros"><span class="ic">${ICON_USERS}</span><span class="lbl">Passageiros</span><span class="cnt" id="navPaxCount" hidden>0</span></button>
+      <button class="nav-item" data-view="pagamentos" title="Pagamentos"><span class="ic">${ICON_CARD}</span><span class="lbl">Pagamentos</span><span class="cnt warn" id="navPagoCount" hidden>0</span></button>
       <button class="nav-item" data-view="lembretes" title="Lembretes"><span class="ic">${ICON_BELL}</span><span class="lbl">Lembretes</span></button>
       <button class="nav-item" data-view="encontro" title="Pontos de Encontro"><span class="ic">${ICON_PIN}</span><span class="lbl">Pontos de Encontro</span></button>
       <button class="nav-item" data-view="frota" title="Frota &amp; Encarregados"><span class="ic">${ICON_BUS}</span><span class="lbl">Frota &amp; Encarregados</span></button>
-      <button class="nav-item" data-view="chatbot" title="Chatbot WhatsApp"><span class="ic">${ICON_CHAT}</span><span class="lbl">Chatbot WhatsApp</span></button>
       <button class="nav-item" data-view="relatorios" title="Relatórios"><span class="ic">${ICON_REPORT}</span><span class="lbl">Relatórios</span></button>
 
       <div class="side-group-label">Acessos</div>
@@ -881,8 +880,8 @@
 
     <div class="side-foot">
       <div class="side-user">
-        <div class="av">WT</div>
-        <div class="who"><div class="n">Wellington T.</div><div class="r">Administrador</div></div>
+        <div class="av" id="sideUserAvatar">--</div>
+        <div class="who"><div class="n" id="sideUserName">—</div><div class="r" id="sideUserRole">—</div></div>
       </div>
     </div>
   </aside>
@@ -950,6 +949,7 @@
     meetingPoints: [],
     encarregados: [],
     notifications: [],
+    admins: [],
     eventConfig: null,
     loaded: false
   };
@@ -975,6 +975,9 @@
 
       var notifRes = await supa.from("notifications").select("*").order("created_at", {ascending:false}).limit(30);
       if(!notifRes.error) DATA.notifications = notifRes.data || [];
+
+      var adminsRes = await supa.from("admins").select("id,name,is_principal,created_at").order("created_at");
+      if(!adminsRes.error) DATA.admins = adminsRes.data || [];
 
       var cfgRes = await supa.from("event_config").select("*").eq("id",1).single();
       if(!cfgRes.error){
@@ -1103,10 +1106,43 @@
     }
   }
 
+  async function dbUpdateMeetingPoint(id, patch){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    try{
+      var res = await supa.from("meeting_points").update(patch).eq("id", id);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
+  }
+
   async function dbDeleteMeetingPoint(id){
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
     try{
       var res = await supa.from("meeting_points").delete().eq("id", id);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
+  }
+
+  async function dbInsertEncarregado(enc){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    try{
+      var res = await supa.from("encarregados").insert(enc);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
+  }
+
+  async function dbDeleteEncarregado(id){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    try{
+      var res = await supa.from("encarregados").delete().eq("id", id);
       if(!res.error) await loadAllData();
       return res;
     }catch(e){
@@ -1266,7 +1302,39 @@
     "Deseja realmente excluir o ponto de encontro":"¿Desea realmente eliminar el punto de encuentro",
     "Não foi possível excluir: ":"No fue posible eliminar: ",
     "Pontos cadastrados no sistema":"Puntos registrados en el sistema",
-    "Ver no mapa":"Ver en el mapa"
+    "Ver no mapa":"Ver en el mapa",
+    "Abono":"Abono parcial",
+    "com passageiros atribuídos":"con pasajeros asignados",
+    "nenhum ônibus atribuído ainda":"ningún autobús asignado todavía",
+    "Nenhum ônibus atribuído ainda.":"Ningún autobús asignado todavía.",
+    "Nenhum cadastro registrado ainda.":"Ninguna inscripción registrada todavía.",
+    "Nenhuma atividade ainda.":"Ninguna actividad todavía.",
+    "Nenhum lembrete enviado ainda.":"Ningún recordatorio enviado todavía.",
+    "Nova inscrição de":"Nueva inscripción de",
+    "pessoa(s)":"persona(s)",
+    "Nenhum ponto de encontro cadastrado ainda.":"Ningún punto de encuentro registrado todavía.",
+    "Nenhum administrador carregado ainda.":"Ningún administrador cargado todavía.",
+    "contas":"cuentas", "você":"tú", "Editar":"Editar",
+    "Para adicionar um novo administrador ou redefinir a senha de outro administrador, isso é feito no painel do Supabase (Authentication → Users), por segurança. O administrador principal pode ver todos os administradores cadastrados aqui.":"Para agregar un nuevo administrador o restablecer la contraseña de otro administrador, esto se hace en el panel de Supabase (Authentication → Users), por seguridad. El administrador principal puede ver todos los administradores registrados aquí.",
+    "Administrador principal":"Administrador principal", "Não conectado":"No conectado",
+    "Cobrar via WhatsApp":"Cobrar por WhatsApp",
+    "Este passageiro não tem telefone cadastrado.":"Este pasajero no tiene teléfono registrado.",
+    "Olá":"Hola", "Lembrete: seu pagamento de":"Recordatorio: tu pago de", "para o":"para el",
+    "(verifique se você está autenticado como administrador principal)":"(verifique que esté autenticado como administrador principal)",
+    "Não foi possível apagar todos os dados: ":"No fue posible borrar todos los datos: ",
+    "Alguns dados não puderam ser apagados — verifique sua permissão de administrador.":"Algunos datos no pudieron borrarse — verifique su permiso de administrador.",
+    "Alguns dados não puderam ser apagados. Verifique se você está logado com uma conta de administrador válida.":"Algunos datos no pudieron borrarse. Verifique que esté conectado con una cuenta de administrador válida.",
+    "Nenhum encarregado cadastrado ainda.":"Ningún encargado registrado todavía.",
+    "Adicionar encarregado":"Agregar encargado", "Nome do encarregado:":"Nombre del encargado:",
+    "Telefone (WhatsApp):":"Teléfono (WhatsApp):", "Número do ônibus (opcional):":"Número del autobús (opcional):",
+    "Novo encarregado":"Nuevo encargado",
+    "Deseja realmente excluir o encarregado":"¿Desea realmente eliminar al encargado",
+    "Excluir encarregado":"Eliminar encargado",
+    "Com passageiros":"Con pasajeros", "Ligar":"Llamar", "ônibus":"autobuses",
+    "Sem ponto atribuído":"Sin punto asignado", "visão do encarregado":"vista del encargado",
+    "Nenhum passageiro cadastrado ainda.":"Ningún pasajero registrado todavía.",
+    "Nenhum encarregado cadastrado ainda. Cadastre em Frota & Encarregados.":"Ningún encargado registrado todavía. Regístrelo en Flota y Encargados.",
+    "Sem ônibus atribuído":"Sin autobús asignado"
   };
   function t(s){
     if(STATE.lang === "es" && STRINGS_ES.hasOwnProperty(s)) return STRINGS_ES[s];
@@ -1457,57 +1525,64 @@
     title:"Dashboard",
     render:function(){
       var regs = DATA.registrations || [];
-      var hasReal = DATA.loaded && regs.length > 0;
-      var totalPax = hasReal ? regs.reduce(function(a,r){ return a+(r.people_count||1); },0) : 612;
-      var pagos = hasReal ? regs.filter(function(r){ return r.payment_status==="pago"; }).length : 533;
-      var pctPagos = hasReal ? (regs.length ? Math.round(pagos/regs.length*100) : 0) : 87;
-      var pendentes = hasReal ? regs.filter(function(r){ return r.payment_status!=="pago"; }).reduce(function(a,r){ return a+(r.people_count||1); },0) : 79;
+      var hasReal = DATA.loaded;
+      var totalPax = hasReal ? regs.reduce(function(a,r){ return a+(r.people_count||1); },0) : 0;
+      var pagos = hasReal ? regs.filter(function(r){ return r.payment_status==="pago"; }).length : 0;
+      var parciais = hasReal ? regs.filter(function(r){ return r.payment_status==="parcial"; }).length : 0;
+      var pendentesCnt = hasReal ? regs.filter(function(r){ return r.payment_status==="pendente"; }).length : 0;
+      var pctPagos = hasReal ? (regs.length ? Math.round(pagos/regs.length*100) : 0) : 0;
+      var pendentes = hasReal ? regs.filter(function(r){ return r.payment_status!=="pago"; }).reduce(function(a,r){ return a+(r.people_count||1); },0) : 0;
       var lembretesCount = (DATA.notifications||[]).length;
       var pontosCount = (DATA.meetingPoints||[]).length;
+      var busSet = {};
+      regs.forEach(function(r){ if(r.bus_number) busSet[r.bus_number] = true; });
+      var busCount = Object.keys(busSet).length;
       var metrics = [
-        { label:t("Inscritos"), value:String(totalPax), of:t("total de pessoas cadastradas"), delta:hasReal?"":"+18 "+t("hoje"), trend:"up", spark:[420,455,480,510,540,560,580,598,605,totalPax||612], color:"var(--c-1)" },
-        { label:t("Pagamentos confirmados"), value:pctPagos+"%", of:pagos+" "+t("de")+" "+(hasReal?regs.length:612), delta:hasReal?"":"+4% "+t("na semana"), trend:"up", spark:[62,66,69,71,75,78,80,83,85,pctPagos||87], color:"var(--st-good)" },
-        { label:t("Pendentes / atrasados"), value:String(pendentes), of:t("aguardando confirmação"), delta:hasReal?"":"-6 "+t("esta semana"), trend:"down", spark:[110,104,101,96,92,90,88,84,81,pendentes||79], color:"var(--st-warning)" },
-        { label:t("Ônibus confirmados"), value:"14 / 16", of:"87,5% "+t("da frota"), delta:"2 "+t("aguardando"), trend:"flat", spark:[9,10,10,11,12,12,13,13,14,14], color:"var(--c-3)" },
-        { label:t("Lembretes enviados"), value:hasReal?String(lembretesCount):"1.284", of:"WhatsApp", delta:hasReal?"":"+96 "+t("hoje"), trend:"up", spark:[820,900,960,1010,1080,1120,1160,1210,1250,hasReal?(lembretesCount||1):1284], color:"var(--c-7)" },
-        { label:t("Pontos de encontro"), value:hasReal?String(pontosCount):"9", of:t("cadastrados no sistema"), delta:hasReal?"":t("todos confirmados"), trend:"flat", spark:[9,9,9,9,9,9,9,9,9,pontosCount||9], color:"var(--c-4)" }
+        { label:t("Inscritos"), value:String(totalPax), of:t("total de pessoas cadastradas"), color:"var(--c-1)" },
+        { label:t("Pagamentos confirmados"), value:pctPagos+"%", of:pagos+" "+t("de")+" "+regs.length, color:"var(--st-good)" },
+        { label:t("Pendentes / atrasados"), value:String(pendentes), of:t("aguardando confirmação"), color:"var(--st-warning)" },
+        { label:t("Ônibus confirmados"), value: busCount ? String(busCount) : "—", of: busCount ? t("com passageiros atribuídos") : t("nenhum ônibus atribuído ainda"), color:"var(--c-3)" },
+        { label:t("Lembretes enviados"), value:String(lembretesCount), of:"WhatsApp", color:"var(--c-7)" },
+        { label:t("Pontos de encontro"), value:String(pontosCount), of:t("cadastrados no sistema"), color:"var(--c-4)" }
       ];
       var mHtml = metrics.map(function(m){
-        var arrow = m.trend==="up"?"▲":(m.trend==="down"?"▼":"＝");
         return '<div class="metric"><div class="row1"><span class="label">'+m.label+'</span></div>'+
           '<div class="value tabular">'+m.value+'</div>'+
-          '<svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none"><path d="'+sparkPath(m.spark,100,26)+'" fill="none" stroke="'+m.color+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
-          '<div class="row1"><span class="delta '+m.trend+'">'+arrow+' '+m.delta+'</span><span style="font-size:.7rem;color:var(--ink-mute)">'+m.of+'</span></div></div>';
+          '<div class="row1" style="margin-top:6px;"><span style="font-size:.7rem;color:var(--ink-mute)">'+m.of+'</span></div></div>';
       }).join('');
+
+      var busRows = regs.filter(function(r){ return r.bus_number; });
+      var busChart = busCount ? barChart(Object.keys(busSet).map(function(b,i){
+        var count = regs.filter(function(r){ return r.bus_number===b; }).reduce(function(a,r){ return a+(r.people_count||1); },0);
+        return {label:t("Ônibus")+" "+b, value:count, color:"var(--c-1)"};
+      }),{max:46,suffix:""}) : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum ônibus atribuído ainda.")+'</p>');
+
+      var payDonut = regs.length ? (
+        donut([{value:pagos,color:"var(--st-good)"},{value:parciais,color:"var(--st-warning)"},{value:pendentesCnt,color:"var(--st-critical)"}],104)+
+        '<div class="legend" style="flex-direction:column;gap:8px;"><span><i style="background:var(--st-good)"></i>'+t("Pago")+' — '+pagos+'</span><span><i style="background:var(--st-warning)"></i>'+t("Abono")+' — '+parciais+'</span><span><i style="background:var(--st-critical)"></i>'+t("Pendente")+' — '+pendentesCnt+'</span></div>'
+      ) : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum cadastro registrado ainda.")+'</p>');
+
+      var recentActivity = regs.slice(0,4).map(function(r){
+        var when = r.created_at ? new Date(r.created_at).toLocaleString(STATE.lang==="es"?"es-AR":"pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "";
+        return '<div class="bot-line in"><span class="who">'+when+'</span><p>'+t("Nova inscrição de")+' '+r.titular_name+' ('+(r.people_count||1)+' '+t("pessoa(s)")+')</p></div>';
+      }).join('') || ('<p class="muted" style="font-size:.85rem;">'+t("Nenhuma atividade ainda.")+'</p>');
+
+      var reminderRows = (DATA.notifications||[]).slice(0,5).map(function(n){
+        var when = n.created_at ? new Date(n.created_at).toLocaleString(STATE.lang==="es"?"es-AR":"pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "";
+        return '<tr><td>'+n.title+'</td><td>'+when+'</td></tr>';
+      }).join('');
+      var reminderTable = reminderRows
+        ? ('<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Lembrete")+'</th><th>'+t("Envio")+'</th></tr></thead><tbody>'+reminderRows+'</tbody></table></div>')
+        : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum lembrete enviado ainda.")+'</p>');
 
       return '<div class="metrics">'+mHtml+'</div>'+
         '<div class="grid split-58">'+
-          '<div class="card"><div class="card-head"><h3>Ocupação por ônibus</h3><span class="muted">hoje</span></div><div class="card-pad">'+
-            barChart([
-              {label:"Ônibus 01", value:44, color:"var(--c-1)"},{label:"Ônibus 02", value:46, color:"var(--c-1)"},
-              {label:"Ônibus 03", value:38, color:"var(--c-1)"},{label:"Ônibus 04", value:45, color:"var(--st-warning)"},
-              {label:"Ônibus 05", value:29, color:"var(--st-critical)"}
-            ],{max:46,suffix:"/46"})+
-          '</div></div>'+
-          '<div class="card"><div class="card-head"><h3>Status de pagamento</h3><span class="muted">total</span></div><div class="card-pad" style="display:flex;gap:16px;align-items:center;">'+
-            donut([{value:533,color:"var(--st-good)"},{value:67,color:"var(--st-warning)"},{value:12,color:"var(--st-critical)"}],104)+
-            '<div class="legend" style="flex-direction:column;gap:8px;"><span><i style="background:var(--st-good)"></i>Pago — 533</span><span><i style="background:var(--st-warning)"></i>Pendente — 67</span><span><i style="background:var(--st-critical)"></i>Atrasado — 12</span></div>'+
-          '</div></div>'+
+          '<div class="card"><div class="card-head"><h3>'+t("Ocupação por ônibus")+'</h3></div><div class="card-pad">'+busChart+'</div></div>'+
+          '<div class="card"><div class="card-head"><h3>'+t("Status de pagamento")+'</h3></div><div class="card-pad" style="display:flex;gap:16px;align-items:center;">'+payDonut+'</div></div>'+
         '</div>'+
         '<div class="grid split-58" style="margin-top:16px;">'+
-          '<div class="card"><div class="card-head"><h3>Atividade recente</h3></div><div class="card-pad">'+
-            '<div class="bot-line in"><span class="who">09:12</span><p>Relatório do dia 17 jul exportado em PDF por Wellington T.</p></div>'+
-            '<div class="bot-line out"><span class="who">08:47</span><p>Renato C. Alves confirmou pagamento de R$ 85,00 via Pix.</p></div>'+
-            '<div class="bot-line in"><span class="who">08:20</span><p>Chatbot respondeu 14 novas dúvidas sobre horário de embarque.</p></div>'+
-            '<div class="bot-line out"><span class="who">07:55</span><p>Irmão Otávio confirmou lista de presença do Ônibus 05.</p></div>'+
-          '</div></div>'+
-          '<div class="card"><div class="card-head"><h3>Próximos lembretes</h3></div><div class="card-pad">'+
-            '<div class="table-scroll"><table class="data"><thead><tr><th>Lembrete</th><th>Envio</th></tr></thead><tbody>'+
-              '<tr><td>Confirmação de vaga</td><td>Hoje, 18:00</td></tr>'+
-              '<tr><td>Horário de embarque</td><td>16 jul, 20:00</td></tr>'+
-              '<tr><td>Documentos necessários</td><td>15 jul, 09:00</td></tr>'+
-            '</tbody></table></div>'+
-          '</div></div>'+
+          '<div class="card"><div class="card-head"><h3>'+t("Atividade recente")+'</h3></div><div class="card-pad">'+recentActivity+'</div></div>'+
+          '<div class="card"><div class="card-head"><h3>'+t("Próximos lembretes")+'</h3></div><div class="card-pad">'+reminderTable+'</div></div>'+
         '</div>';
     }
   };
@@ -1518,7 +1593,7 @@
     title:"Passageiros",
     render:function(){
       var regs = DATA.registrations || [];
-      var hasReal = DATA.loaded && regs.length > 0;
+      var hasReal = DATA.loaded;
       var totalPax = hasReal ? regs.reduce(function(a,r){ return a + (r.people_count||1); }, 0) : 612;
       var checkins = hasReal ? regs.filter(function(r){ return r.checked_in; }).length : 0;
       var cancel = hasReal ? regs.filter(function(r){ return r.cancelled; }).length : 3;
@@ -1608,16 +1683,14 @@
     title:"Pagamentos",
     render:function(){
       var regs = DATA.registrations || [];
-      var hasReal = DATA.loaded && regs.length > 0;
-      var totalEsperado, recebido, abono, falta;
-      if(hasReal){
-        totalEsperado = regs.reduce(function(a,r){ return a + Number(r.total_amount||0); }, 0);
-        recebido = regs.filter(function(r){ return r.payment_status==="pago"; }).reduce(function(a,r){ return a + Number(r.total_amount||0); }, 0);
-        abono = regs.filter(function(r){ return r.payment_status==="parcial"; }).reduce(function(a,r){ return a + Number(r.amount_paid||0); }, 0);
-        falta = totalEsperado - recebido - abono;
-      } else {
-        totalEsperado = 52020; recebido = 45305; abono = 900; falta = 5815;
-      }
+      var hasReal = DATA.loaded;
+      var totalEsperado = regs.reduce(function(a,r){ return a + Number(r.total_amount||0); }, 0);
+      var recebido = regs.filter(function(r){ return r.payment_status==="pago"; }).reduce(function(a,r){ return a + Number(r.total_amount||0); }, 0);
+      var abono = regs.filter(function(r){ return r.payment_status==="parcial"; }).reduce(function(a,r){ return a + Number(r.amount_paid||0); }, 0);
+      var falta = totalEsperado - recebido - abono;
+      var pagoCount = regs.filter(function(r){ return r.payment_status==="pago"; }).length;
+      var abonoCount = regs.filter(function(r){ return r.payment_status==="parcial"; }).length;
+      var pendCount = regs.filter(function(r){ return r.payment_status==="pendente"; }).length;
       return '<div class="grid cols-4" style="margin-bottom:16px;">'+
           '<div class="metric"><div class="label">'+t("Total esperado")+'</div><div class="value tabular" data-money="'+money(formatBRL(totalEsperado))+'">'+money(formatBRL(totalEsperado))+'</div></div>'+
           '<div class="metric"><div class="label">'+t("Recebido (pago completo)")+'</div><div class="value tabular" style="color:var(--st-good)" data-money="'+money(formatBRL(recebido))+'">'+money(formatBRL(recebido))+'</div></div>'+
@@ -1630,19 +1703,31 @@
             (hasReal ? regs.map(function(r){
               var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
               var proofLink = r.payment_proof_url ? ('<a class="actionbtn ghost" href="'+r.payment_proof_url+'" target="_blank" rel="noopener" style="font-size:.74rem;padding:5px 9px;">'+t("Ver comprovante enviado")+'</a>') : ('<span style="font-size:.72rem;color:var(--ink-mute);">'+t("Nenhum enviado")+'</span>');
-              return '<tr><td>'+r.titular_name+'</td><td class="tabular">'+money(formatBRL(Number(r.total_amount||0)))+'</td><td><span class="pill '+pay[0]+'"><i class="dotp"></i>'+t(pay[1])+'</span></td><td style="display:flex;gap:6px;flex-wrap:wrap;"><button type="button" class="actionbtn ghost gen-receipt" data-reg="'+r.id+'" style="font-size:.74rem;padding:5px 9px;">'+t("Comprovante PDF")+'</button>'+proofLink+'</td></tr>';
+              var waBtn = (r.phone && r.payment_status!=="pago") ? ('<button type="button" class="actionbtn ghost send-charge" data-phone="'+r.phone.replace(/\D/g,'')+'" data-name="'+r.titular_name.replace(/"/g,'&quot;')+'" data-total="'+money(formatBRL(Number(r.total_amount||0)))+'" style="font-size:.74rem;padding:5px 9px;">'+t("Cobrar via WhatsApp")+'</button>') : '';
+              return '<tr><td>'+r.titular_name+'</td><td class="tabular">'+money(formatBRL(Number(r.total_amount||0)))+'</td><td><span class="pill '+pay[0]+'"><i class="dotp"></i>'+t(pay[1])+'</span></td><td style="display:flex;gap:6px;flex-wrap:wrap;"><button type="button" class="actionbtn ghost gen-receipt" data-reg="'+r.id+'" style="font-size:.74rem;padding:5px 9px;">'+t("Comprovante PDF")+'</button>'+proofLink+waBtn+'</td></tr>';
             }).join('') : '<tr><td colspan="4" style="color:var(--ink-mute);">'+t("Sem cadastros ainda")+'</td></tr>')+
           '</tbody></table></div>'+
-          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn">'+t("Enviar cobrança via WhatsApp")+'</button></div>'+
-          '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">O status só passa para "Pago" quando o administrador confirma que o valor total foi recebido — mesmo que o passageiro já tenha feito um abono.</p>'+
+          '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">O status só passa para "Pago" quando o administrador confirma que o valor total foi recebido — mesmo que o passageiro já tenha feito um abono. Use o botão "Cobrar via WhatsApp" em cada linha para enviar uma cobrança individual.</p>'+
         '</div></div>'+
-        '<div class="card"><div class="card-head"><h3>Distribuição</h3></div><div class="card-pad" style="display:flex;gap:16px;align-items:center;">'+
-          donut([{value:533,color:"var(--st-good)"},{value:30,color:"var(--brand)"},{value:37,color:"var(--st-warning)"},{value:12,color:"var(--st-critical)"}],110)+
-          '<div class="legend" style="flex-direction:column;gap:8px;"><span><i style="background:var(--st-good)"></i>Pago — 533</span><span><i style="background:var(--brand)"></i>Abono — 30</span><span><i style="background:var(--st-warning)"></i>Pendente — 37</span><span><i style="background:var(--st-critical)"></i>Atrasado — 12</span></div>'+
+        '<div class="card"><div class="card-head"><h3>'+t("Distribuição")+'</h3></div><div class="card-pad" style="display:flex;gap:16px;align-items:center;">'+
+          (regs.length ? (
+            donut([{value:pagoCount,color:"var(--st-good)"},{value:abonoCount,color:"var(--brand)"},{value:pendCount,color:"var(--st-warning)"}],110)+
+            '<div class="legend" style="flex-direction:column;gap:8px;"><span><i style="background:var(--st-good)"></i>'+t("Pago")+' — '+pagoCount+'</span><span><i style="background:var(--brand)"></i>'+t("Abono")+' — '+abonoCount+'</span><span><i style="background:var(--st-warning)"></i>'+t("Pendente")+' — '+pendCount+'</span></div>'
+          ) : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum cadastro registrado ainda.")+'</p>'))+
         '</div></div>'+
       '</div>';
     },
     after:function(root){
+      root.querySelectorAll(".send-charge").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var phone = btn.getAttribute("data-phone");
+          var name = btn.getAttribute("data-name");
+          var total = btn.getAttribute("data-total");
+          if(!phone){ jvAlert(t("Este passageiro não tem telefone cadastrado.")); return; }
+          var msg = t("Olá")+" "+name+"! "+t("Lembrete: seu pagamento de")+" "+total+" "+t("para o")+" "+STATE.eventName+" "+t("ainda está pendente. Pode nos confirmar, por favor?");
+          window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(msg), "_blank");
+        });
+      });
       root.querySelectorAll(".gen-receipt").forEach(function(btn){
         btn.addEventListener("click", async function(){
           var regId = btn.getAttribute("data-reg");
@@ -1733,48 +1818,19 @@
   views.encontro = {
     title:"Pontos de Encontro",
     render:function(){
-      var days = {
-        "17 jul":[
-          {time:"05:30", place:"Salão do Reino — Jardim do Vale", info:"Ônibus 01 e 02 · Responsável: Irmão Diego", count:210},
-          {time:"05:45", place:"Praça Central — Vale Novo", info:"Ônibus 03 · Responsável: Irmã Patrícia", count:112},
-          {time:"06:00", place:"Posto Ipiranga, Av. Recanto", info:"Ônibus 04 e 05 · Responsável: Irmão Otávio", count:198}
-        ],
-        "18 jul":[
-          {time:"06:00", place:"Salão do Reino — Jardim do Vale", info:"Todos os ônibus · Concentração geral", count:210},
-          {time:"06:15", place:"Praça Central — Vale Novo", info:"Ônibus 03 · Responsável: Irmã Patrícia", count:112},
-          {time:"06:15", place:"Posto Ipiranga, Av. Recanto", info:"Ônibus 04 e 05 · Responsável: Irmão Otávio", count:198}
-        ],
-        "19 jul":[
-          {time:"06:00", place:"Salão do Reino — Jardim do Vale", info:"Todos os ônibus · Último dia", count:210},
-          {time:"06:15", place:"Praça Central — Vale Novo", info:"Ônibus 03 · Responsável: Irmã Patrícia", count:112},
-          {time:"06:15", place:"Posto Ipiranga, Av. Recanto", info:"Ônibus 04 e 05 · Responsável: Irmão Otávio", count:198}
-        ]
-      };
-      var tabs = Object.keys(days).map(function(d,i){ return '<button type="button" class="daytab'+(i===0?' active':'')+'" data-day="'+d+'">'+d+'</button>'; }).join('');
-      var panels = Object.keys(days).map(function(d,i){
-        var cards = days[d].map(function(s){
-          return '<div class="encontro-card"><span class="encontro-time">'+s.time+'</span><div class="encontro-body"><strong>'+s.place+'</strong><span>'+s.info+'</span></div><span class="encontro-count">'+s.count+' pax</span><a class="icon-btn call" title="Ver no mapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(s.place+" Itatiba SP")+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>';
-        }).join('');
-        return '<div class="day-panel" data-day-panel="'+d+'" style="'+(i===0?'':'display:none;')+'">'+cards+'</div>';
-      }).join('');
-      var realPoints = (DATA.meetingPoints||[]).map(function(mp){
-        return '<div class="encontro-card"><span class="encontro-time">—</span><div class="encontro-body"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+'</span></div><a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+(mp.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((mp.address||mp.name)+" Itatiba SP")))+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a>'+
+      var pts = DATA.meetingPoints || [];
+      var realPoints = pts.map(function(mp){
+        return '<div class="encontro-card"><span class="encontro-time">—</span><div class="encontro-body"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+(mp.day_label?(' · '+mp.day_label):'')+'</span></div><a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+(mp.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((mp.address||mp.name)+" Itatiba SP")))+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a>'+
           '<button type="button" class="icon-btn danger del-ponto" data-id="'+mp.id+'" data-name="'+mp.name.replace(/"/g,'&quot;')+'" title="'+t("Eliminar")+'"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7m2 0v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7h10Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
       }).join('');
-      var realBlock = realPoints ? ('<div class="card-pad" style="padding-top:0;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600;margin:14px 0 8px;">'+t("Pontos cadastrados no sistema")+'</div>'+realPoints+'</div>') : '';
+      var body = realPoints || ('<p class="muted" style="font-size:.85rem;margin:8px 0 0;">'+t("Nenhum ponto de encontro cadastrado ainda. Clique em \"Adicionar ponto\" para começar.")+'</p>');
       return '<div class="card card-pad">'+
         '<div class="actions-row" style="justify-content:space-between;margin-bottom:14px;">'+
-          '<div class="daytab-group" style="margin-bottom:0;">'+tabs+'</div>'+
+          '<h3 style="margin:0;font-size:.95rem;">'+t("Pontos cadastrados no sistema")+'</h3>'+
           '<button type="button" class="actionbtn primary" id="addPontoBtn">'+t("Adicionar ponto")+'</button>'+
-        '</div>'+panels+realBlock+'</div>';
+        '</div>'+body+'</div>';
     },
     after:function(root){
-      var tabs = root.querySelectorAll(".daytab"), panels = root.querySelectorAll("[data-day-panel]");
-      tabs.forEach(function(tab){ tab.addEventListener("click", function(){
-        tabs.forEach(function(t){ t.classList.remove("active"); }); tab.classList.add("active");
-        var day = tab.getAttribute("data-day");
-        panels.forEach(function(p){ p.style.display = (p.getAttribute("data-day-panel")===day) ? "" : "none"; });
-      }); });
       var addBtn = root.querySelector("#addPontoBtn");
       if(addBtn){
         addBtn.addEventListener("click", async function(){
@@ -1803,29 +1859,57 @@
   views.frota = {
     title:"Frota & Encarregados",
     render:function(){
-      var contacts = [
-        {name:"Irmão Diego M.", role:"Ônibus 01 e 02", init:"DM"},
-        {name:"Irmã Patrícia L.", role:"Ônibus 03", init:"PL"},
-        {name:"Irmão Otávio S.", role:"Ônibus 04 e 05", init:"OS"},
-        {name:"Irmão Wellington T.", role:"Coordenação geral", init:"WT"}
-      ];
-      var cards = contacts.map(function(c){
-        return '<div class="contact-card"><div class="avatar">'+c.init+'</div><div style="flex:1;min-width:0;"><div class="contact-name">'+c.name+'</div><div class="contact-role">'+c.role+'</div></div>'+
-          '<button type="button" class="icon-btn whats" title="WhatsApp">'+ICONS.whats+'</button>'+
-          '<button type="button" class="icon-btn call" title="Ligar">'+ICONS.call+'</button></div>';
-      }).join('');
+      var regs = DATA.registrations || [];
+      var busMap = {};
+      regs.forEach(function(r){
+        if(!r.bus_number) return;
+        if(!busMap[r.bus_number]) busMap[r.bus_number] = 0;
+        busMap[r.bus_number] += (r.people_count||1);
+      });
+      var busKeys = Object.keys(busMap);
+      var busRows = busKeys.length ? busKeys.map(function(b){
+        return '<tr><td class="tabular">'+b+'</td><td class="tabular">'+busMap[b]+'</td><td><span class="pill good"><i class="dotp"></i>'+t("Com passageiros")+'</span></td></tr>';
+      }).join('') : ('<tr><td colspan="3" style="color:var(--ink-mute);">'+t("Nenhum ônibus atribuído ainda.")+'</td></tr>');
+
+      var encs = DATA.encarregados || [];
+      var cards = encs.length ? encs.map(function(c){
+        var phoneDigits = (c.phone||"").replace(/\D/g,"");
+        return '<div class="contact-card"><div class="avatar">'+initials(c.name)+'</div><div style="flex:1;min-width:0;"><div class="contact-name">'+c.name+'</div><div class="contact-role">'+(c.bus_number ? (t("Ônibus")+" "+c.bus_number) : (c.phone||''))+'</div></div>'+
+          (phoneDigits ? ('<a class="icon-btn whats" title="WhatsApp" target="_blank" rel="noopener" href="https://wa.me/'+phoneDigits+'">'+ICONS.whats+'</a><a class="icon-btn call" title="'+t("Ligar")+'" href="tel:'+phoneDigits+'">'+ICONS.call+'</a>') : '')+
+          '<button type="button" class="icon-btn danger del-enc" data-id="'+c.id+'" data-name="'+c.name.replace(/"/g,'&quot;')+'" title="'+t("Eliminar")+'"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7m2 0v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7h10Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
+      }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum encarregado cadastrado ainda.")+'</p>');
       return '<div class="grid split-58">'+
-        '<div class="card"><div class="card-head"><h3>Status da frota</h3><span class="muted">16 ônibus</span></div><div class="card-pad">'+
-          '<div class="table-scroll"><table class="data"><thead><tr><th>Ônibus</th><th>Lugares</th><th>Status</th></tr></thead><tbody>'+
-            '<tr><td class="tabular">01</td><td class="tabular">44/46</td><td><span class="pill good"><i class="dotp"></i>Confirmado</span></td></tr>'+
-            '<tr><td class="tabular">02</td><td class="tabular">46/46</td><td><span class="pill good"><i class="dotp"></i>Lotado</span></td></tr>'+
-            '<tr><td class="tabular">03</td><td class="tabular">38/46</td><td><span class="pill good"><i class="dotp"></i>Confirmado</span></td></tr>'+
-            '<tr><td class="tabular">04</td><td class="tabular">45/46</td><td><span class="pill warning"><i class="dotp"></i>Aguardando contrato</span></td></tr>'+
-            '<tr><td class="tabular">05</td><td class="tabular">29/46</td><td><span class="pill warning"><i class="dotp"></i>Aguardando contrato</span></td></tr>'+
-          '</tbody></table></div>'+
+        '<div class="card"><div class="card-head"><h3>'+t("Status da frota")+'</h3><span class="muted">'+busKeys.length+' '+t("ônibus")+'</span></div><div class="card-pad">'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Ônibus")+'</th><th>'+t("Passageiros")+'</th><th>'+t("Status")+'</th></tr></thead><tbody>'+busRows+'</tbody></table></div>'+
         '</div></div>'+
-        '<div class="card"><div class="card-head"><h3>Encarregados</h3></div><div class="card-pad">'+cards+'</div></div>'+
+        '<div class="card"><div class="card-head"><h3>'+t("Encarregados")+'</h3></div><div class="card-pad">'+cards+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" id="addEncBtn">'+t("Adicionar encarregado")+'</button></div>'+
+        '</div></div>'+
       '</div>';
+    },
+    after:function(root){
+      var addBtn = root.querySelector("#addEncBtn");
+      if(addBtn){
+        addBtn.addEventListener("click", async function(){
+          var name = await jvPrompt(t("Nome do encarregado:"), "", {title:t("Novo encarregado")});
+          if(!name) return;
+          var phone = await jvPrompt(t("Telefone (WhatsApp):"), "", {title:t("Novo encarregado")}) || "";
+          var bus = await jvPrompt(t("Número do ônibus (opcional):"), "", {title:t("Novo encarregado")}) || "";
+          var res = await dbInsertEncarregado({name:toTitleCase(name), phone:phone, bus_number:bus});
+          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
+          rerenderViews();
+        });
+      }
+      root.querySelectorAll(".del-enc").forEach(function(btn){
+        btn.addEventListener("click", async function(){
+          var id = btn.getAttribute("data-id"), name = btn.getAttribute("data-name");
+          var ok = await jvConfirm(t("Deseja realmente excluir o encarregado")+' "'+name+'"?', {title:t("Excluir encarregado"), danger:true, okLabel:t("Excluir")});
+          if(!ok) return;
+          var res = await dbDeleteEncarregado(id);
+          if(res.error){ await jvAlert(t("Não foi possível excluir: ") + res.error.message); return; }
+          rerenderViews();
+        });
+      });
     }
   };
 
@@ -1923,7 +2007,7 @@
   views.relatorios = {
     title:"Relatórios",
     render:function(){
-      var hasReal = DATA.loaded && DATA.registrations && DATA.registrations.length > 0;
+      var hasReal = DATA.loaded;
       return '<div class="grid split-58">'+
         '<div class="card"><div class="card-head"><h3>'+t("Gerar relatório")+'</h3></div><div class="card-pad">'+
           '<div class="actions-row">'+
@@ -2028,24 +2112,19 @@
   views["acesso-admin"] = {
     title:"Acesso do Administrador",
     render:function(){
-      var admins = [
-        {name:"Wellington T.", email:"wellington@jardimdovale.org", role:"Administrador principal", last:"agora", init:"WT", principal:true},
-        {name:"Diego M.", email:"diego@jardimdovale.org", role:"Financeiro", last:"há 2h", init:"DM", principal:false},
-        {name:"Patrícia L.", email:"patricia@jardimdovale.org", role:"Comunicação", last:"ontem", init:"PL", principal:false}
-      ];
-      var rows = admins.map(function(a){
-        return '<div class="userlist-row"><div class="avatar">'+a.init+'</div>'+
-          '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.87rem;">'+a.name+'</div><div style="font-size:.76rem;color:var(--ink-mute);">'+a.email+'</div></div>'+
-          '<span class="badge brand">'+a.role+'</span>'+
-          (a.principal
-            ? '<span class="badge neutral" style="width:120px;text-align:center;">você</span>'
-            : '<button type="button" class="actionbtn ghost" style="font-size:.74rem;padding:5px 9px;">Redefinir senha</button>')+
+      var admins = DATA.admins || [];
+      var myId = currentAdmin ? currentAdmin.id : null;
+      var rows = admins.length ? admins.map(function(a){
+        var isMe = myId && a.id === myId;
+        return '<div class="userlist-row"><div class="avatar">'+initials(a.name)+'</div>'+
+          '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.87rem;">'+a.name+'</div></div>'+
+          '<span class="badge brand">'+(a.is_principal ? t("Administrador principal") : t("Administrador"))+'</span>'+
+          (isMe ? '<span class="badge neutral" style="width:120px;text-align:center;">'+t("você")+'</span>' : '')+
           '</div>';
-      }).join('');
+      }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum administrador carregado ainda.")+'</p>');
       return '<div class="grid split-58">'+
-        '<div class="card"><div class="card-head"><h3>Administradores</h3><span class="muted">3 contas</span></div><div class="card-pad">'+rows+
-          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary">Convidar administrador</button></div>'+
-          '<p class="i18n-note" style="margin:12px 0 0;font-size:.78rem;color:var(--ink-mute);">O administrador principal pode ver todo o sistema e gerenciar as contas dos demais administradores (criar, redefinir senha, desativar), mas não pode entrar na sessão ativa de outro administrador nem ver o que ele está fazendo no momento.</p>'+
+        '<div class="card"><div class="card-head"><h3>Administradores</h3><span class="muted">'+admins.length+' '+t("contas")+'</span></div><div class="card-pad">'+rows+
+          '<p class="i18n-note" style="margin:12px 0 0;font-size:.78rem;color:var(--ink-mute);">'+t("Para adicionar um novo administrador ou redefinir a senha de outro administrador, isso é feito no painel do Supabase (Authentication → Users), por segurança. O administrador principal pode ver todos os administradores cadastrados aqui.")+'</p>'+
         '</div></div>'+
         '<div>'+
           '<div class="card card-pad" style="margin-bottom:16px;">'+sectionLabel("Minha conta")+
@@ -2087,38 +2166,28 @@
   views["acesso-encarregado"] = {
     title:"Acesso do Encarregado",
     render:function(){
-      var pax = [
-        {name:"Marcos A. Ferreira", sub:"Ônibus 02 · Pago", on:true},
-        {name:"Talita R. Souza", sub:"Ônibus 01 · Pago", on:true},
-        {name:"Renato C. Alves", sub:"Ônibus 01 · Atrasado", on:false},
-        {name:"Simone D. Rocha", sub:"Ônibus 02 · Atrasado", on:false},
-        {name:"Ester M. Costa", sub:"Ônibus 03 · Pago", on:false},
-        {name:"Josué B. Andrade", sub:"Ônibus 02 · Pendente", on:false}
-      ];
-      var rows = pax.map(function(p){
-        return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'">'+(p.on?ICONS.check.replace('viewBox="0 0 24 24"','viewBox="0 0 24 24" style="width:12px;height:12px"'):'')+'</button>'+
-          '<div style="flex:1;min-width:0;"><div class="nm">'+p.name+'</div><div class="sub">'+p.sub+'</div></div></div>';
-      }).join('');
+      var regs = DATA.registrations || [];
+      var rows = regs.length ? regs.map(function(r){
+        var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+        var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
+        var sub = (mp?mp.name:t("Sem ponto atribuído"))+' · '+t(pay[1]);
+        return '<div class="check-row"><button type="button" class="cb'+(r.checked_in?' on':'')+'">'+(r.checked_in?ICONS.check.replace('viewBox="0 0 24 24"','viewBox="0 0 24 24" style="width:12px;height:12px"'):'')+'</button>'+
+          '<div style="flex:1;min-width:0;"><div class="nm">'+r.titular_name+'</div><div class="sub">'+sub+'</div></div></div>';
+      }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum passageiro cadastrado ainda.")+'</p>');
+      var encs = DATA.encarregados || [];
+      var encCards = encs.length ? encs.map(function(c){
+        return '<div class="role-card" style="margin-bottom:10px;">'+
+            '<div class="role-ic" style="background:var(--brand-soft);color:var(--brand);">'+ICONS.pin+'</div>'+
+            '<h4>'+c.name+'</h4><p>'+(c.bus_number ? (t("Ônibus")+" "+c.bus_number) : t("Sem ônibus atribuído"))+(c.phone?(' · '+c.phone):'')+'</p>'+
+          '</div>';
+      }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum encarregado cadastrado ainda. Cadastre em Frota & Encarregados.")+'</p>');
       return '<div class="grid split-58">'+
-        '<div class="card"><div class="card-head"><h3>Salão do Reino — Jardim do Vale</h3><span class="muted">visão do encarregado</span></div><div class="card-pad">'+
-          '<p class="i18n-note" style="margin:0 0 10px;color:var(--ink-soft);font-size:.85rem;">Cada encarregado vê apenas os passageiros do seu ponto de encontro, para confirmar presença no embarque.</p>'+
+        '<div class="card"><div class="card-head"><h3>'+t("Passageiros")+'</h3><span class="muted">'+t("visão do encarregado")+'</span></div><div class="card-pad">'+
+          '<p class="i18n-note" style="margin:0 0 10px;color:var(--ink-soft);font-size:.85rem;">'+t("Cada encarregado vê apenas os passageiros do seu ponto de encontro, para confirmar presença no embarque.")+'</p>'+
           rows+
-          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" data-goto="encarregado">Abrir Painel do Encarregado</button></div>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" data-goto="encarregado">'+t("Abrir Painel do Encarregado")+'</button></div>'+
         '</div></div>'+
-        '<div class="card card-pad">'+sectionLabel("Encarregados com acesso")+
-          '<div class="role-card" style="margin-bottom:10px;">'+
-            '<div class="role-ic" style="background:var(--brand-soft);color:var(--brand);">'+ICONS.pin+'</div>'+
-            '<h4>Irmão Diego M.</h4><p>Vê passageiros de: Salão do Reino — Jardim do Vale (Ônibus 01 e 02)</p>'+
-          '</div>'+
-          '<div class="role-card" style="margin-bottom:10px;">'+
-            '<div class="role-ic" style="background:var(--brand-soft);color:var(--brand);">'+ICONS.pin+'</div>'+
-            '<h4>Irmã Patrícia L.</h4><p>Vê passageiros de: Praça Central — Vale Novo (Ônibus 03)</p>'+
-          '</div>'+
-          '<div class="role-card">'+
-            '<div class="role-ic" style="background:var(--brand-soft);color:var(--brand);">'+ICONS.pin+'</div>'+
-            '<h4>Irmão Otávio S.</h4><p>Vê passageiros de: Posto Ipiranga, Av. Recanto (Ônibus 04 e 05)</p>'+
-          '</div>'+
-        '</div>'+
+        '<div class="card card-pad">'+sectionLabel("Encarregados com acesso")+encCards+'</div>'+
       '</div>';
     }
   };
@@ -2174,10 +2243,17 @@
       '</div>'+
       '<div class="grid split-58" style="margin-top:16px;">'+
         '<div class="card card-pad">'+sectionLabel("Pontos de encontro")+
-          '<div class="settings-row"><div class="txt"><strong>Salão do Reino — Jardim do Vale</strong><span>3 dias · Ônibus 01 e 02</span></div><button type="button" class="actionbtn ghost">Editar</button></div>'+
-          '<div class="settings-row"><div class="txt"><strong>Praça Central — Vale Novo</strong><span>3 dias · Ônibus 03</span></div><button type="button" class="actionbtn ghost">Editar</button></div>'+
-          '<div class="settings-row"><div class="txt"><strong>Posto Ipiranga, Av. Recanto</strong><span>3 dias · Ônibus 04 e 05</span></div><button type="button" class="actionbtn ghost">Editar</button></div>'+
-          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary">Adicionar ponto de encontro</button></div>'+
+          (function(){
+            var pts = DATA.meetingPoints || [];
+            if(!pts.length) return '<p class="muted" style="font-size:.85rem;margin:0 0 12px;">'+t("Nenhum ponto de encontro cadastrado ainda.")+'</p>';
+            return pts.map(function(mp){
+              return '<div class="settings-row"><div class="txt"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+'</span></div>'+
+                '<button type="button" class="actionbtn ghost cfg-edit-ponto" data-id="'+mp.id+'" data-name="'+mp.name.replace(/"/g,'&quot;')+'" data-address="'+(mp.address||'').replace(/"/g,'&quot;')+'">'+t("Editar")+'</button>'+
+                '<button type="button" class="actionbtn ghost cfg-del-ponto" data-id="'+mp.id+'" data-name="'+mp.name.replace(/"/g,'&quot;')+'" style="color:var(--st-critical);border-color:var(--st-critical);margin-left:8px;">'+t("Excluir")+'</button>'+
+              '</div>';
+            }).join('');
+          })()+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" id="cfgAddPontoBtn">'+t("Adicionar ponto de encontro")+'</button></div>'+
         '</div>'+
         '<div class="card card-pad">'+sectionLabel("Preferências gerais")+
           '<div class="settings-row"><div class="txt"><strong>Modo escuro automático</strong><span>Seguir o sistema do dispositivo</span></div><button type="button" class="switch on"></button></div>'+
@@ -2325,11 +2401,26 @@
           URL.revokeObjectURL(url);
 
           try{
-            await supa.from("notifications").delete().neq("id","00000000-0000-0000-0000-000000000000");
-            await supa.from("registrations").delete().neq("id","00000000-0000-0000-0000-000000000000");
-            await supa.from("meeting_points").delete().neq("id","00000000-0000-0000-0000-000000000000");
+            var r1 = await supa.from("notifications").delete().neq("id","00000000-0000-0000-0000-000000000000");
+            if(r1.error) throw r1.error;
+            var r2 = await supa.from("passengers").delete().neq("id","00000000-0000-0000-0000-000000000000");
+            if(r2.error) throw r2.error;
+            var r3 = await supa.from("registrations").delete().neq("id","00000000-0000-0000-0000-000000000000");
+            if(r3.error) throw r3.error;
+            var r4 = await supa.from("meeting_points").delete().neq("id","00000000-0000-0000-0000-000000000000");
+            if(r4.error) throw r4.error;
+            var r5 = await supa.from("encarregados").delete().neq("id","00000000-0000-0000-0000-000000000000");
+            if(r5.error) throw r5.error;
           }catch(e){
-            if(errBox){ errBox.textContent = t("Erro ao reiniciar: ") + e.message; errBox.hidden = false; return; }
+            if(errBox){ errBox.textContent = t("Erro ao reiniciar: ") + (e.message || String(e)) + " " + t("(verifique se você está autenticado como administrador principal)"); errBox.hidden = false; }
+            await jvAlert(t("Não foi possível apagar todos os dados: ") + (e.message || String(e)));
+            return;
+          }
+          await loadAllData();
+          if((DATA.registrations||[]).length || (DATA.meetingPoints||[]).length || (DATA.notifications||[]).length || (DATA.encarregados||[]).length){
+            if(errBox){ errBox.textContent = t("Alguns dados não puderam ser apagados — verifique sua permissão de administrador."); errBox.hidden = false; }
+            await jvAlert(t("Alguns dados não puderam ser apagados. Verifique se você está logado com uma conta de administrador válida."));
+            return;
           }
 
           var newName = await jvPrompt(t("Nome do novo evento:"), STATE.eventName, {title:t("Novo evento")}) || STATE.eventName;
@@ -2748,7 +2839,7 @@
   var checkSvg = '<svg viewBox="0 0 24 24" fill="none" style="width:12px;height:12px;"><path d="m5 12.5 4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   function renderEnc(){
     if(!encList) return;
-    var hasReal = DATA.loaded && DATA.registrations && DATA.registrations.length > 0;
+    var hasReal = DATA.loaded;
     if(hasReal){
       var rows = [];
       DATA.registrations.forEach(function(r){
@@ -2757,10 +2848,10 @@
           rows.push({name:p.full_name, sub:payLbl, on:!!r.checked_in, regId:r.id});
         });
       });
-      encList.innerHTML = rows.map(function(p,i){
+      encList.innerHTML = rows.length ? rows.map(function(p,i){
         return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'" data-reg="'+p.regId+'">'+(p.on?checkSvg:'')+'</button>'+
           '<div style="flex:1;min-width:0;"><div class="nm">'+p.name+'</div><div class="sub">'+p.sub+'</div></div></div>';
-      }).join('');
+      }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum passageiro cadastrado ainda.")+'</p>');
       encList.querySelectorAll(".cb").forEach(function(btn){
         btn.addEventListener("click", async function(){
           var regId = btn.getAttribute("data-reg");
@@ -2829,6 +2920,53 @@
   applyI18n();
 
   /* ---- carrega dados reais do Supabase e re-renderiza as telas já montadas ---- */
+  function updateSidebarCounts(){
+    var regs = DATA.registrations || [];
+    var totalPax = regs.reduce(function(a,r){ return a+(r.people_count||1); },0);
+    var pendCount = regs.filter(function(r){ return r.payment_status!=="pago"; }).length;
+    var paxEl = document.getElementById("navPaxCount");
+    var pagoEl = document.getElementById("navPagoCount");
+    if(paxEl){ paxEl.textContent = String(totalPax); paxEl.hidden = totalPax === 0; }
+    if(pagoEl){ pagoEl.textContent = String(pendCount); pagoEl.hidden = pendCount === 0; }
+  }
+
+  function initials(name){
+    var parts = (name||"").trim().split(/\s+/).filter(Boolean);
+    if(!parts.length) return "--";
+    return (parts[0][0] + (parts[1]?parts[1][0]:"")).toUpperCase();
+  }
+
+  var currentAdmin = null; // {name, email, is_principal}
+  async function refreshAdminIdentity(){
+    var nameEl = document.getElementById("sideUserName");
+    var roleEl = document.getElementById("sideUserRole");
+    var avEl = document.getElementById("sideUserAvatar");
+    if(!dbOk()){ return; }
+    try{
+      var userRes = await supa.auth.getUser();
+      var user = userRes && userRes.data && userRes.data.user;
+      if(!user){
+        currentAdmin = null;
+        if(nameEl) nameEl.textContent = t("Não conectado");
+        if(roleEl) roleEl.textContent = "—";
+        if(avEl) avEl.textContent = "--";
+        return;
+      }
+      var adminRes = await supa.from("admins").select("name, is_principal").eq("id", user.id).single();
+      var name = (!adminRes.error && adminRes.data && adminRes.data.name) ? adminRes.data.name : user.email;
+      var isPrincipal = !adminRes.error && adminRes.data && adminRes.data.is_principal;
+      currentAdmin = { id:user.id, name:name, email:user.email, is_principal:!!isPrincipal };
+      if(nameEl) nameEl.textContent = name;
+      if(roleEl) roleEl.textContent = isPrincipal ? t("Administrador principal") : t("Administrador");
+      if(avEl) avEl.textContent = initials(name);
+    }catch(e){
+      currentAdmin = null;
+      if(nameEl) nameEl.textContent = t("Não conectado");
+      if(roleEl) roleEl.textContent = "—";
+      if(avEl) avEl.textContent = "--";
+    }
+  }
+
   function rerenderViews(){
     Object.keys(views).forEach(function(k){
       var sec = document.getElementById("view-"+k);
@@ -2837,8 +2975,13 @@
       if(views[k].after) views[k].after(sec);
     });
     renderEnc();
+    updateSidebarCounts();
   }
   loadAllData().then(function(ok){ if(ok) rerenderViews(); });
+  refreshAdminIdentity().then(function(){ rerenderViews(); });
+  if(dbOk() && supa.auth && supa.auth.onAuthStateChange){
+    try{ supa.auth.onAuthStateChange(function(){ refreshAdminIdentity().then(function(){ rerenderViews(); }); }); }catch(e){}
+  }
   if(dbOk() && supa.channel){
     try{
       supa.channel("jv-live")
