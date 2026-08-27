@@ -534,30 +534,15 @@
   .jv-modal-actions button.jv-danger{ background:var(--st-critical); border-color:var(--st-critical); color:#fff; }
 </style>
 
-<div class="previewbar">
-  <span class="lbl">Pré-visualizar tela:</span>
-  <button type="button" data-screen="login" class="active">Login</button>
-  <button type="button" data-screen="cadastro">Cadastro</button>
-  <button type="button" data-screen="passenger">Portal do Passageiro</button>
-  <button type="button" data-screen="encarregado">Painel do Encarregado</button>
-  <button type="button" data-screen="erp">ERP Administrativo</button>
-
-  <div class="global-theme" style="display:flex;gap:8px;align-items:center;">
-    <div class="theme-toggle" role="group" aria-label="Idioma">
-      <button type="button" data-lang-btn="pt" class="active">PT</button>
-      <button type="button" data-lang-btn="es">ES</button>
-    </div>
-    <div class="theme-toggle" role="group" aria-label="Tema claro ou escuro">
-      <button type="button" data-theme-btn="light" aria-label="Tema claro"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-      <button type="button" data-theme-btn="dark" aria-label="Tema escuro"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
-      <button type="button" data-theme-btn="system" aria-label="Tema do sistema"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="12" rx="1.6" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 20h7M12 16.5V20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-    </div>
-  </div>
-</div>
+<!-- (barra de pré-visualização de telas removida: permitia abrir o ERP administrativo e dados de passageiros sem login — risco de privacidade) -->
 
 <!-- ===================== LOGIN ===================== -->
 <section class="screen screen-plain" id="screen-login">
   <div class="login-wrap">
+    <div class="theme-toggle" role="group" aria-label="Idioma" style="margin:0 0 14px;width:fit-content;">
+      <button type="button" data-lang-btn="pt" class="active">PT</button>
+      <button type="button" data-lang-btn="es">ES</button>
+    </div>
     <div class="login-brand">
       <div class="glyph"><svg viewBox="0 0 24 24" fill="none"><path d="M5 14.5V7.2C5 6 6 5 7.2 5h9.6C18 5 19 6 19 7.2v7.3" stroke="currentColor" stroke-width="1.7"/><path d="M5 14.5h14M5 14.5l-1 2.3M19 14.5l1 2.3M8 17.3v1M16 17.3v1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.3" cy="11.6" r="1" fill="currentColor"/><circle cx="15.7" cy="11.6" r="1" fill="currentColor"/><path d="M6.6 8h10.8" stroke="currentColor" stroke-width="1.7"/><path d="M2.3 19.6 6 16l3 3 4-4.6 3.5 3.6 3.2-2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg></div>
       <h2>Jardim do Vale</h2>
@@ -582,12 +567,10 @@
       </div>
 
       <div class="login-panel" data-login-panel="encarregado">
-        <div class="field" style="margin-bottom:12px;"><label>Ponto de encontro</label>
-          <select><option>Salão do Reino — Jardim do Vale</option><option>Praça Central — Vale Novo</option><option>Posto Ipiranga, Av. Recanto</option></select>
-        </div>
-        <div class="field" style="margin-bottom:16px;"><label>Senha do encarregado</label><input type="password" value="••••••"></div>
-        <button type="button" class="actionbtn primary full-btn" data-goto="encarregado">Entrar como encarregado</button>
-        <div class="login-foot"><span>Acesso restrito aos irmãos designados pela administração.</span></div>
+        <div class="field" style="margin-bottom:16px;"><label>Código de acesso</label><input type="text" id="encLoginCodeInput" placeholder="Ex: 4821" autocomplete="off"></div>
+        <p id="encLoginErr" hidden style="margin:0 0 12px;font-size:.8rem;color:var(--st-critical);font-weight:600;"></p>
+        <button type="button" class="actionbtn primary full-btn" id="encLoginNext">Entrar como encarregado</button>
+        <div class="login-foot"><span>Acesso restrito aos irmãos designados pela administração. Use o código que a administração te entregou.</span></div>
       </div>
 
       <div class="login-panel" data-login-panel="admin">
@@ -784,8 +767,8 @@
   <div class="panel-wrap">
     <div class="backlink" data-goto="login"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sair</span></div>
     <div class="portal-head">
-      <div class="av">DM</div>
-      <div><h2>Irmão Diego M.</h2><span id="encarregadoEventSub">Encarregado · Salão do Reino — Jardim do Vale</span></div>
+      <div class="av" id="encAvatar">--</div>
+      <div><h2 id="encHeaderName">Encarregado</h2><span id="encarregadoEventSub">Encarregado</span></div>
     </div>
 
     <div class="role-tabs" style="margin-bottom:16px;">
@@ -796,46 +779,37 @@
 
     <!-- ---- passageiros ---- -->
     <div class="login-panel active" data-enc-panel="passageiros">
-      <div class="daytab-group">
-        <button type="button" class="daytab active">17 jul</button>
-        <button type="button" class="daytab">18 jul</button>
-        <button type="button" class="daytab">19 jul</button>
+      <div class="daytab-group" id="encDayTabs">
+        <button type="button" class="daytab active" data-day="">Todos os dias</button>
       </div>
 
       <div class="panel-stats">
-        <div class="metric"><div class="label">Total</div><div class="value tabular">44</div></div>
-        <div class="metric"><div class="label">Presentes</div><div class="value tabular" style="color:var(--st-good)">31</div></div>
-        <div class="metric"><div class="label">Faltando</div><div class="value tabular" style="color:var(--st-warning)">13</div></div>
+        <div class="metric"><div class="label">Total</div><div class="value tabular" id="encStatTotal">0</div></div>
+        <div class="metric"><div class="label">Presentes</div><div class="value tabular" style="color:var(--st-good)" id="encStatPresent">0</div></div>
+        <div class="metric"><div class="label">Faltando</div><div class="value tabular" style="color:var(--st-warning)" id="encStatMissing">0</div></div>
       </div>
 
       <div class="card card-pad">
-        <div class="search-mini"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.4-3.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input type="text" placeholder="Buscar passageiro…"></div>
+        <div class="search-mini"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.4-3.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input type="text" id="encSearchInput" placeholder="Buscar passageiro…"></div>
         <div id="encarregadoList"></div>
         <div class="actions-row" style="margin-top:14px;">
-          <button type="button" class="actionbtn primary">Marcar todos presentes</button>
-          <button type="button" class="actionbtn">Enviar lista à administração</button>
+          <button type="button" class="actionbtn primary" id="encMarkAllBtn">Marcar todos presentes</button>
+          <button type="button" class="actionbtn" id="encSendListBtn">Enviar lista à administração</button>
         </div>
       </div>
     </div>
 
     <!-- ---- pontos de encontro ---- -->
     <div class="login-panel" data-enc-panel="pontos">
-      <div class="card card-pad">
-        <p style="margin:0 0 12px;color:var(--ink-soft);font-size:.85rem;">Seu ponto de encontro nos três dias do congresso.</p>
-        <div class="encontro-card"><span class="encontro-time">05:30</span><div class="encontro-body"><strong>Salão do Reino — Jardim do Vale</strong><span>17 jul · Ônibus 01 e 02</span></div><span class="encontro-count">44 pax</span><a class="icon-btn call" title="Ver no mapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Sal%C3%A3o%20do%20Reino%20Jardim%20do%20Vale%20Itatiba%20SP" style="margin-left:6px;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>
-        <div class="encontro-card"><span class="encontro-time">06:00</span><div class="encontro-body"><strong>Salão do Reino — Jardim do Vale</strong><span>18 jul · Concentração geral</span></div><span class="encontro-count">44 pax</span><a class="icon-btn call" title="Ver no mapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Sal%C3%A3o%20do%20Reino%20Jardim%20do%20Vale%20Itatiba%20SP" style="margin-left:6px;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>
-        <div class="encontro-card"><span class="encontro-time">06:00</span><div class="encontro-body"><strong>Salão do Reino — Jardim do Vale</strong><span>19 jul · Último dia</span></div><span class="encontro-count">44 pax</span><a class="icon-btn call" title="Ver no mapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Sal%C3%A3o%20do%20Reino%20Jardim%20do%20Vale%20Itatiba%20SP" style="margin-left:6px;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>
+      <div class="card card-pad" id="encPontosCard">
+        <p style="margin:0 0 12px;color:var(--ink-soft);font-size:.85rem;">Pontos de encontro cadastrados pela administração.</p>
       </div>
     </div>
 
     <!-- ---- avisos ---- -->
     <div class="login-panel" data-enc-panel="avisos">
-      <div class="card card-pad">
+      <div class="card card-pad" id="encAvisosCard">
         <p style="margin:0 0 4px;color:var(--ink-soft);font-size:.85rem;">Avisos e lembretes enviados pela administração.</p>
-        <div class="bot-line in"><span class="who">Hoje</span><p>Confirme a presença dos passageiros do seu ponto até às 18h de hoje.</p></div>
-        <div class="bot-line in"><span class="who">16 jul</span><p>Horário de embarque atualizado: chegada 15 min antes do horário de saída.</p></div>
-        <div class="bot-line in"><span class="who">15 jul</span><p>Lembre os passageiros de trazerem documento de identificação.</p></div>
-        <div class="bot-line in"><span class="who">12 jul</span><p>2 passageiros do seu ônibus estão com pagamento em atraso — verifique no embarque.</p></div>
       </div>
     </div>
   </div>
@@ -897,10 +871,13 @@
           <kbd>/</kbd>
         </div>
         <button class="icon-toolbtn" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none"><path d="M6 10.5a6 6 0 1 1 12 0c0 3.4 1 4.8 1.6 5.4H4.4C5 15.3 6 13.9 6 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 18.8a2.4 2.4 0 0 0 4.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ping"></span></button>
+        <div class="theme-toggle" role="group" aria-label="Idioma">
+          <button type="button" data-lang-btn="pt" class="active">PT</button>
+          <button type="button" data-lang-btn="es">ES</button>
+        </div>
         <div class="theme-toggle" role="group" aria-label="Tema">
           <button type="button" data-theme-btn="light" aria-label="Tema claro"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
           <button type="button" data-theme-btn="dark" aria-label="Tema escuro"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
-          <button type="button" data-theme-btn="system" aria-label="Tema do sistema"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="12" rx="1.6" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 20h7M12 16.5V20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
       </div>
     </div>
@@ -1103,6 +1080,17 @@
     }
   }
 
+  /* ---- pede nome, endereço e (opcional) link exato do Google Maps para um ponto de encontro ---- */
+  async function promptMeetingPointFields(defaults){
+    defaults = defaults || {};
+    var name = await jvPrompt(t("Nome do ponto de encontro:"), defaults.name || "", {title:t("Ponto de encontro")});
+    if(!name) return null;
+    var address = await jvPrompt(t("Endereço (rua, número, bairro):"), defaults.address || "", {title:t("Ponto de encontro")}) || "";
+    var mapsUrl = await jvPrompt(t("Link exato do Google Maps (opcional, mas recomendado para marcar o ponto certo — abra o local no Google Maps, toque em Compartilhar e cole o link aqui):"), defaults.maps_url || "", {title:t("Ponto de encontro")}) || "";
+    var dayLabel = await jvPrompt(t("Dia (opcional, ex: 17 jul):"), defaults.day_label || "", {title:t("Ponto de encontro")}) || "";
+    return {name:name, address:address, maps_url:mapsUrl, day_label:dayLabel};
+  }
+
   async function dbUpdateMeetingPoint(id, patch){
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
     try{
@@ -1151,6 +1139,17 @@
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
     try{
       var res = await supa.from("notifications").insert(n);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
+  }
+
+  async function dbDeleteNotification(id){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    try{
+      var res = await supa.from("notifications").delete().eq("id", id);
       if(!res.error) await loadAllData();
       return res;
     }catch(e){
@@ -1345,7 +1344,98 @@
     "Ainda não se inscreveu? ":"¿Todavía no te inscribiste? ",
     "Faça sua inscrição aqui":"Haz tu inscripción aquí",
     "Telefone (WhatsApp)":"Teléfono (WhatsApp)", "Documento (CPF)":"Documento (CPF)",
-    "Olá":"Hola"
+    "Olá":"Hola",
+    "Informe seu telefone e documento.":"Ingresa tu teléfono y documento.",
+    "Banco de dados não conectado.":"Base de datos no conectada.",
+    "Telefone ou documento não encontrados. Verifique os dados ou faça sua inscrição.":"Teléfono o documento no encontrados. Verifica los datos o haz tu inscripción.",
+    "Ponto de encontro":"Punto de encuentro",
+    "Ponto de encontro cadastrado no sistema":"Punto de encuentro registrado en el sistema",
+    "Pontos cadastrados no sistema":"Puntos registrados en el sistema",
+    "Adicionar ponto":"Agregar punto",
+    "Adicionar ponto de encontro":"Agregar punto de encuentro",
+    "Nenhum ponto de encontro cadastrado ainda. Clique em \"Adicionar ponto\" para começar.":"Ningún punto de encuentro registrado todavía. Haz clic en \"Agregar punto\" para comenzar.",
+    "Nenhum ponto de encontro cadastrado ainda.":"Ningún punto de encuentro registrado todavía.",
+    "Nome do ponto de encontro:":"Nombre del punto de encuentro:",
+    "Endereço (rua, número, bairro):":"Dirección (calle, número, barrio):",
+    "Link exato do Google Maps (opcional, mas recomendado para marcar o ponto certo — abra o local no Google Maps, toque em Compartilhar e cole o link aqui):":"Enlace exacto de Google Maps (opcional, pero recomendado para marcar el punto correcto — abre el lugar en Google Maps, toca Compartir y pega el enlace aquí):",
+    "Dia (opcional, ex: 17 jul):":"Día (opcional, ej: 17 jul):",
+    "Ponto de encontro":"Punto de encuentro",
+    "Excluir ponto de encontro":"Eliminar punto de encuentro",
+    "Deseja realmente excluir o ponto de encontro":"¿Deseas eliminar el punto de encuentro",
+    "Não foi possível salvar: ":"No fue posible guardar: ",
+    "Não foi possível excluir: ":"No fue posible eliminar: ",
+    "Eliminar":"Eliminar",
+    "Excluir":"Eliminar",
+    "Editar":"Editar",
+    "Ver no mapa":"Ver en el mapa",
+    "Faça login como encarregado para ver seus passageiros.":"Inicia sesión como encargado para ver tus pasajeros.",
+    "Nenhum passageiro cadastrado neste ônibus ainda.":"Ningún pasajero registrado en este autobús todavía.",
+    "Nenhum passageiro para marcar.":"Ningún pasajero para marcar.",
+    "Nenhum passageiro cadastrado ainda.":"Ningún pasajero registrado todavía.",
+    "Ônibus":"Autobús",
+    "Presentes":"Presentes",
+    "Lista enviada à administração com sucesso.":"Lista enviada a la administración con éxito.",
+    "Não foi possível enviar: ":"No fue posible enviar: ",
+    "Pontos de encontro cadastrados pela administração.":"Puntos de encuentro registrados por la administración.",
+    "Avisos e lembretes enviados pela administração.":"Avisos y recordatorios enviados por la administración.",
+    "Nenhum aviso recebido ainda.":"Ningún aviso recibido todavía.",
+    "Todos os dias":"Todos los días",
+    "Faça login como encarregado primeiro.":"Inicia sesión como encargado primero.",
+    "Informe o telefone e o número do ônibus.":"Ingresa el teléfono y el número del autobús.",
+    "Telefone ou número do ônibus não encontrados. Verifique com a administração.":"Teléfono o número de autobús no encontrados. Verifica con la administración.",
+    "Entrando…":"Entrando…",
+    "Encarregado":"Encargado",
+    "Excluir lembrete":"Eliminar recordatorio",
+    "Deseja realmente excluir este lembrete?":"¿Deseas eliminar este recordatorio?",
+    "Nenhum lembrete enviado ainda.":"Ningún recordatorio enviado todavía.",
+    "Sem passageiros":"Sin pasajeros",
+    "Encarregado designado, sem passageiros":"Encargado asignado, sin pasajeros",
+    "Com passageiros":"Con pasajeros",
+    "Nenhum ônibus atribuído ainda.":"Ningún autobús asignado todavía.",
+    "Nenhum encarregado cadastrado ainda.":"Ningún encargado registrado todavía.",
+    "Nenhum encarregado cadastrado ainda. Cadastre em Frota & Encarregados.":"Ningún encargado registrado todavía. Regístralo en Flota y Encargados.",
+    "Sessão automática":"Sesión automática",
+    "Autenticação em duas etapas":"Autenticación en dos pasos",
+    "Alertas de novo acesso":"Alertas de nuevo acceso",
+    "Requer conexão com a API do WhatsApp Business (ainda não configurada nesta conta).":"Requiere conexión con la API de WhatsApp Business (todavía no configurada en esta cuenta).",
+    "Sua sessão será encerrada automaticamente após 30 minutos sem uso.":"Tu sesión se cerrará automáticamente después de 30 minutos sin uso.",
+    "O que o passageiro vê":"Lo que el pasajero ve",
+    "Meu ônibus":"Mi autobús",
+    "Meu ponto de encontro":"Mi punto de encuentro",
+    "Status de pagamento":"Estado de pago",
+    "Lembretes recebidos":"Recordatorios recibidos",
+    "Dados de outros passageiros":"Datos de otros pasajeros",
+    "Nunca exibidos neste acesso":"Nunca se muestran en este acceso",
+    "visível":"visible", "oculto":"oculto",
+    "Como os passageiros acessam":"Cómo acceden los pasajeros",
+    "Cada passageiro acessa com o telefone e o documento (CPF) que ele mesmo cadastrou. Não existe usuário/senha compartilhado.":"Cada pasajero accede con el teléfono y el documento (CPF) que él mismo registró. No existe usuario/contraseña compartido.",
+    "Redefinir senha":"Restablecer contraseña",
+    "Abrir Portal do Passageiro":"Abrir Portal del Pasajero",
+    "Ver tela de cadastro":"Ver pantalla de registro",
+    "Dia":"Día",
+    "Pré-visualização":"Vista previa",
+    "Nome Completo":"Nombre Completo",
+    "Documento":"Documento",
+    "Telefone":"Teléfono",
+    "Ponto":"Punto",
+    "Total":"Total",
+    "Sistema Coordenado de Transporte":"Sistema Coordinado de Transporte",
+    "Congregação":"Congregación",
+    "passageiros":"pasajeros",
+    "Pontos de Encontro":"Puntos de Encuentro",
+    "Pontos de Encontro deste dia":"Puntos de Encuentro de este día",
+    "Relatório de Passageiros por Dia de Viagem":"Informe de Pasajeros por Día de Viaje",
+    "Data de emissão":"Fecha de emisión",
+    "Total de passageiros":"Total de pasajeros",
+    "O relatório reúne os passageiros do dia selecionado (ou de todos os dias), com pontos de encontro.":"El informe reúne a los pasajeros del día seleccionado (o de todos los días), con puntos de encuentro.",
+    "Sem dados ainda":"Sin datos todavía",
+    "Sem ponto atribuído":"Sin punto asignado",
+    "Código":"Código",
+    "Informe o código de acesso.":"Ingresa el código de acceso.",
+    "Código de acesso inválido. Verifique com a administração.":"Código de acceso inválido. Verifica con la administración.",
+    "Encarregado cadastrado. Código de acesso":"Encargado registrado. Código de acceso",
+    "Código de acesso para este encarregado (entregue este código a ele):":"Código de acceso para este encargado (entrégaselo a él):",
+    "Telefone (WhatsApp, opcional):":"Teléfono (WhatsApp, opcional):"
   };
   function t(s){
     if(STATE.lang === "es" && STRINGS_ES.hasOwnProperty(s)) return STRINGS_ES[s];
@@ -1783,11 +1873,13 @@
       var pax = (DATA.registrations||[]).reduce(function(a,r){ return a+(r.people_count||1); },0);
       var rows = notifs.length ? notifs.map(function(n){
         var when = n.created_at ? new Date(n.created_at).toLocaleString(STATE.lang==="es"?"es-AR":"pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "—";
-        return '<tr><td>'+n.title+'</td><td class="tabular">'+pax+'</td><td>WhatsApp</td><td>'+when+'</td></tr>';
-      }).join('') : ('<tr><td colspan="4" style="color:var(--ink-mute);">'+t("Nenhum lembrete enviado ainda.")+'</td></tr>');
+        return '<tr><td>'+n.title+'</td><td class="tabular">'+pax+'</td><td>WhatsApp</td><td>'+when+'</td><td>'+
+          '<button type="button" class="icon-btn danger del-lembrete" data-id="'+n.id+'" title="'+t("Eliminar")+'"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7m2 0v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7h10Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+        '</td></tr>';
+      }).join('') : ('<tr><td colspan="5" style="color:var(--ink-mute);">'+t("Nenhum lembrete enviado ainda.")+'</td></tr>');
       return '<div class="grid split-58">'+
         '<div class="card"><div class="card-head"><h3>'+t("Lembretes enviados")+'</h3></div><div class="card-pad">'+
-          '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Lembrete")+'</th><th>'+t("Público")+'</th><th>'+t("Canal")+'</th><th>'+t("Envio")+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Lembrete")+'</th><th>'+t("Público")+'</th><th>'+t("Canal")+'</th><th>'+t("Envio")+'</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
           '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" id="sendReminderBtn">'+t("Criar lembrete")+'</button></div>'+
           '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">'+t("Ao enviar, o passageiro e o encarregado recebem a notificação com o tom de mensagem padrão do próprio celular deles.")+'</p>'+
         '</div></div>'+
@@ -1805,24 +1897,25 @@
           var message = await jvPrompt(t("Mensagem para os passageiros e encarregados:"), "", {title:t("Novo lembrete")}) || "";
           if(!message) return;
           var res = await dbInsertNotification({title:title || t("Aviso"), message:message, target:"todos"});
-          if(res.error){ await jvAlert(t("Não foi possível enviar: ") + res.error.message); }
+          if(res.error){ await jvAlert(t("Não foi possível enviar: ") + res.error.message); return; }
           playNotificationSound();
-          var portalCard = document.querySelector("#screen-passenger .portal-card:last-child");
-          if(portalCard){
-            var line = document.createElement("div");
-            line.className = "bot-line in"; line.style.paddingTop = "8px";
-            line.innerHTML = '<span class="who">'+t("Agora")+'</span><p>'+t("Novo aviso enviado pela administração — confira em Avisos/Lembretes.")+'</p>';
-            portalCard.appendChild(line);
-          }
-          var encList = document.querySelector('[data-enc-panel="avisos"] .card-pad');
-          if(encList){
-            var line2 = document.createElement("div");
-            line2.className = "bot-line in";
-            line2.innerHTML = '<span class="who">'+t("Agora")+'</span><p>'+t("Novo aviso enviado pela administração — confira em Avisos/Lembretes.")+'</p>';
-            encList.appendChild(line2);
-          }
+          if(currentPassengerReg) renderPassengerPortal(currentPassengerReg);
+          if(typeof renderEncAvisos === "function") renderEncAvisos();
+          rerenderViews();
         });
       }
+      root.querySelectorAll(".del-lembrete").forEach(function(btn){
+        btn.addEventListener("click", async function(){
+          var id = btn.getAttribute("data-id");
+          var ok = await jvConfirm(t("Deseja realmente excluir este lembrete?"), {title:t("Excluir lembrete"), danger:true, okLabel:t("Excluir")});
+          if(!ok) return;
+          var res = await dbDeleteNotification(id);
+          if(res.error){ await jvAlert(t("Não foi possível excluir: ") + res.error.message); return; }
+          if(currentPassengerReg) renderPassengerPortal(currentPassengerReg);
+          if(typeof renderEncAvisos === "function") renderEncAvisos();
+          rerenderViews();
+        });
+      });
     }
   };
 
@@ -1846,10 +1939,9 @@
       var addBtn = root.querySelector("#addPontoBtn");
       if(addBtn){
         addBtn.addEventListener("click", async function(){
-          var name = await jvPrompt(t("Nome do ponto de encontro:"), "", {title:t("Novo ponto de encontro")});
-          if(!name) return;
-          var address = await jvPrompt(t("Endereço (para o Google Maps):"), "", {title:t("Novo ponto de encontro")}) || "";
-          var res = await dbInsertMeetingPoint({name:name, address:address});
+          var mp = await promptMeetingPointFields();
+          if(!mp) return;
+          var res = await dbInsertMeetingPoint(mp);
           if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
           rerenderViews();
         });
@@ -1872,21 +1964,29 @@
     title:"Frota & Encarregados",
     render:function(){
       var regs = DATA.registrations || [];
+      var encsForBuses = DATA.encarregados || [];
       var busMap = {};
+      /* toda ônibus com um encarregado cadastrado já conta como parte da frota, mesmo sem passageiros ainda */
+      encsForBuses.forEach(function(c){
+        if(!c.bus_number) return;
+        if(busMap[c.bus_number] === undefined) busMap[c.bus_number] = 0;
+      });
       regs.forEach(function(r){
         if(!r.bus_number) return;
-        if(!busMap[r.bus_number]) busMap[r.bus_number] = 0;
+        if(busMap[r.bus_number] === undefined) busMap[r.bus_number] = 0;
         busMap[r.bus_number] += (r.people_count||1);
       });
       var busKeys = Object.keys(busMap);
       var busRows = busKeys.length ? busKeys.map(function(b){
-        return '<tr><td class="tabular">'+b+'</td><td class="tabular">'+busMap[b]+'</td><td><span class="pill good"><i class="dotp"></i>'+t("Com passageiros")+'</span></td></tr>';
+        var enc = encsForBuses.find(function(c){ return String(c.bus_number)===String(b); });
+        var status = busMap[b] > 0 ? t("Com passageiros") : (enc ? t("Encarregado designado, sem passageiros") : t("Sem passageiros"));
+        return '<tr><td class="tabular">'+b+'</td><td class="tabular">'+busMap[b]+'</td><td><span class="pill '+(busMap[b]>0?'good':'warning')+'"><i class="dotp"></i>'+status+'</span></td></tr>';
       }).join('') : ('<tr><td colspan="3" style="color:var(--ink-mute);">'+t("Nenhum ônibus atribuído ainda.")+'</td></tr>');
 
       var encs = DATA.encarregados || [];
       var cards = encs.length ? encs.map(function(c){
         var phoneDigits = (c.phone||"").replace(/\D/g,"");
-        return '<div class="contact-card"><div class="avatar">'+initials(c.name)+'</div><div style="flex:1;min-width:0;"><div class="contact-name">'+c.name+'</div><div class="contact-role">'+(c.bus_number ? (t("Ônibus")+" "+c.bus_number) : (c.phone||''))+'</div></div>'+
+        return '<div class="contact-card"><div class="avatar">'+initials(c.name)+'</div><div style="flex:1;min-width:0;"><div class="contact-name">'+c.name+'</div><div class="contact-role">'+(c.bus_number ? (t("Ônibus")+" "+c.bus_number) : (c.phone||''))+(c.access_code ? (' · '+t("Código")+': '+c.access_code) : '')+'</div></div>'+
           (phoneDigits ? ('<a class="icon-btn whats" title="WhatsApp" target="_blank" rel="noopener" href="https://wa.me/'+phoneDigits+'">'+ICONS.whats+'</a><a class="icon-btn call" title="'+t("Ligar")+'" href="tel:'+phoneDigits+'">'+ICONS.call+'</a>') : '')+
           '<button type="button" class="icon-btn danger del-enc" data-id="'+c.id+'" data-name="'+c.name.replace(/"/g,'&quot;')+'" title="'+t("Eliminar")+'"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7m2 0v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7h10Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
       }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum encarregado cadastrado ainda.")+'</p>');
@@ -1905,10 +2005,13 @@
         addBtn.addEventListener("click", async function(){
           var name = await jvPrompt(t("Nome do encarregado:"), "", {title:t("Novo encarregado")});
           if(!name) return;
-          var phone = await jvPrompt(t("Telefone (WhatsApp):"), "", {title:t("Novo encarregado")}) || "";
+          var phone = await jvPrompt(t("Telefone (WhatsApp, opcional):"), "", {title:t("Novo encarregado")}) || "";
           var bus = await jvPrompt(t("Número do ônibus (opcional):"), "", {title:t("Novo encarregado")}) || "";
-          var res = await dbInsertEncarregado({name:toTitleCase(name), phone:phone, bus_number:bus});
+          var suggestedCode = String(Math.floor(1000 + Math.random()*9000));
+          var code = await jvPrompt(t("Código de acesso para este encarregado (entregue este código a ele):"), suggestedCode, {title:t("Novo encarregado")}) || suggestedCode;
+          var res = await dbInsertEncarregado({name:toTitleCase(name), phone:phone, bus_number:bus, access_code:code});
           if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
+          await jvAlert(t("Encarregado cadastrado. Código de acesso") + ": " + code);
           rerenderViews();
         });
       }
@@ -2016,23 +2119,54 @@
   };
 
   /* ---- RELATÓRIOS ---- */
+  /* ---- relatório: agrupamento real por dia (usa o campo "Dia" cadastrado em cada ponto de encontro) ---- */
+  function reportDayGroups(){
+    var days = [];
+    (DATA.meetingPoints||[]).forEach(function(mp){ if(mp.day_label && days.indexOf(mp.day_label)===-1) days.push(mp.day_label); });
+    return days;
+  }
+  function reportRegsForDay(day){
+    return (DATA.registrations||[]).filter(function(r){
+      if(!day) return true;
+      var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+      return mp && mp.day_label === day;
+    });
+  }
+  function reportBuildDay(day){
+    var regs = reportRegsForDay(day);
+    var rows = [];
+    regs.forEach(function(r){
+      var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+      (r.passengers||[{full_name:r.titular_name, doc_number:r.doc_number}]).forEach(function(p){
+        rows.push([String(rows.length+1), p.full_name, p.doc_number||r.doc_number||"", r.phone||"", mp?mp.name:t("Sem ponto atribuído")]);
+      });
+    });
+    var pontosDoDia = (DATA.meetingPoints||[]).filter(function(mp){ return !day || mp.day_label === day; });
+    return {rows:rows, pontos:pontosDoDia, total:rows.length};
+  }
   views.relatorios = {
     title:"Relatórios",
     render:function(){
       var hasReal = DATA.loaded;
+      var days = reportDayGroups();
+      var daySelectHtml = '<select id="repDaySelect"><option value="">'+t("Todos os dias")+'</option>'+
+        days.map(function(d){ return '<option value="'+d.replace(/"/g,'&quot;')+'">'+d+'</option>'; }).join('')+
+      '</select>';
       return '<div class="grid split-58">'+
         '<div class="card"><div class="card-head"><h3>'+t("Gerar relatório")+'</h3></div><div class="card-pad">'+
+          '<div class="field" style="max-width:260px;margin-bottom:14px;"><label>'+t("Dia")+'</label>'+daySelectHtml+'</div>'+
           '<div class="actions-row">'+
             '<button type="button" class="actionbtn primary" id="repPdfBtn">'+t("Baixar relatório em PDF")+'</button>'+
             '<button type="button" class="actionbtn" id="repXlsBtn">'+t("Baixar relatório em Excel")+'</button>'+
           '</div>'+
-          '<p class="i18n-note" style="margin:12px 0 0;font-size:.78rem;color:var(--ink-mute);">'+t("O relatório reúne todos os passageiros cadastrados, agrupados por ponto de encontro, com status de pagamento.")+(hasReal?'':' · '+t("ainda não há cadastros reais — o arquivo sairá vazio"))+'</p>'+
+          '<p class="i18n-note" style="margin:12px 0 0;font-size:.78rem;color:var(--ink-mute);">'+t("O relatório reúne os passageiros do dia selecionado (ou de todos os dias), com pontos de encontro.")+(hasReal?'':' · '+t("ainda não há cadastros reais — o arquivo sairá vazio"))+'</p>'+
         '</div></div>'+
         '<div class="card"><div class="card-head"><h3>'+t("Resumo atual")+'</h3></div><div class="card-pad">'+
           '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Ponto de encontro")+'</th><th>'+t("Passageiros")+'</th></tr></thead><tbody>'+
             reportSummaryRows()+
           '</tbody></table></div>'+
         '</div></div>'+
+        '<div class="card" id="repPreviewCard" style="grid-column:1/-1;"><div class="card-head"><h3>'+t("Pré-visualização")+'</h3></div><div class="card-pad" id="repPreviewBody"></div></div>'+
       '</div>';
       function reportSummaryRows(){
         if(!hasReal) return '<tr><td colspan="2" style="color:var(--ink-mute);">'+t("Sem dados ainda")+'</td></tr>';
@@ -2046,46 +2180,79 @@
       }
     },
     after:function(root){
-      function buildRows(){
-        var rows = [];
-        (DATA.registrations||[]).forEach(function(r){
-          var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
-          var pay = PAY_LABEL[r.payment_status] || PAY_LABEL.pendente;
-          (r.passengers||[{full_name:r.titular_name}]).forEach(function(p){
-            rows.push([p.full_name, r.doc_number||"", mp?mp.name:"—", t(pay[1]), formatBRL(Number(r.total_amount||0))]);
-          });
-        });
-        return rows;
+      var daySelect = root.querySelector("#repDaySelect");
+      function currentDay(){ return daySelect ? daySelect.value : ""; }
+
+      function renderPreview(){
+        var body = root.querySelector("#repPreviewBody");
+        if(!body) return;
+        var day = currentDay();
+        var data = reportBuildDay(day);
+        var rowsHtml = data.rows.length ? data.rows.map(function(r){
+          return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td><td>'+r[4]+'</td></tr>';
+        }).join('') : ('<tr><td colspan="5" style="color:var(--ink-mute);">'+t("Sem dados ainda")+'</td></tr>');
+        var pontosHtml = data.pontos.length ? data.pontos.map(function(p,i){ return '<div>'+(i+1)+' — <i>'+p.name+'</i></div>'; }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum ponto de encontro cadastrado ainda.")+'</p>');
+        body.innerHTML = '<p style="margin:0 0 10px;font-weight:700;">'+(day || t("Todos os dias"))+' · '+t("Total")+': '+data.total+'</p>'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>Nº</th><th>'+t("Nome Completo")+'</th><th>'+t("Documento")+'</th><th>'+t("Telefone")+'</th><th>'+t("Ponto")+'</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>'+
+          '<p style="margin:14px 0 6px;font-weight:700;">'+t("Pontos de Encontro deste dia")+'</p>'+pontosHtml;
       }
+      if(daySelect) daySelect.addEventListener("change", renderPreview);
+      renderPreview();
+
       var pdfBtn = root.querySelector("#repPdfBtn");
       if(pdfBtn){
         pdfBtn.addEventListener("click", async function(){
           if(!(window.jspdf && window.jspdf.jsPDF)){ await jvAlert(t("Gerador de PDF indisponível (verifique a conexão com a internet).")); return; }
+          var day = currentDay();
+          var days = day ? [day] : (reportDayGroups().length ? reportDayGroups() : [""]);
           var doc = new window.jspdf.jsPDF();
-          doc.setFontSize(16); doc.text(STATE.eventName + " — " + t("Relatório de passageiros"), 14, 18);
-          doc.setFontSize(10); doc.text(eventDateLabel(), 14, 25);
-          var rows = buildRows();
-          if(doc.autoTable){
-            doc.autoTable({ startY:32, head:[[t("Nome"), t("Documento"), t("Ponto de encontro"), t("Pagamento"), t("Valor")]], body: rows });
-          } else {
-            var y = 34;
-            rows.forEach(function(r){ doc.setFontSize(9); doc.text(r.join(" · "), 14, y); y += 6; });
-          }
-          doc.save("relatorio-jardim-do-vale.pdf");
+          days.forEach(function(d, idx){
+            if(idx > 0) doc.addPage();
+            var data = reportBuildDay(d);
+            doc.setFontSize(16); doc.text(STATE.eventName, 14, 18);
+            doc.setFontSize(10); doc.text(t("Relatório de Passageiros por Dia de Viagem") + " · " + STATE.eventName, 14, 25);
+            doc.setFontSize(9); doc.text(t("Data de emissão") + ": " + new Date().toLocaleString(STATE.lang==="es"?"es-AR":"pt-BR"), 14, 31);
+            doc.setFontSize(11); doc.text((d || t("Todos os dias")).toUpperCase() + " · " + t("Total de passageiros") + ": " + data.total, 14, 40);
+            var startY = 46;
+            if(doc.autoTable){
+              doc.autoTable({ startY:startY, head:[["Nº", t("Nome Completo"), t("Documento"), t("Telefone"), t("Ponto")]], body: data.rows });
+              startY = doc.lastAutoTable.finalY + 8;
+            } else {
+              data.rows.forEach(function(r){ doc.setFontSize(9); doc.text(r.join(" · "), 14, startY); startY += 6; });
+              startY += 6;
+            }
+            doc.setFontSize(11); doc.text(t("Pontos de Encontro deste dia"), 14, startY);
+            startY += 6;
+            data.pontos.forEach(function(p,i){ doc.setFontSize(9); doc.text((i+1)+" — "+p.name, 14, startY); startY += 6; });
+          });
+          doc.save("relatorio-jardim-do-vale" + (day ? ("-"+day.replace(/\s+/g,"_")) : "") + ".pdf");
         });
       }
       var xlsBtn = root.querySelector("#repXlsBtn");
       if(xlsBtn){
         xlsBtn.addEventListener("click", function(){
-          var rows = buildRows();
-          var header = [t("Nome"), t("Documento"), t("Ponto de encontro"), t("Pagamento"), t("Valor")];
+          var day = currentDay();
+          var days = day ? [day] : (reportDayGroups().length ? reportDayGroups() : [""]);
+          var header = ["Nº", t("Nome Completo"), t("Documento"), t("Telefone"), t("Ponto")];
           if(window.XLSX){
-            var ws = XLSX.utils.aoa_to_sheet([header].concat(rows));
             var wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Passageiros");
-            XLSX.writeFile(wb, "relatorio-jardim-do-vale.xlsx");
+            days.forEach(function(d){
+              var data = reportBuildDay(d);
+              var aoa = [
+                [t("Sistema Coordenado de Transporte") + " · " + STATE.eventName],
+                [t("Congregação") + ": Jardim do Vale", "", t("Dia") + ": " + (d || t("Todos os dias"))],
+                [], header
+              ].concat(data.rows).concat([[], [t("Total") + ": " + data.total + " " + t("passageiros")], [], [t("Pontos de Encontro")]]).concat(
+                data.pontos.map(function(p,i){ return [(i+1)+" — "+p.name]; })
+              );
+              var ws = XLSX.utils.aoa_to_sheet(aoa);
+              var sheetName = (d || "Todos").replace(/[\\/*?:\[\]]/g,"").slice(0,31) || "Relatorio";
+              XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            });
+            XLSX.writeFile(wb, "relatorio-jardim-do-vale" + (day ? ("-"+day.replace(/\s+/g,"_")) : "") + ".xlsx");
           } else {
-            var csv = [header].concat(rows).map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(","); }).join("\n");
+            var data = reportBuildDay(day);
+            var csv = [header].concat(data.rows).map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(","); }).join("\n");
             var blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
             var url = URL.createObjectURL(blob);
             var a = document.createElement("a"); a.href = url; a.download = "relatorio-jardim-do-vale.csv";
@@ -2097,26 +2264,92 @@
   };
 
   /* ---- ACESSO DO PASSAGEIRO ---- */
+  var SECURITY_DEFAULT = {twofa:false, session_timeout:true, login_alerts:false};
+  function getSecurityConfig(){
+    var cfg = DATA.eventConfig && DATA.eventConfig.security_config;
+    if(cfg && typeof cfg === "object") return Object.assign({}, SECURITY_DEFAULT, cfg);
+    return Object.assign({}, SECURITY_DEFAULT);
+  }
+  async function setSecurityConfig(key, value){
+    var cur = getSecurityConfig();
+    cur[key] = value;
+    if(!dbOk()) return {error:{message:t("Banco de dados não conectado.")}};
+    try{
+      var res = await supa.from("event_config").update({security_config: cur}).eq("id",1);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message:(e && e.message) || String(e)}};
+    }
+  }
+  var inactivityTimer = null;
+  function armInactivityLogout(){
+    if(inactivityTimer) clearTimeout(inactivityTimer);
+    if(!getSecurityConfig().session_timeout) return;
+    if(document.getElementById("screen-erp") && document.getElementById("screen-erp").hidden) return;
+    inactivityTimer = setTimeout(async function(){
+      if(dbOk() && supa.auth){ try{ await supa.auth.signOut(); }catch(e){} }
+      goScreen("login");
+    }, 30*60*1000);
+  }
+  ["click","keydown","mousemove","touchstart"].forEach(function(ev){
+    document.addEventListener(ev, function(){ armInactivityLogout(); }, {passive:true});
+  });
+
+  var VISIBILITY_DEFAULT = {onibus:true, ponto:true, pagamento:true, lembretes:true};
+  function getPassengerVisibility(){
+    var cfg = DATA.eventConfig && DATA.eventConfig.passenger_visibility;
+    if(cfg && typeof cfg === "object") return Object.assign({}, VISIBILITY_DEFAULT, cfg);
+    return Object.assign({}, VISIBILITY_DEFAULT);
+  }
+  async function setPassengerVisibility(key, value){
+    var cur = getPassengerVisibility();
+    cur[key] = value;
+    if(!dbOk()) return {error:{message:t("Banco de dados não conectado.")}};
+    try{
+      var res = await supa.from("event_config").update({passenger_visibility: cur}).eq("id",1);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message:(e && e.message) || String(e)}};
+    }
+  }
+
   views["acesso-passageiro"] = {
     title:"Acesso do Passageiro",
     render:function(){
+      var vis = getPassengerVisibility();
+      function row(key,label,sub){
+        var on = !!vis[key];
+        return '<div class="settings-row"><div class="txt"><strong>'+t(label)+'</strong><span>'+t(sub)+'</span></div><button type="button" class="switch vis-toggle'+(on?' on':'')+'" data-key="'+key+'" aria-label="'+t(label)+'"></button></div>';
+      }
       return '<div class="grid split-58">'+
         '<div class="card card-pad">'+
-          sectionLabel("Login público compartilhado")+
-          '<p style="margin:0 0 14px;color:var(--ink-soft);font-size:.88rem;">Usado por todos os passageiros para consultar seu ônibus, ponto de encontro e status de pagamento.</p>'+
-          '<div class="credential"><span>usuário: <strong>Jardim</strong></span><span class="copy">copiar</span></div>'+
-          '<div class="credential" style="margin-top:8px;"><span>senha: <strong>1914</strong></span><span class="copy">copiar</span></div>'+
-          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" data-goto="passenger">Abrir Portal do Passageiro</button><button type="button" class="actionbtn" data-goto="cadastro">Ver tela de cadastro</button><button type="button" class="actionbtn">Redefinir senha</button></div>'+
+          sectionLabel("Como os passageiros acessam")+
+          '<p style="margin:0 0 14px;color:var(--ink-soft);font-size:.88rem;">'+t("Cada passageiro acessa com o telefone e o documento (CPF) que ele mesmo cadastrou. Não existe usuário/senha compartilhado.")+'</p>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" data-goto="passenger">'+t("Abrir Portal do Passageiro")+'</button><button type="button" class="actionbtn" data-goto="cadastro">'+t("Ver tela de cadastro")+'</button></div>'+
         '</div>'+
         '<div class="card card-pad">'+
           sectionLabel("O que o passageiro vê")+
-          '<div class="settings-row"><div class="txt"><strong>Meu ônibus</strong><span>Número, horário e encarregado</span></div><span class="badge brand">visível</span></div>'+
-          '<div class="settings-row"><div class="txt"><strong>Meu ponto de encontro</strong><span>Endereço, hora e mapa</span></div><span class="badge brand">visível</span></div>'+
-          '<div class="settings-row"><div class="txt"><strong>Status de pagamento</strong><span>Pago, pendente ou atrasado</span></div><span class="badge brand">visível</span></div>'+
-          '<div class="settings-row"><div class="txt"><strong>Lembretes recebidos</strong><span>Histórico de mensagens do WhatsApp</span></div><span class="badge brand">visível</span></div>'+
-          '<div class="settings-row"><div class="txt"><strong>Dados de outros passageiros</strong><span>Nunca exibidos neste acesso</span></div><span class="badge neutral">oculto</span></div>'+
+          row("onibus","Meu ônibus","Número, horário e encarregado")+
+          row("ponto","Meu ponto de encontro","Endereço, hora e mapa")+
+          row("pagamento","Status de pagamento","Pago, pendente ou atrasado")+
+          row("lembretes","Lembretes recebidos","Histórico de mensagens do WhatsApp")+
+          '<div class="settings-row"><div class="txt"><strong>'+t("Dados de outros passageiros")+'</strong><span>'+t("Nunca exibidos neste acesso")+'</span></div><span class="badge neutral">'+t("oculto")+'</span></div>'+
         '</div>'+
       '</div>';
+    },
+    after:function(root){
+      root.querySelectorAll(".vis-toggle").forEach(function(btn){
+        btn.addEventListener("click", async function(){
+          var key = btn.getAttribute("data-key");
+          var next = !btn.classList.contains("on");
+          btn.classList.toggle("on", next);
+          var res = await setPassengerVisibility(key, next);
+          if(res.error){ btn.classList.toggle("on", !next); await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
+          if(currentPassengerReg) renderPassengerPortal(currentPassengerReg);
+        });
+      });
     }
   };
 
@@ -2150,9 +2383,12 @@
             '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">Define quantas contas de encarregado o administrador pode criar em Acesso do Encarregado.</p>'+
           '</div>'+
           '<div class="card card-pad">'+sectionLabel("Segurança")+
-            '<div class="settings-row"><div class="txt"><strong>Autenticação em duas etapas</strong><span>Exigir código extra no login</span></div><button type="button" class="switch on"></button></div>'+
-            '<div class="settings-row"><div class="txt"><strong>Sessão automática</strong><span>Encerrar após 30 min de inatividade</span></div><button type="button" class="switch"></button></div>'+
-            '<div class="settings-row"><div class="txt"><strong>Alertas de novo acesso</strong><span>Notificar por WhatsApp a cada login</span></div><button type="button" class="switch on"></button></div>'+
+            (function(){
+              var sec = getSecurityConfig();
+              return '<div class="settings-row"><div class="txt"><strong>'+t("Sessão automática")+'</strong><span>'+t("Sua sessão será encerrada automaticamente após 30 minutos sem uso.")+'</span></div><button type="button" class="switch sec-toggle'+(sec.session_timeout?' on':'')+'" data-key="session_timeout"></button></div>'+
+                '<div class="settings-row"><div class="txt"><strong>'+t("Autenticação em duas etapas")+'</strong><span>'+t("Requer conexão com a API do WhatsApp Business (ainda não configurada nesta conta).")+'</span></div><button type="button" class="switch sec-toggle'+(sec.twofa?' on':'')+'" data-key="twofa"></button></div>'+
+                '<div class="settings-row"><div class="txt"><strong>'+t("Alertas de novo acesso")+'</strong><span>'+t("Requer conexão com a API do WhatsApp Business (ainda não configurada nesta conta).")+'</span></div><button type="button" class="switch sec-toggle'+(sec.login_alerts?' on':'')+'" data-key="login_alerts"></button></div>';
+            })()+
           '</div>'+
         '</div>'+
       '</div>';
@@ -2171,6 +2407,16 @@
           if(okBox) okBox.hidden = false;
         });
       }
+      root.querySelectorAll(".sec-toggle").forEach(function(sw){
+        sw.addEventListener("click", async function(){
+          var key = sw.getAttribute("data-key");
+          var next = !sw.classList.contains("on");
+          sw.classList.toggle("on", next);
+          var res = await setSecurityConfig(key, next);
+          if(res.error){ sw.classList.toggle("on", !next); await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
+          if(key === "session_timeout") armInactivityLogout();
+        });
+      });
     }
   };
 
@@ -2190,7 +2436,7 @@
       var encCards = encs.length ? encs.map(function(c){
         return '<div class="role-card" style="margin-bottom:10px;">'+
             '<div class="role-ic" style="background:var(--brand-soft);color:var(--brand);">'+ICONS.pin+'</div>'+
-            '<h4>'+c.name+'</h4><p>'+(c.bus_number ? (t("Ônibus")+" "+c.bus_number) : t("Sem ônibus atribuído"))+(c.phone?(' · '+c.phone):'')+'</p>'+
+            '<h4>'+c.name+'</h4><p>'+(c.bus_number ? (t("Ônibus")+" "+c.bus_number) : t("Sem ônibus atribuído"))+(c.phone?(' · '+c.phone):'')+(c.access_code?(' · '+t("Código")+': '+c.access_code):'')+'</p>'+
           '</div>';
       }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum encarregado cadastrado ainda. Cadastre em Frota & Encarregados.")+'</p>');
       return '<div class="grid split-58">'+
@@ -2446,6 +2692,39 @@
           if(note){ note.hidden = false; }
         });
       }
+
+      /* ---- pontos de encontro (cartão de Configurações) ---- */
+      var cfgAddPontoBtn = root.querySelector("#cfgAddPontoBtn");
+      if(cfgAddPontoBtn){
+        cfgAddPontoBtn.addEventListener("click", async function(){
+          var mp = await promptMeetingPointFields();
+          if(!mp) return;
+          var res = await dbInsertMeetingPoint(mp);
+          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
+          rerenderViews();
+        });
+      }
+      root.querySelectorAll(".cfg-edit-ponto").forEach(function(btn){
+        btn.addEventListener("click", async function(){
+          var id = btn.getAttribute("data-id");
+          var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === id; });
+          var updated = await promptMeetingPointFields(mp || {});
+          if(!updated) return;
+          var res = await dbUpdateMeetingPoint(id, updated);
+          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
+          rerenderViews();
+        });
+      });
+      root.querySelectorAll(".cfg-del-ponto").forEach(function(btn){
+        btn.addEventListener("click", async function(){
+          var id = btn.getAttribute("data-id"), name = btn.getAttribute("data-name");
+          var ok = await jvConfirm(t("Deseja realmente excluir o ponto de encontro")+' "'+name+'"?', {title:t("Excluir ponto de encontro"), danger:true, okLabel:t("Excluir")});
+          if(!ok) return;
+          var res = await dbDeleteMeetingPoint(id);
+          if(res.error){ await jvAlert(t("Não foi possível excluir: ") + res.error.message); return; }
+          rerenderViews();
+        });
+      });
     }
   };
 
@@ -2486,19 +2765,30 @@
 
   /* ================= TOP-LEVEL SCREENS (login / cadastro / portals / erp) ================= */
   var screenIds = ["login","cadastro","passenger","encarregado","erp"];
-  function goScreen(id){
+  var currentScreen = "login";
+  function goScreen(id, opts){
     if(screenIds.indexOf(id) === -1) return;
+    opts = opts || {};
     screenIds.forEach(function(s){
       var node = document.getElementById("screen-"+s);
       if(node) node.hidden = (s !== id);
     });
-    document.querySelectorAll(".previewbar [data-screen]").forEach(function(b){
-      b.classList.toggle("active", b.getAttribute("data-screen") === id);
-    });
     window.scrollTo(0,0);
+    if(!opts.fromHistory){
+      try{
+        if(id === currentScreen){ history.replaceState({jvScreen:id}, "", "#"+id); }
+        else{ history.pushState({jvScreen:id}, "", "#"+id); }
+      }catch(e){}
+    }
+    currentScreen = id;
   }
-  document.querySelectorAll(".previewbar [data-screen]").forEach(function(b){
-    b.addEventListener("click", function(){ goScreen(b.getAttribute("data-screen")); });
+  window.addEventListener("popstate", function(e){
+    var id = (e.state && e.state.jvScreen) || (location.hash||"").replace("#","");
+    if(screenIds.indexOf(id) !== -1){
+      goScreen(id, {fromHistory:true});
+    } else {
+      goScreen("login", {fromHistory:true});
+    }
   });
   document.addEventListener("click", function(e){
     var t = e.target.closest("[data-goto]");
@@ -2553,14 +2843,20 @@
       if(sub) sub.textContent = STATE.eventName + " · " + (companions.length ? (t("Grupo de")+" "+(companions.length+1)+" "+t("pessoas")) : t("Inscrição confirmada"));
     }
     var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === reg.meeting_point_id; });
+    var vis = getPassengerVisibility();
     var cards = document.querySelectorAll("#screen-passenger .portal-card");
     if(cards[0]){
-      cards[0].querySelector(".v").textContent = reg.bus_number ? (t("Ônibus")+" "+reg.bus_number) : t("Ainda não atribuído");
-      cards[0].querySelector(".sub").textContent = mp ? mp.name : t("Ponto de encontro ainda não atribuído");
+      cards[0].hidden = !(vis.onibus || vis.ponto);
+      cards[0].querySelector(".v").textContent = vis.onibus ? (reg.bus_number ? (t("Ônibus")+" "+reg.bus_number) : t("Ainda não atribuído")) : t("Oculto pela administração");
+      cards[0].querySelector(".sub").textContent = vis.ponto ? (mp ? mp.name : t("Ponto de encontro ainda não atribuído")) : "";
       var mapLink = cards[0].querySelector("a.actionbtn");
-      if(mapLink) mapLink.href = mp ? (mp.maps_url || ("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent((mp.address||mp.name)+" Itatiba SP"))) : "#";
+      if(mapLink){
+        if(vis.ponto){ mapLink.href = mp ? (mp.maps_url || ("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent((mp.address||mp.name)+" Itatiba SP"))) : "#"; mapLink.hidden = false; }
+        else mapLink.hidden = true;
+      }
     }
     if(cards[1]){
+      cards[1].hidden = !vis.pagamento;
       var pay = PAY_LABEL[reg.payment_status] || PAY_LABEL.pendente;
       var vEl = cards[1].querySelector(".v"); if(vEl){ vEl.textContent = money(formatBRL(Number(reg.total_amount||0))); vEl.removeAttribute("data-money"); }
       var pillEl = cards[1].querySelector(".pill");
@@ -2588,7 +2884,8 @@
       }
     }
     if(cards[3]){
-      var notifs = (DATA.notifications||[]).slice(0,5);
+      cards[3].hidden = !vis.lembretes;
+      var notifs = (DATA.notifications||[]).filter(function(n){ return n.target === "todos" || n.target === "passageiros"; }).slice(0,5);
       var body = notifs.length ? notifs.map(function(n){
         var when = n.created_at ? new Date(n.created_at).toLocaleDateString(STATE.lang==="es"?"es-AR":"pt-BR") : "";
         return '<div class="bot-line in" style="padding-top:8px;"><span class="who">'+when+'</span><p>'+n.title+(n.message?(': '+n.message):'')+'</p></div>';
@@ -2867,55 +3164,200 @@
 
   /* ---- encarregado checklist ---- */
   var encList = document.getElementById("encarregadoList");
-  var encPaxDemo = [
-    {name:"Marcos A. Ferreira", sub:"Ônibus 02 · Pago", on:true},
-    {name:"Talita R. Souza", sub:"Ônibus 02 · Pago", on:true},
-    {name:"Renato C. Alves", sub:"Ônibus 01 · Atrasado", on:false},
-    {name:"Simone D. Rocha", sub:"Ônibus 02 · Atrasado", on:false},
-    {name:"Ester M. Costa", sub:"Ônibus 01 · Pago", on:false},
-    {name:"Josué B. Andrade", sub:"Ônibus 02 · Pendente", on:false},
-    {name:"Aparecida N. Melo", sub:"Ônibus 01 · Pendente", on:true}
-  ];
   var checkSvg = '<svg viewBox="0 0 24 24" fill="none" style="width:12px;height:12px;"><path d="m5 12.5 4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  function renderEnc(){
-    if(!encList) return;
-    var hasReal = DATA.loaded;
-    if(hasReal){
-      var rows = [];
-      DATA.registrations.forEach(function(r){
-        var payLbl = t((PAY_LABEL[r.payment_status]||PAY_LABEL.pendente)[1]);
-        (r.passengers||[{full_name:r.titular_name, id:r.id}]).forEach(function(p){
-          rows.push({name:p.full_name, sub:payLbl, on:!!r.checked_in, regId:r.id});
-        });
+
+  /* ---- encarregado: real login (código de acesso definido pela administração em Frota & Encarregados) ---- */
+  var currentEncarregado = null;
+  var encSelectedDay = "";
+  var encLoginNext = document.getElementById("encLoginNext");
+  if(encLoginNext){
+    encLoginNext.addEventListener("click", async function(){
+      var errBox = document.getElementById("encLoginErr");
+      if(errBox) errBox.hidden = true;
+      var codeVal = ((document.getElementById("encLoginCodeInput")||{}).value||"").trim();
+      if(!codeVal){
+        if(errBox){ errBox.textContent = t("Informe o código de acesso."); errBox.hidden = false; }
+        return;
+      }
+      if(!dbOk()){
+        if(errBox){ errBox.textContent = t("Banco de dados não conectado."); errBox.hidden = false; }
+        return;
+      }
+      encLoginNext.disabled = true;
+      var oldTxt = encLoginNext.textContent;
+      encLoginNext.textContent = t("Entrando…");
+      await loadAllData();
+      encLoginNext.disabled = false;
+      encLoginNext.textContent = oldTxt;
+      var found = (DATA.encarregados||[]).find(function(e){
+        return e.access_code && String(e.access_code).trim().toLowerCase() === codeVal.toLowerCase();
       });
-      encList.innerHTML = rows.length ? rows.map(function(p,i){
-        return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'" data-reg="'+p.regId+'">'+(p.on?checkSvg:'')+'</button>'+
-          '<div style="flex:1;min-width:0;"><div class="nm">'+p.name+'</div><div class="sub">'+p.sub+'</div></div></div>';
-      }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum passageiro cadastrado ainda.")+'</p>');
-      encList.querySelectorAll(".cb").forEach(function(btn){
-        btn.addEventListener("click", async function(){
-          var regId = btn.getAttribute("data-reg");
-          var reg = DATA.registrations.find(function(r){ return r.id === regId; });
-          var res = await dbUpdateRegistration(regId, {checked_in: !(reg && reg.checked_in)});
-          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
-          renderEnc();
-        });
-      });
+      if(!found){
+        if(errBox){ errBox.textContent = t("Código de acesso inválido. Verifique com a administração."); errBox.hidden = false; }
+        return;
+      }
+      currentEncarregado = found;
+      encSelectedDay = "";
+      renderEncarregadoIdentity();
+      renderEncDayTabs();
+      renderEnc();
+      renderEncPontos();
+      renderEncAvisos();
+      goScreen("encarregado");
+    });
+  }
+
+  function renderEncarregadoIdentity(){
+    var nameEl = document.getElementById("encHeaderName"), avEl = document.getElementById("encAvatar"), subEl = document.getElementById("encarregadoEventSub");
+    if(!currentEncarregado){
+      if(nameEl) nameEl.textContent = t("Encarregado");
+      if(avEl) avEl.textContent = "--";
+      if(subEl) subEl.textContent = t("Encarregado");
       return;
     }
-    encList.innerHTML = encPaxDemo.map(function(p,i){
-      return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'" data-idx="'+i+'">'+(p.on?checkSvg:'')+'</button>'+
-        '<div style="flex:1;min-width:0;"><div class="nm">'+p.name+'</div><div class="sub">'+p.sub+'</div></div></div>';
-    }).join('');
-    encList.querySelectorAll(".cb").forEach(function(btn){
+    if(nameEl) nameEl.textContent = currentEncarregado.name;
+    if(avEl) avEl.textContent = initials(currentEncarregado.name);
+    if(subEl) subEl.textContent = t("Encarregado") + " · " + (currentEncarregado.bus_number ? (t("Ônibus")+" "+currentEncarregado.bus_number) : STATE.eventName);
+  }
+
+  function encMyRegs(){
+    if(!currentEncarregado) return [];
+    var bus = String(currentEncarregado.bus_number||"").trim().toLowerCase();
+    return (DATA.registrations||[]).filter(function(r){ return bus && String(r.bus_number||"").trim().toLowerCase() === bus; });
+  }
+
+  function renderEncDayTabs(){
+    var wrap = document.getElementById("encDayTabs");
+    if(!wrap) return;
+    var days = [];
+    encMyRegs().forEach(function(r){
+      var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+      if(mp && mp.day_label && days.indexOf(mp.day_label) === -1) days.push(mp.day_label);
+    });
+    var html = '<button type="button" class="daytab'+(encSelectedDay===""?' active':'')+'" data-day="">'+t("Todos os dias")+'</button>';
+    days.forEach(function(d){
+      html += '<button type="button" class="daytab'+(encSelectedDay===d?' active':'')+'" data-day="'+d.replace(/"/g,'&quot;')+'">'+d+'</button>';
+    });
+    wrap.innerHTML = html;
+    wrap.querySelectorAll(".daytab").forEach(function(btn){
       btn.addEventListener("click", function(){
-        var idx = +btn.getAttribute("data-idx");
-        encPaxDemo[idx].on = !encPaxDemo[idx].on;
+        encSelectedDay = btn.getAttribute("data-day") || "";
+        renderEncDayTabs();
         renderEnc();
       });
     });
   }
+
+  function renderEnc(){
+    if(!encList) return;
+    if(!currentEncarregado){
+      encList.innerHTML = '<p class="muted" style="font-size:.85rem;">'+t("Faça login como encarregado para ver seus passageiros.")+'</p>';
+      var t0=document.getElementById("encStatTotal"), p0=document.getElementById("encStatPresent"), m0=document.getElementById("encStatMissing");
+      if(t0) t0.textContent="0"; if(p0) p0.textContent="0"; if(m0) m0.textContent="0";
+      return;
+    }
+    var regs = encMyRegs().filter(function(r){
+      if(!encSelectedDay) return true;
+      var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+      return mp && mp.day_label === encSelectedDay;
+    });
+    var searchVal = ((document.getElementById("encSearchInput")||{}).value||"").trim().toLowerCase();
+    var rows = [];
+    regs.forEach(function(r){
+      var payLbl = t((PAY_LABEL[r.payment_status]||PAY_LABEL.pendente)[1]);
+      (r.passengers||[{full_name:r.titular_name, id:r.id}]).forEach(function(p){
+        if(searchVal && p.full_name.toLowerCase().indexOf(searchVal) === -1) return;
+        rows.push({name:p.full_name, sub:payLbl, on:!!r.checked_in, regId:r.id});
+      });
+    });
+    var total = rows.length, present = rows.filter(function(r){ return r.on; }).length;
+    var t0=document.getElementById("encStatTotal"), p0=document.getElementById("encStatPresent"), m0=document.getElementById("encStatMissing");
+    if(t0) t0.textContent = String(total);
+    if(p0) p0.textContent = String(present);
+    if(m0) m0.textContent = String(total-present);
+    encList.innerHTML = rows.length ? rows.map(function(p,i){
+      return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'" data-reg="'+p.regId+'">'+(p.on?checkSvg:'')+'</button>'+
+        '<div style="flex:1;min-width:0;"><div class="nm">'+p.name+'</div><div class="sub">'+p.sub+'</div></div></div>';
+    }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum passageiro cadastrado neste ônibus ainda.")+'</p>');
+    encList.querySelectorAll(".cb").forEach(function(btn){
+      btn.addEventListener("click", async function(){
+        var regId = btn.getAttribute("data-reg");
+        var reg = DATA.registrations.find(function(r){ return r.id === regId; });
+        var res = await dbUpdateRegistration(regId, {checked_in: !(reg && reg.checked_in)});
+        if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
+        renderEnc();
+      });
+    });
+  }
+  var encSearchInput = document.getElementById("encSearchInput");
+  if(encSearchInput) encSearchInput.addEventListener("input", function(){ renderEnc(); });
+
+  var encMarkAllBtn = document.getElementById("encMarkAllBtn");
+  if(encMarkAllBtn){
+    encMarkAllBtn.addEventListener("click", async function(){
+      var regs = encMyRegs().filter(function(r){
+        if(!encSelectedDay) return true;
+        var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === r.meeting_point_id; });
+        return mp && mp.day_label === encSelectedDay;
+      });
+      if(!regs.length){ await jvAlert(t("Nenhum passageiro para marcar.")); return; }
+      encMarkAllBtn.disabled = true;
+      for(var i=0;i<regs.length;i++){ await dbUpdateRegistration(regs[i].id, {checked_in:true}); }
+      encMarkAllBtn.disabled = false;
+      renderEnc();
+    });
+  }
+
+  var encSendListBtn = document.getElementById("encSendListBtn");
+  if(encSendListBtn){
+    encSendListBtn.addEventListener("click", async function(){
+      if(!currentEncarregado){ await jvAlert(t("Faça login como encarregado primeiro.")); return; }
+      var regs = encMyRegs();
+      var present = regs.filter(function(r){ return r.checked_in; }).length;
+      var total = regs.length;
+      if(!dbOk()){ await jvAlert(t("Banco de dados não conectado.")); return; }
+      encSendListBtn.disabled = true;
+      try{
+        await supa.from("audit_log").insert({
+          action: "encarregado_enviou_lista",
+          target_name: currentEncarregado.name + " — " + t("Ônibus") + " " + (currentEncarregado.bus_number||"—"),
+          reason: t("Presentes") + ": " + present + "/" + total + (encSelectedDay ? (" · " + encSelectedDay) : "")
+        });
+        await jvAlert(t("Lista enviada à administração com sucesso."));
+      }catch(e){
+        await jvAlert(t("Não foi possível enviar: ") + ((e && e.message) || String(e)));
+      }
+      encSendListBtn.disabled = false;
+    });
+  }
+
+  function renderEncPontos(){
+    var card = document.getElementById("encPontosCard");
+    if(!card) return;
+    var pts = DATA.meetingPoints || [];
+    var body = pts.length ? pts.map(function(mp){
+      return '<div class="encontro-card"><span class="encontro-time">—</span><div class="encontro-body"><strong>'+mp.name+'</strong><span>'+(mp.address||'')+(mp.day_label?(' · '+mp.day_label):'')+'</span></div>'+
+        '<a class="icon-btn call" title="'+t("Ver no mapa")+'" target="_blank" rel="noopener" href="'+(mp.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((mp.address||mp.name)+" Itatiba SP")))+'" style="margin-left:6px;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>';
+    }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum ponto de encontro cadastrado ainda.")+'</p>');
+    card.innerHTML = '<p style="margin:0 0 12px;color:var(--ink-soft);font-size:.85rem;">'+t("Pontos de encontro cadastrados pela administração.")+'</p>'+body;
+  }
+
+  function renderEncAvisos(){
+    var card = document.getElementById("encAvisosCard");
+    if(!card) return;
+    var notifs = (DATA.notifications||[]).filter(function(n){ return n.target === "todos" || n.target === "encarregados"; }).slice(0,15);
+    var body = notifs.length ? notifs.map(function(n){
+      var when = n.created_at ? new Date(n.created_at).toLocaleDateString(STATE.lang==="es"?"es-AR":"pt-BR") : "";
+      return '<div class="bot-line in"><span class="who">'+when+'</span><p>'+n.title+(n.message?(': '+n.message):'')+'</p></div>';
+    }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum aviso recebido ainda.")+'</p>');
+    card.innerHTML = '<p style="margin:0 0 4px;color:var(--ink-soft);font-size:.85rem;">'+t("Avisos e lembretes enviados pela administração.")+'</p>'+body;
+  }
+
+  renderEncarregadoIdentity();
+  renderEncDayTabs();
   if(encList) renderEnc();
+  renderEncPontos();
+  renderEncAvisos();
 
   /* ---- floating help widget ---- */
   var helpFab = document.getElementById("helpFab");
@@ -2954,7 +3396,8 @@
     });
   });
 
-  goScreen("login");
+  try{ history.replaceState({jvScreen:"login"}, "", "#login"); }catch(e){}
+  goScreen("login", {fromHistory:true});
 
   markI18n();
   applyI18n();
@@ -3014,7 +3457,10 @@
       sec.innerHTML = views[k].render();
       if(views[k].after) views[k].after(sec);
     });
+    renderEncDayTabs();
     renderEnc();
+    renderEncPontos();
+    renderEncAvisos();
     updateSidebarCounts();
   }
   loadAllData().then(function(ok){ if(ok) rerenderViews(); });
