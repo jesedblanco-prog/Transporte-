@@ -573,14 +573,11 @@
 
       <div class="login-panel active" data-login-panel="passageiro">
         <div id="passLoginStep1">
-          <div class="field" style="margin-bottom:12px;"><label>Usuário</label><input type="text" value="Jardim"></div>
-          <div class="field" style="margin-bottom:16px;"><label>Senha</label><input type="password" value="1914"></div>
+          <div class="field" style="margin-bottom:12px;"><label id="passPhoneLabel">Telefone (WhatsApp)</label><input type="text" id="passPhoneInput" placeholder="(11) 90000-0000"></div>
+          <div class="field" style="margin-bottom:12px;"><label id="passDocLabel">Documento (CPF)</label><input type="text" id="passDocInput" placeholder="000.000.000-00"></div>
+          <p id="passLoginErr" hidden style="margin:0 0 12px;font-size:.8rem;color:var(--st-critical);font-weight:600;"></p>
           <button type="button" class="actionbtn primary full-btn" id="passLoginNext">Entrar como passageiro</button>
-        </div>
-        <div id="passLoginStep2" hidden>
-          <p class="i18n-note" style="margin:0 0 14px;color:var(--ink-soft);font-size:.85rem;">Este login é compartilhado por todos os passageiros. Confirme o WhatsApp usado na sua inscrição para vermos seus dados.</p>
-          <div class="field" style="margin-bottom:16px;"><label>WhatsApp</label><input type="text" id="passWhatsInput" placeholder="(11) 90000-0000"></div>
-          <button type="button" class="actionbtn primary full-btn" data-goto="passenger">Continuar</button>
+          <div class="login-foot"><span id="passRegisterNote">Ainda não se inscreveu? </span><a data-goto="cadastro" data-i18n="Faça sua inscrição aqui" style="color:var(--brand);font-weight:700;cursor:pointer;" id="passRegisterLink">Faça sua inscrição aqui</a></div>
         </div>
       </div>
 
@@ -1334,7 +1331,21 @@
     "Sem ponto atribuído":"Sin punto asignado", "visão do encarregado":"vista del encargado",
     "Nenhum passageiro cadastrado ainda.":"Ningún pasajero registrado todavía.",
     "Nenhum encarregado cadastrado ainda. Cadastre em Frota & Encarregados.":"Ningún encargado registrado todavía. Regístrelo en Flota y Encargados.",
-    "Sem ônibus atribuído":"Sin autobús asignado"
+    "Sem ônibus atribuído":"Sin autobús asignado",
+    "Copiar o link desta visualização":"Copiar el enlace de esta vista",
+    "Link copiado!":"¡Enlace copiado!",
+    "Lembretes enviados":"Recordatorios enviados", "Resumo":"Resumen", "Pessoas alcançadas":"Personas alcanzadas",
+    "Informe seu telefone e documento.":"Ingrese su teléfono y documento.",
+    "Telefone ou documento não encontrados. Verifique os dados ou faça sua inscrição.":"Teléfono o documento no encontrados. Verifique los datos o haga su inscripción.",
+    "Ainda não atribuído":"Todavía no asignado",
+    "Ponto de encontro ainda não atribuído":"Punto de encuentro todavía no asignado",
+    "Forma de pagamento não informada":"Forma de pago no informada",
+    "Nenhum lembrete recebido ainda.":"Ningún recordatorio recibido todavía.",
+    "Inscrição confirmada":"Inscripción confirmada",
+    "Ainda não se inscreveu? ":"¿Todavía no te inscribiste? ",
+    "Faça sua inscrição aqui":"Haz tu inscripción aquí",
+    "Telefone (WhatsApp)":"Teléfono (WhatsApp)", "Documento (CPF)":"Documento (CPF)",
+    "Olá":"Hola"
   };
   function t(s){
     if(STATE.lang === "es" && STRINGS_ES.hasOwnProperty(s)) return STRINGS_ES[s];
@@ -1768,19 +1779,20 @@
   views.lembretes = {
     title:"Lembretes",
     render:function(){
+      var notifs = DATA.notifications || [];
+      var pax = (DATA.registrations||[]).reduce(function(a,r){ return a+(r.people_count||1); },0);
+      var rows = notifs.length ? notifs.map(function(n){
+        var when = n.created_at ? new Date(n.created_at).toLocaleString(STATE.lang==="es"?"es-AR":"pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "—";
+        return '<tr><td>'+n.title+'</td><td class="tabular">'+pax+'</td><td>WhatsApp</td><td>'+when+'</td></tr>';
+      }).join('') : ('<tr><td colspan="4" style="color:var(--ink-mute);">'+t("Nenhum lembrete enviado ainda.")+'</td></tr>');
       return '<div class="grid split-58">'+
-        '<div class="card"><div class="card-head"><h3>Próximos disparos</h3></div><div class="card-pad">'+
-          '<div class="table-scroll"><table class="data"><thead><tr><th>Lembrete</th><th>Público</th><th>Canal</th><th>Envio</th></tr></thead><tbody>'+
-            '<tr><td>Confirmação de vaga</td><td class="tabular">79</td><td>WhatsApp</td><td>Hoje, 18:00</td></tr>'+
-            '<tr><td>Horário de embarque</td><td class="tabular">612</td><td>WhatsApp</td><td>16 jul, 20:00</td></tr>'+
-            '<tr><td>Documentos necessários</td><td class="tabular">612</td><td>WhatsApp</td><td>15 jul, 09:00</td></tr>'+
-            '<tr><td>Pagamento em atraso</td><td class="tabular">12</td><td>WhatsApp</td><td>Hoje, 12:00</td></tr>'+
-          '</tbody></table></div>'+
-          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" id="sendReminderBtn">Criar lembrete</button><button type="button" class="actionbtn">Ver histórico</button></div>'+
-          '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">Ao enviar, o passageiro e o encarregado recebem a notificação com o tom de mensagem padrão do próprio celular deles.</p>'+
+        '<div class="card"><div class="card-head"><h3>'+t("Lembretes enviados")+'</h3></div><div class="card-pad">'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>'+t("Lembrete")+'</th><th>'+t("Público")+'</th><th>'+t("Canal")+'</th><th>'+t("Envio")+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" id="sendReminderBtn">'+t("Criar lembrete")+'</button></div>'+
+          '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">'+t("Ao enviar, o passageiro e o encarregado recebem a notificação com o tom de mensagem padrão do próprio celular deles.")+'</p>'+
         '</div></div>'+
-        '<div class="card"><div class="card-head"><h3>Entrega (7 dias)</h3></div><div class="card-pad">'+
-          barChart([{label:"Entregue", value:96, color:"var(--st-good)"},{label:"Lido", value:81, color:"var(--c-1)"},{label:"Falhou", value:3, color:"var(--st-critical)"}],{max:100,suffix:"%"})+
+        '<div class="card"><div class="card-head"><h3>'+t("Resumo")+'</h3></div><div class="card-pad">'+
+          '<div class="grid cols-2">'+metricMini(t("Lembretes enviados"), String(notifs.length), "var(--c-1)")+metricMini(t("Pessoas alcançadas"), String(pax), "var(--st-good)")+'</div>'+
         '</div></div>'+
       '</div>';
     },
@@ -2270,26 +2282,9 @@
         '<p id="backupOk" hidden style="color:var(--st-good);font-size:.8rem;margin:4px 0 0;">Backup baixado com sucesso.</p>'+
         '<p id="resetErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:4px 0 0;"></p>'+
       '</div>'+
-      '<div class="card card-pad" style="margin-top:16px;">'+sectionLabel("Compartilhar & Código")+
-        '<p class="i18n-note" style="margin:0 0 14px;color:var(--ink-soft);font-size:.85rem;">Compartilhe o link do sistema ou edite as configurações avançadas por código — protegido pela senha do administrador.</p>'+
-        '<div id="codeGate" class="grid cols-2" style="align-items:end;">'+
-          '<div class="field"><label>Senha do administrador</label><input type="password" id="codePassInput" placeholder="••••••••"></div>'+
-          '<div><button type="button" class="actionbtn primary" id="unlockCodeBtn">Desbloquear</button></div>'+
-        '</div>'+
-        '<p id="codePassErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:8px 0 0;">Senha incorreta. Tente novamente.</p>'+
-        '<div id="codePanel" hidden>'+
-          '<div class="grid cols-2" style="margin-bottom:16px;">'+
-            '<div>'+
-              '<div class="settings-row"><div class="txt"><strong>Compartilhar sistema</strong><span>Copiar o link desta visualização</span></div><button type="button" class="actionbtn" id="copyShareLink">Copiar link do sistema</button></div>'+
-              '<p id="copyShareNote" hidden style="color:var(--st-good);font-size:.8rem;margin:6px 0 0;">Link copiado!</p>'+
-            '</div>'+
-            '<div class="settings-row"><div class="txt"><strong>Link somente leitura</strong><span>Para encarregados sem edição</span></div><button type="button" class="switch"></button></div>'+
-          '</div>'+
-          '<div class="field" style="margin-bottom:8px;"><label>Editar configurações via código (JSON)</label><textarea id="configJsonArea" rows="7" style="font-family:\'IBM Plex Mono\',monospace;font-size:.78rem;padding:10px;border-radius:9px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink);width:100%;resize:vertical;"></textarea></div>'+
-          '<div class="actions-row"><button type="button" class="actionbtn primary" id="applyConfigJson">Aplicar alterações</button></div>'+
-          '<p id="codeJsonOk" hidden style="color:var(--st-good);font-size:.8rem;margin:8px 0 0;">Configurações aplicadas com sucesso.</p>'+
-          '<p id="codeJsonErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:8px 0 0;">JSON inválido — verifique a sintaxe.</p>'+
-        '</div>'+
+      '<div class="card card-pad" style="margin-top:16px;">'+sectionLabel("Compartilhar sistema")+
+        '<div class="settings-row"><div class="txt"><strong>'+t("Compartilhar sistema")+'</strong><span>'+t("Copiar o link desta visualização")+'</span></div><button type="button" class="actionbtn" id="copyShareLink">'+t("Copiar link do sistema")+'</button></div>'+
+        '<p id="copyShareNote" hidden style="color:var(--st-good);font-size:.8rem;margin:6px 0 0;">'+t("Link copiado!")+'</p>'+
       '</div>';
     },
     after:function(root){
@@ -2440,22 +2435,7 @@
         });
       }
 
-      /* ---- share & code (password gate) ---- */
-      var unlockBtn = root.querySelector("#unlockCodeBtn");
-      if(unlockBtn){
-        unlockBtn.addEventListener("click", function(){
-          var pass = root.querySelector("#codePassInput");
-          var gate = root.querySelector("#codeGate");
-          var panel = root.querySelector("#codePanel");
-          var err = root.querySelector("#codePassErr");
-          if(pass && pass.value === "admin123"){
-            if(gate) gate.hidden = true;
-            if(panel) panel.hidden = false;
-          } else if(err){
-            err.hidden = false;
-          }
-        });
-      }
+      /* ---- share system link ---- */
       var copyLinkBtn = root.querySelector("#copyShareLink");
       if(copyLinkBtn){
         copyLinkBtn.addEventListener("click", function(){
@@ -2466,27 +2446,6 @@
           if(note){ note.hidden = false; }
         });
       }
-      var applyJsonBtn = root.querySelector("#applyConfigJson");
-      if(applyJsonBtn){
-        applyJsonBtn.addEventListener("click", function(){
-          var ta = root.querySelector("#configJsonArea");
-          var jerr = root.querySelector("#codeJsonErr");
-          var jok = root.querySelector("#codeJsonOk");
-          try{
-            var parsed = JSON.parse(ta.value);
-            STATE = Object.assign(STATE, parsed);
-            persistState();
-            applyI18n();
-            if(jerr) jerr.hidden = true;
-            if(jok) jok.hidden = false;
-          }catch(e){
-            if(jok) jok.hidden = true;
-            if(jerr) jerr.hidden = false;
-          }
-        });
-      }
-      var jsonArea = root.querySelector("#configJsonArea");
-      if(jsonArea){ jsonArea.value = JSON.stringify(STATE, null, 2); }
     }
   };
 
@@ -2536,10 +2495,6 @@
     document.querySelectorAll(".previewbar [data-screen]").forEach(function(b){
       b.classList.toggle("active", b.getAttribute("data-screen") === id);
     });
-    if(id === "login"){
-      var s1 = document.getElementById("passLoginStep1"), s2 = document.getElementById("passLoginStep2");
-      if(s1 && s2){ s1.hidden = false; s2.hidden = true; }
-    }
     window.scrollTo(0,0);
   }
   document.querySelectorAll(".previewbar [data-screen]").forEach(function(b){
@@ -2550,13 +2505,97 @@
     if(t){ goScreen(t.getAttribute("data-goto")); }
   });
 
-  /* ---- passenger login: shared login + whatsapp confirmation step ---- */
+  /* ---- passenger login: identify by phone + document from their own registration ---- */
+  function normPhone(v){ return (v||"").replace(/\D/g,""); }
+  function normDoc(v){ return (v||"").replace(/\D/g,""); }
+  var currentPassengerReg = null;
   var passLoginNext = document.getElementById("passLoginNext");
   if(passLoginNext){
-    passLoginNext.addEventListener("click", function(){
-      document.getElementById("passLoginStep1").hidden = true;
-      document.getElementById("passLoginStep2").hidden = false;
+    passLoginNext.addEventListener("click", async function(){
+      var errBox = document.getElementById("passLoginErr");
+      if(errBox) errBox.hidden = true;
+      var phoneVal = normPhone((document.getElementById("passPhoneInput")||{}).value);
+      var docVal = normDoc((document.getElementById("passDocInput")||{}).value);
+      if(!phoneVal || !docVal){
+        if(errBox){ errBox.textContent = t("Informe seu telefone e documento."); errBox.hidden = false; }
+        return;
+      }
+      if(!dbOk()){
+        if(errBox){ errBox.textContent = t("Banco de dados não conectado."); errBox.hidden = false; }
+        return;
+      }
+      passLoginNext.disabled = true;
+      var oldTxt = passLoginNext.textContent;
+      passLoginNext.textContent = t("Entrando…");
+      await loadAllData();
+      passLoginNext.disabled = false;
+      passLoginNext.textContent = oldTxt;
+      var found = (DATA.registrations||[]).find(function(r){
+        return normPhone(r.phone) === phoneVal && normDoc(r.doc_number) === docVal;
+      });
+      if(!found){
+        if(errBox){ errBox.textContent = t("Telefone ou documento não encontrados. Verifique os dados ou faça sua inscrição."); errBox.hidden = false; }
+        return;
+      }
+      currentPassengerReg = found;
+      renderPassengerPortal(found);
+      goScreen("passenger");
     });
+  }
+
+  function renderPassengerPortal(reg){
+    var companions = (reg.passengers||[]).filter(function(p){ return !p.is_titular; });
+    var head = document.querySelector("#screen-passenger .portal-head");
+    if(head){
+      head.querySelector(".av").textContent = initials(reg.titular_name);
+      head.querySelector("h2").textContent = t("Olá") + ", " + reg.titular_name.split(" ")[0] + " 👋";
+      var sub = head.querySelector("#portalEventSub");
+      if(sub) sub.textContent = STATE.eventName + " · " + (companions.length ? (t("Grupo de")+" "+(companions.length+1)+" "+t("pessoas")) : t("Inscrição confirmada"));
+    }
+    var mp = (DATA.meetingPoints||[]).find(function(m){ return m.id === reg.meeting_point_id; });
+    var cards = document.querySelectorAll("#screen-passenger .portal-card");
+    if(cards[0]){
+      cards[0].querySelector(".v").textContent = reg.bus_number ? (t("Ônibus")+" "+reg.bus_number) : t("Ainda não atribuído");
+      cards[0].querySelector(".sub").textContent = mp ? mp.name : t("Ponto de encontro ainda não atribuído");
+      var mapLink = cards[0].querySelector("a.actionbtn");
+      if(mapLink) mapLink.href = mp ? (mp.maps_url || ("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent((mp.address||mp.name)+" Itatiba SP"))) : "#";
+    }
+    if(cards[1]){
+      var pay = PAY_LABEL[reg.payment_status] || PAY_LABEL.pendente;
+      var vEl = cards[1].querySelector(".v"); if(vEl){ vEl.textContent = money(formatBRL(Number(reg.total_amount||0))); vEl.removeAttribute("data-money"); }
+      var pillEl = cards[1].querySelector(".pill");
+      if(pillEl){ pillEl.className = "pill "+pay[0]; pillEl.innerHTML = '<i class="dotp"></i>'+t(pay[1]); }
+      var subEl = cards[1].querySelector(".sub");
+      if(subEl) subEl.textContent = reg.payment_method ? (t("Forma de pagamento")+": "+reg.payment_method) : t("Forma de pagamento não informada");
+    }
+    if(cards[2]){
+      var enc = (DATA.encarregados||[]).find(function(e){ return e.bus_number && reg.bus_number && String(e.bus_number)===String(reg.bus_number); });
+      var nameEl = cards[2].querySelector(".contact-name"), roleEl = cards[2].querySelector(".contact-role"), avEl = cards[2].querySelector(".avatar");
+      var waBtn = cards[2].querySelector(".icon-btn.whats"), callBtn = cards[2].querySelector(".icon-btn.call");
+      if(enc){
+        if(nameEl) nameEl.textContent = enc.name;
+        if(roleEl) roleEl.textContent = enc.bus_number ? (t("Ônibus")+" "+enc.bus_number) : "";
+        if(avEl) avEl.textContent = initials(enc.name);
+        var phoneDigits = (enc.phone||"").replace(/\D/g,"");
+        if(waBtn){ if(phoneDigits){ waBtn.onclick = function(){ window.open("https://wa.me/"+phoneDigits, "_blank"); }; waBtn.hidden = false; } else waBtn.hidden = true; }
+        if(callBtn){ if(phoneDigits){ callBtn.onclick = function(){ location.href = "tel:"+phoneDigits; }; callBtn.hidden = false; } else callBtn.hidden = true; }
+      } else {
+        if(nameEl) nameEl.textContent = t("Ainda não atribuído");
+        if(roleEl) roleEl.textContent = "";
+        if(avEl) avEl.textContent = "--";
+        if(waBtn) waBtn.hidden = true;
+        if(callBtn) callBtn.hidden = true;
+      }
+    }
+    if(cards[3]){
+      var notifs = (DATA.notifications||[]).slice(0,5);
+      var body = notifs.length ? notifs.map(function(n){
+        var when = n.created_at ? new Date(n.created_at).toLocaleDateString(STATE.lang==="es"?"es-AR":"pt-BR") : "";
+        return '<div class="bot-line in" style="padding-top:8px;"><span class="who">'+when+'</span><p>'+n.title+(n.message?(': '+n.message):'')+'</p></div>';
+      }).join('') : ('<p class="muted" style="font-size:.85rem;">'+t("Nenhum lembrete recebido ainda.")+'</p>');
+      var kEl = cards[3].querySelector(".k");
+      cards[3].innerHTML = (kEl ? kEl.outerHTML : '<div class="k">'+t("Lembretes recebidos")+'</div>') + body;
+    }
   }
 
   /* ---- login role tabs ---- */
@@ -2654,6 +2693,7 @@
 
   /* ---- cadastro chips + submit ---- */
   document.querySelectorAll(".chip-check").forEach(function(chip){
+    if(chip.closest("#paymentMethods")) return; /* payment method chips have their own exclusive-select handler in renderPaymentMethods() */
     chip.addEventListener("click", function(){ chip.classList.toggle("on"); });
   });
   /* ---- admin: forgot password ---- */
