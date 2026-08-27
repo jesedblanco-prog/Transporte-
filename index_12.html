@@ -1,0 +1,2152 @@
+<title>Jardim do Vale ERP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ============ TOKENS ============ */
+  :root{
+    color-scheme: light;
+    --bg:            #f6f6f9;
+    --plane:         #eeeef4;
+    --surface:       #ffffff;
+    --surface-2:     #fbfbfd;
+    --ink:           #1b1c27;
+    --ink-soft:      #565a6e;
+    --ink-mute:      #8b8fa3;
+    --hairline:      #e5e5ee;
+    --hairline-2:    #d6d7e3;
+    --ring:          rgba(27,28,39,0.08);
+
+    --brand:         #2f5fd8;
+    --brand-strong:  #1f3f9e;
+    --brand-soft:    #e9eefb;
+    --brand-ink:     #ffffff;
+    --brand-2:       #4f7fe8;
+
+    /* sidebar (distinct dark plane, premium admin feel) */
+    --side-bg:       #14151f;
+    --side-bg-2:     #1a1b28;
+    --side-ink:      #e9e9f2;
+    --side-ink-mute: #8b8ea3;
+    --side-active:   #23253a;
+    --side-hair:     rgba(233,233,242,0.08);
+
+    /* categorical (validated, dataviz skill default) */
+    --c-1: #2a78d6; --c-2: #eb6834; --c-3: #1baf7a; --c-4: #eda100;
+    --c-5: #e87ba4; --c-6: #008300; --c-7: #4a3aa7; --c-8: #e34948;
+
+    /* status (fixed) */
+    --st-good:     #0ca30c;
+    --st-warning:  #c98200;
+    --st-serious:  #ec835a;
+    --st-critical: #d03b3b;
+
+    --shadow-sm: 0 1px 2px rgba(18,32,26,0.06);
+    --shadow-md: 0 8px 24px -12px rgba(18,32,26,0.22);
+    --shadow-lg: 0 20px 48px -20px rgba(18,32,26,0.35);
+
+    --sbw: 268px;
+    --sbw-collapsed: 76px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --bg:          #15161d;
+      --plane:       #1a1b23;
+      --surface:     #1c1d27;
+      --surface-2:   #21222d;
+      --ink:         #e7e7ee;
+      --ink-soft:    #a9abbc;
+      --ink-mute:    #74778a;
+      --hairline:    #2a2b37;
+      --hairline-2:  #343642;
+      --ring:        rgba(231,231,238,0.07);
+
+      --brand:       #7fa4f2;
+      --brand-strong:#a8c0f7;
+      --brand-soft:  #1c2c4a;
+      --brand-ink:   #0d1420;
+      --brand-2:     #9db8f5;
+
+      --side-bg:     #101019;
+      --side-bg-2:   #161723;
+      --side-ink:    #e9e9f2;
+      --side-ink-mute:#82859a;
+      --side-active: #202234;
+      --side-hair:   rgba(233,233,242,0.07);
+
+      --c-1: #3987e5; --c-2: #d95926; --c-3: #199e70; --c-4: #c98500;
+      --c-5: #d55181; --c-6: #2fa72f; --c-7: #9085e9; --c-8: #e66767;
+
+      --st-good:#2fbf2f; --st-warning:#e0a324; --st-serious:#f0a17c; --st-critical:#e6605f;
+
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+      --shadow-md: 0 10px 28px -14px rgba(0,0,0,0.65);
+      --shadow-lg: 0 22px 50px -20px rgba(0,0,0,0.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:          #15161d;
+    --plane:       #1a1b23;
+    --surface:     #1c1d27;
+    --surface-2:   #21222d;
+    --ink:         #e7e7ee;
+    --ink-soft:    #a9abbc;
+    --ink-mute:    #74778a;
+    --hairline:    #2a2b37;
+    --hairline-2:  #343642;
+    --ring:        rgba(231,231,238,0.07);
+
+    --brand:       #7fa4f2;
+    --brand-strong:#a8c0f7;
+    --brand-soft:  #1c2c4a;
+    --brand-ink:   #0d1420;
+    --brand-2:     #9db8f5;
+
+    --side-bg:     #101019;
+    --side-bg-2:   #161723;
+    --side-ink:    #e9e9f2;
+    --side-ink-mute:#82859a;
+    --side-active: #202234;
+    --side-hair:   rgba(233,233,242,0.07);
+
+    --c-1: #3987e5; --c-2: #d95926; --c-3: #199e70; --c-4: #c98500;
+    --c-5: #d55181; --c-6: #2fa72f; --c-7: #9085e9; --c-8: #e66767;
+
+    --st-good:#2fbf2f; --st-warning:#e0a324; --st-serious:#f0a17c; --st-critical:#e6605f;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+    --shadow-md: 0 10px 28px -14px rgba(0,0,0,0.65);
+    --shadow-lg: 0 22px 50px -20px rgba(0,0,0,0.7);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; }
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing:antialiased; line-height:1.45;
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
+  h1,h2,h3,.display{ font-family:"Sora", system-ui, sans-serif; text-transform:none; letter-spacing:-0.01em; text-wrap:balance; font-weight:700; margin:0; }
+  .mono,.tabular{ font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; }
+  ::selection{ background:var(--brand); color:var(--brand-ink); }
+
+  /* ============ APP SHELL ============ */
+  .app{ display:flex; min-height:100vh; }
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    width:var(--sbw); flex:none; background:var(--side-bg); color:var(--side-ink);
+    display:flex; flex-direction:column; position:sticky; top:0; height:100vh; z-index:40;
+    transition:width 0.22s ease; overflow:hidden;
+  }
+  .sidebar.collapsed{ width:var(--sbw-collapsed); }
+  .side-head{ display:flex; align-items:center; gap:11px; padding:18px 16px; border-bottom:1px solid var(--side-hair); flex:none; }
+  .side-head .glyph{ width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:var(--brand-ink); display:flex; align-items:center; justify-content:center; flex:none; }
+  .side-head .glyph svg{ width:20px; height:20px; }
+  .side-head .txt{ min-width:0; overflow:hidden; white-space:nowrap; }
+  .side-head .txt .n{ font-size:0.95rem; font-weight:600; letter-spacing:0.01em; }
+  .side-head .txt .s{ font-family:"Plus Jakarta Sans"; text-transform:none; font-weight:500; font-size:0.68rem; color:var(--side-ink-mute); }
+  .sidebar.collapsed .side-head .txt{ display:none; }
+
+  .side-collapse{
+    position:absolute; top:20px; right:-11px; width:22px; height:22px; border-radius:50%;
+    background:var(--surface); border:1px solid var(--hairline-2); color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-sm); z-index:5;
+  }
+  .side-collapse svg{ width:12px; height:12px; transition:transform 0.22s ease; }
+  .sidebar.collapsed .side-collapse svg{ transform:rotate(180deg); }
+
+  .side-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; padding:14px 12px 10px; }
+  .side-scroll::-webkit-scrollbar{ width:6px; }
+  .side-scroll::-webkit-scrollbar-thumb{ background:var(--side-hair); border-radius:4px; }
+
+  .side-group-label{ font-size:0.66rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--side-ink-mute); font-weight:700; padding:14px 12px 6px; white-space:nowrap; }
+  .sidebar.collapsed .side-group-label{ opacity:0; height:8px; padding:8px 0 0; overflow:hidden; }
+
+  .nav-item{
+    width:100%; display:flex; align-items:center; gap:12px; padding:9px 12px; border:0; background:transparent;
+    border-radius:10px; cursor:pointer; text-align:left; color:var(--side-ink); margin-bottom:2px; position:relative;
+  }
+  .nav-item:hover{ background:var(--side-hair); }
+  .nav-item.active{ background:var(--side-active); color:#fff; }
+  .nav-item.active::before{ content:""; position:absolute; left:-12px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--brand); }
+  .nav-item .ic{ width:20px; height:20px; flex:none; display:flex; align-items:center; justify-content:center; color:inherit; opacity:0.9; }
+  .nav-item .ic svg{ width:18px; height:18px; }
+  .nav-item .lbl{ flex:1; min-width:0; font-size:0.86rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .nav-item .cnt{ font-family:"IBM Plex Mono",monospace; font-size:0.68rem; font-weight:600; padding:1px 7px; border-radius:999px; background:rgba(255,255,255,0.08); color:var(--side-ink-mute); flex:none; }
+  .nav-item.active .cnt{ background:rgba(255,255,255,0.14); color:#fff; }
+  .nav-item .cnt.warn{ background:color-mix(in oklab, var(--st-warning) 30%, transparent); color:#ffce85; }
+  .sidebar.collapsed .nav-item{ justify-content:center; padding:10px 0; }
+  .sidebar.collapsed .nav-item .lbl,.sidebar.collapsed .nav-item .cnt{ display:none; }
+  .sidebar.collapsed .nav-item.active::before{ left:0; }
+
+  .side-foot{ border-top:1px solid var(--side-hair); padding:12px; flex:none; }
+  .side-user{ display:flex; align-items:center; gap:10px; padding:8px; border-radius:10px; }
+  .side-user:hover{ background:var(--side-hair); cursor:pointer; }
+  .side-user .av{ width:34px; height:34px; border-radius:9px; background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.78rem; flex:none; }
+  .side-user .who{ min-width:0; overflow:hidden; white-space:nowrap; }
+  .side-user .who .n{ font-size:0.82rem; font-weight:600; }
+  .side-user .who .r{ font-size:0.7rem; color:var(--side-ink-mute); }
+  .sidebar.collapsed .side-user .who{ display:none; }
+
+  .side-backdrop{ display:none; }
+
+  /* ---------- main ---------- */
+  .main{ flex:1; min-width:0; display:flex; flex-direction:column; }
+
+  .topbar{
+    position:sticky; top:0; z-index:20; background:color-mix(in oklab, var(--bg) 90%, transparent);
+    backdrop-filter:blur(10px); border-bottom:1px solid var(--hairline);
+  }
+  .topbar-inner{ display:flex; align-items:center; gap:14px; padding:14px 24px; flex-wrap:wrap; }
+  .burger{ display:none; width:36px; height:36px; border-radius:9px; border:1px solid var(--hairline-2); background:var(--surface); align-items:center; justify-content:center; cursor:pointer; flex:none; }
+  .burger svg{ width:17px; height:17px; }
+  .crumbs{ margin-right:auto; min-width:0; }
+  .crumbs .eyebrow{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-mute); font-weight:600; }
+  .crumbs h1{ font-size:1.28rem; margin-top:1px; }
+
+  .searchbar{
+    display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--hairline);
+    border-radius:10px; padding:8px 12px; width:min(320px,32vw); color:var(--ink-mute); box-shadow:var(--shadow-sm);
+  }
+  .searchbar svg{ width:15px; height:15px; flex:none; }
+  .searchbar input{ border:0; outline:0; background:transparent; font:inherit; color:var(--ink); width:100%; font-size:0.84rem; }
+  .searchbar kbd{ font-family:"IBM Plex Mono",monospace; font-size:0.66rem; background:var(--plane); border:1px solid var(--hairline-2); border-radius:5px; padding:1px 5px; color:var(--ink-mute); flex:none; }
+
+  .icon-toolbtn{ width:36px; height:36px; border-radius:9px; border:1px solid var(--hairline-2); background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; flex:none; }
+  .icon-toolbtn svg{ width:16px; height:16px; }
+  .icon-toolbtn .ping{ position:absolute; top:-3px; right:-3px; width:9px; height:9px; border-radius:50%; background:var(--st-critical); border:2px solid var(--bg); }
+
+  .theme-toggle{ display:flex; align-items:center; gap:2px; background:var(--surface); border:1px solid var(--hairline); border-radius:999px; padding:3px; flex:none; }
+  .theme-toggle button{ border:0; background:transparent; border-radius:999px; width:28px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-mute); }
+  .theme-toggle button.active{ background:var(--brand); color:var(--brand-ink); }
+  .theme-toggle svg{ width:13px; height:13px; }
+
+  .content{ padding:22px 24px 64px; max-width:1360px; width:100%; margin:0 auto; }
+  .view{ display:none; animation:viewin 0.25s ease; }
+  .view.active{ display:block; }
+  @keyframes viewin{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+
+  .view-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+  .view-head p{ margin:5px 0 0; color:var(--ink-soft); font-size:0.9rem; max-width:60ch; }
+  .view-head .actions-row{ flex:none; }
+
+  /* ============ SHARED CARD/UI PARTS ============ */
+  .card{ background:var(--surface); border:1px solid var(--hairline); border-radius:16px; box-shadow:var(--shadow-sm); }
+  .card-pad{ padding:18px 20px; }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:16px 20px 0; }
+  .card-head h3{ font-size:0.92rem; letter-spacing:0.01em; }
+  .card-head .muted{ font-family:"Plus Jakarta Sans"; text-transform:none; font-weight:500; font-size:0.72rem; color:var(--ink-mute); }
+
+  .grid{ display:grid; gap:16px; }
+  .grid.cols-2{ grid-template-columns:1fr 1fr; }
+  .grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+  .grid.cols-4{ grid-template-columns:repeat(4,1fr); }
+  .grid.split-58{ grid-template-columns:1.3fr 1fr; }
+
+  .metrics{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:18px; }
+  .metric{ background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:14px 15px 12px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .metric .label{ font-size:0.66rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-mute); font-weight:600; }
+  .metric .value{ font-size:1.44rem; font-weight:600; letter-spacing:-0.01em; }
+  .metric .delta{ font-size:0.71rem; font-weight:600; }
+  .metric .delta.up{ color:var(--st-good); } .metric .delta.down{ color:var(--st-critical); } .metric .delta.flat{ color:var(--ink-mute); }
+  .metric svg.spark{ width:100%; height:26px; display:block; }
+  .metric .row1{ display:flex; justify-content:space-between; gap:6px; }
+
+  .badge{ font-size:0.66rem; font-weight:700; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:0.04em; white-space:nowrap; }
+  .badge.good{ background:color-mix(in oklab, var(--st-good) 16%, transparent); color:var(--st-good); }
+  .badge.warning{ background:color-mix(in oklab, var(--st-warning) 20%, transparent); color:var(--st-warning); }
+  .badge.critical{ background:color-mix(in oklab, var(--st-critical) 16%, transparent); color:var(--st-critical); }
+  .badge.neutral{ background:var(--plane); color:var(--ink-soft); }
+  .badge.brand{ background:var(--brand-soft); color:var(--brand); }
+
+  table.data{ width:100%; border-collapse:collapse; font-size:0.83rem; }
+  table.data th{ text-align:left; font-size:0.67rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-mute); font-weight:600; padding:0 10px 8px 0; border-bottom:1px solid var(--hairline); white-space:nowrap; }
+  table.data td{ padding:9px 10px 9px 0; border-bottom:1px solid var(--hairline); vertical-align:middle; }
+  table.data tr:last-child td{ border-bottom:0; }
+  .table-scroll{ overflow-x:auto; }
+
+  .pill{ display:inline-flex; align-items:center; gap:5px; font-size:0.73rem; font-weight:600; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .pill.good{ background:color-mix(in oklab, var(--st-good) 14%, transparent); color:var(--st-good); }
+  .pill.warning{ background:color-mix(in oklab, var(--st-warning) 18%, transparent); color:var(--st-warning); }
+  .pill.critical{ background:color-mix(in oklab, var(--st-critical) 14%, transparent); color:var(--st-critical); }
+  .pill.neutral{ background:var(--plane); color:var(--ink-soft); }
+  .pill .dotp{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+  .avatar{ width:30px; height:30px; border-radius:50%; background:var(--plane); display:flex; align-items:center; justify-content:center; font-size:0.68rem; font-weight:700; color:var(--ink-soft); flex:none; }
+
+  .actionbtn{ display:inline-flex; align-items:center; gap:7px; padding:8px 13px; border-radius:9px; border:1px solid var(--hairline-2); background:var(--surface-2); cursor:pointer; font-size:0.82rem; font-weight:600; color:var(--ink); }
+  .actionbtn.primary{ background:var(--brand); border-color:var(--brand); color:var(--brand-ink); }
+  .actionbtn.ghost{ background:transparent; border-color:transparent; }
+  .actionbtn svg{ width:15px; height:15px; }
+  .actions-row{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  .legend{ display:flex; gap:14px; flex-wrap:wrap; font-size:0.76rem; color:var(--ink-soft); }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .legend i{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+
+  .daytab-group{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+  .daytab{ padding:7px 14px; border-radius:8px; border:1px solid var(--hairline); background:var(--surface-2); font-size:0.8rem; font-weight:600; cursor:pointer; color:var(--ink-soft); }
+  .daytab.active{ background:var(--brand-soft); border-color:var(--brand); color:var(--brand); }
+
+  .encontro-card{ border:1px solid var(--hairline); border-radius:11px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start; }
+  .encontro-card + .encontro-card{ margin-top:8px; }
+  .encontro-time{ font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:0.86rem; color:var(--brand); flex:none; width:56px; }
+  .encontro-body{ flex:1; min-width:0; }
+  .encontro-body strong{ display:block; font-size:0.88rem; }
+  .encontro-body span{ font-size:0.78rem; color:var(--ink-soft); }
+  .encontro-count{ flex:none; font-size:0.72rem; font-weight:700; color:var(--ink-soft); background:var(--plane); border-radius:999px; padding:3px 10px; }
+
+  .contact-card{ display:flex; align-items:center; gap:12px; border:1px solid var(--hairline); border-radius:11px; padding:11px 13px; }
+  .contact-card + .contact-card{ margin-top:8px; }
+  .contact-name{ font-weight:600; font-size:0.88rem; }
+  .contact-role{ font-size:0.76rem; color:var(--ink-mute); }
+  .icon-btn{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; border:1px solid var(--hairline-2); background:var(--surface-2); flex:none; cursor:pointer; }
+  .icon-btn.whats{ color:var(--st-good); }
+  .icon-btn.call{ color:var(--brand); }
+  .icon-btn svg{ width:16px; height:16px; }
+
+  .bot-line{ display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--hairline); font-size:0.82rem; }
+  .bot-line:last-child{ border-bottom:0; }
+  .bot-line .who{ font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.03em; flex:none; width:64px; padding-top:2px; }
+  .bot-line.in .who{ color:var(--ink-mute); } .bot-line.out .who{ color:var(--brand); }
+  .bot-line p{ margin:0; color:var(--ink-soft); }
+
+  /* checklist for encarregado view */
+  .check-row{ display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid var(--hairline); }
+  .check-row:last-child{ border-bottom:0; }
+  .check-row .cb{ width:20px; height:20px; border-radius:6px; border:1.6px solid var(--hairline-2); flex:none; display:flex; align-items:center; justify-content:center; cursor:pointer; background:var(--surface); }
+  .check-row .cb.on{ background:var(--st-good); border-color:var(--st-good); color:#fff; }
+  .check-row .cb svg{ width:12px; height:12px; }
+  .check-row .nm{ flex:1; min-width:0; font-size:0.86rem; font-weight:600; }
+  .check-row .sub{ font-size:0.74rem; color:var(--ink-mute); }
+
+  /* access / role cards */
+  .role-card{ border:1px solid var(--hairline); border-radius:14px; padding:18px; display:flex; flex-direction:column; gap:10px; background:var(--surface-2); }
+  .role-card .role-ic{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; }
+  .role-card .role-ic svg{ width:20px; height:20px; }
+  .role-card h4{ font-family:"Sora"; text-transform:none; font-weight:700; font-size:1rem; letter-spacing:-0.005em; }
+  .role-card p{ margin:0; font-size:0.83rem; color:var(--ink-soft); }
+  .credential{ display:flex; align-items:center; justify-content:space-between; background:var(--surface); border:1px dashed var(--hairline-2); border-radius:9px; padding:9px 12px; font-family:"IBM Plex Mono",monospace; font-size:0.82rem; }
+  .credential .copy{ font-size:0.68rem; color:var(--brand); font-weight:700; cursor:pointer; letter-spacing:0.03em; text-transform:uppercase; font-family:"Plus Jakarta Sans"; }
+
+  .settings-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0; border-bottom:1px solid var(--hairline); }
+  .settings-row:last-child{ border-bottom:0; }
+  .settings-row .txt strong{ display:block; font-size:0.88rem; font-weight:600; }
+  .settings-row .txt span{ font-size:0.78rem; color:var(--ink-mute); }
+
+  .switch{ width:42px; height:24px; border-radius:999px; background:var(--hairline-2); position:relative; cursor:pointer; flex:none; border:0; }
+  .switch::after{ content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:var(--shadow-sm); transition:left 0.18s ease; }
+  .switch.on{ background:var(--brand); }
+  .switch.on::after{ left:21px; }
+
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field label{ font-size:0.72rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.03em; }
+  .field input,.field select{ font:inherit; padding:9px 11px; border-radius:9px; border:1px solid var(--hairline-2); background:var(--surface); color:var(--ink); font-size:0.85rem; }
+
+  .userlist-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--hairline); }
+  .userlist-row:last-child{ border-bottom:0; }
+
+  footer.foot{ margin-top:32px; padding-top:18px; border-top:1px solid var(--hairline); font-size:0.76rem; color:var(--ink-mute); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+
+  /* ============ SCREENS / PREVIEW SWITCHER ============ */
+  [hidden]{ display:none !important; }
+
+  .previewbar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    padding:9px 18px; background:var(--side-bg); color:var(--side-ink);
+    font-size:0.76rem; position:relative; z-index:50;
+  }
+  .previewbar .lbl{ color:var(--side-ink-mute); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; font-size:0.66rem; }
+  .previewbar button{
+    border:1px solid var(--side-hair); background:transparent; color:var(--side-ink);
+    padding:5px 12px; border-radius:999px; cursor:pointer; font-size:0.76rem; font-weight:600;
+  }
+  .previewbar button.active{ background:var(--brand); border-color:var(--brand); color:var(--brand-ink); }
+
+  .global-theme{ margin-left:auto; }
+
+  .screen-plain{ min-height:calc(100vh - 40px); background:var(--bg); display:flex; align-items:flex-start; justify-content:center; padding:44px 18px; }
+  .backlink{ display:inline-flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--ink-soft); cursor:pointer; margin-bottom:16px; font-weight:600; }
+  .backlink svg{ width:15px; height:15px; }
+
+  /* ---- login ---- */
+  .login-wrap{ width:100%; max-width:420px; }
+  .login-brand{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:22px; text-align:center; }
+  .login-brand .glyph{ width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:var(--brand-ink); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-md); }
+  .login-brand .glyph svg{ width:29px; height:29px; }
+  .login-brand h2{ font-size:1.3rem; }
+  .login-brand p{ margin:2px 0 0; font-size:0.82rem; color:var(--ink-mute); }
+  .role-tabs{ display:flex; background:var(--plane); border-radius:11px; padding:4px; gap:4px; margin-bottom:18px; }
+  .role-tabs button{ flex:1; border:0; background:transparent; padding:9px 6px; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer; color:var(--ink-soft); }
+  .role-tabs button.active{ background:var(--surface); color:var(--brand); box-shadow:var(--shadow-sm); }
+  .login-panel{ display:none; }
+  .login-panel.active{ display:block; }
+  .login-foot{ text-align:center; margin-top:16px; font-size:0.82rem; color:var(--ink-soft); }
+  .login-foot a{ color:var(--brand); font-weight:700; cursor:pointer; }
+  .full-btn{ width:100%; justify-content:center; padding:11px; font-size:0.88rem; }
+
+  /* ---- stepper (cadastro) ---- */
+  .stepper{ display:flex; gap:6px; margin-bottom:22px; flex-wrap:wrap; }
+  .step{ flex:1; min-width:130px; display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px; background:var(--surface); border:1px solid var(--hairline); }
+  .step .n{ width:22px; height:22px; border-radius:50%; background:var(--brand-soft); color:var(--brand); font-size:0.72rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none; }
+  .step .t{ font-size:0.78rem; font-weight:600; color:var(--ink-soft); }
+  .form-section{ margin-bottom:22px; }
+  .form-section h4{ font-size:0.98rem; margin-bottom:12px; letter-spacing:0.01em; }
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .form-grid .span2{ grid-column:1 / -1; }
+  .chip-check{ display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:999px; border:1px solid var(--hairline-2); background:var(--surface); cursor:pointer; font-size:0.83rem; font-weight:600; color:var(--ink-soft); }
+  .chip-check.on{ background:var(--brand-soft); border-color:var(--brand); color:var(--brand); }
+  .radio-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .upload-box{ border:1.5px dashed var(--hairline-2); border-radius:11px; padding:20px; text-align:center; color:var(--ink-mute); font-size:0.82rem; cursor:pointer; }
+  .success-banner{ display:none; align-items:center; gap:10px; background:color-mix(in oklab, var(--st-good) 14%, transparent); color:var(--st-good); border-radius:11px; padding:12px 16px; font-weight:600; font-size:0.86rem; margin-top:16px; }
+  .success-banner.show{ display:flex; }
+  .success-banner svg{ width:18px; height:18px; flex:none; }
+
+  /* ---- passenger portal / encarregado panel shells ---- */
+  .portal-wrap{ width:100%; max-width:480px; }
+  .portal-head{ display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+  .portal-head .av{ width:46px; height:46px; border-radius:12px; background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .portal-head h2{ font-size:1.1rem; }
+  .portal-head span{ font-size:0.78rem; color:var(--ink-mute); }
+  .portal-card{ background:var(--surface); border:1px solid var(--hairline); border-radius:15px; padding:16px 18px; margin-bottom:12px; box-shadow:var(--shadow-sm); }
+  .portal-card .k{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-mute); font-weight:700; margin-bottom:6px; }
+  .portal-card .v{ font-size:1.05rem; font-weight:600; }
+  .portal-card .sub{ font-size:0.82rem; color:var(--ink-soft); margin-top:2px; }
+
+  .panel-wrap{ width:100%; max-width:700px; }
+  .panel-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+  .panel-stats .metric{ text-align:center; }
+  .search-mini{ display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--hairline); border-radius:10px; padding:8px 12px; margin-bottom:12px; }
+  .search-mini svg{ width:15px; height:15px; color:var(--ink-mute); flex:none; }
+  .search-mini input{ border:0; outline:0; background:transparent; font:inherit; width:100%; font-size:0.85rem; color:var(--ink); }
+
+  /* ---- whatsapp phone simulation ---- */
+  .wa-phone{ background:#0b141a; border-radius:20px; padding:10px; box-shadow:var(--shadow-lg); max-width:340px; margin:0 auto; }
+  .wa-screen{ background:#e5ded4; border-radius:13px; overflow:hidden; }
+  .wa-head{ background:#005e54; color:#fff; padding:12px 14px; display:flex; align-items:center; gap:10px; }
+  .wa-head .av{ width:32px; height:32px; border-radius:50%; background:#0a7a6c; display:flex; align-items:center; justify-content:center; flex:none; }
+  .wa-head .av svg{ width:16px; height:16px; }
+  .wa-head .nm{ font-size:0.86rem; font-weight:700; }
+  .wa-head .st{ font-size:0.68rem; opacity:0.85; }
+  .wa-body{ padding:12px 10px; display:flex; flex-direction:column; gap:7px; min-height:280px; max-height:340px; overflow-y:auto; }
+  .wa-bubble{ max-width:82%; padding:7px 10px 8px; border-radius:9px; font-size:0.82rem; line-height:1.35; position:relative; box-shadow:0 1px 1px rgba(0,0,0,0.08); }
+  .wa-bubble.in{ align-self:flex-start; background:#fff; border-top-left-radius:2px; }
+  .wa-bubble.out{ align-self:flex-end; background:#d9fdd3; border-top-right-radius:2px; }
+  .wa-bubble .tm{ display:block; text-align:right; font-size:0.62rem; color:#5c6b6f; margin-top:3px; }
+  .wa-typing{ align-self:flex-start; background:#fff; border-radius:9px; border-top-left-radius:2px; padding:9px 12px; display:flex; gap:4px; }
+  .wa-typing i{ width:6px; height:6px; border-radius:50%; background:#8a9a9d; display:inline-block; animation:wa-bounce 1.1s infinite ease-in-out; }
+  .wa-typing i:nth-child(2){ animation-delay:0.15s; } .wa-typing i:nth-child(3){ animation-delay:0.3s; }
+  @keyframes wa-bounce{ 0%,60%,100%{ transform:translateY(0); opacity:0.5; } 30%{ transform:translateY(-4px); opacity:1; } }
+  .wa-input{ background:#f0f0f0; padding:9px 12px; display:flex; align-items:center; gap:8px; }
+  .wa-input .box{ flex:1; background:#fff; border-radius:18px; padding:7px 12px; font-size:0.8rem; color:#8a9a9d; }
+  .wa-input .snd{ width:30px; height:30px; border-radius:50%; background:#00a884; color:#fff; display:flex; align-items:center; justify-content:center; flex:none; }
+  .wa-input .snd svg{ width:14px; height:14px; }
+
+  /* ---- floating help widget (passenger portal) ---- */
+  .help-fab{ position:fixed; bottom:22px; right:22px; width:56px; height:56px; border-radius:50%; background:#25d366; color:#fff; border:0; box-shadow:var(--shadow-lg); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:70; }
+  .help-fab svg{ width:27px; height:27px; }
+  .help-panel{ position:fixed; bottom:88px; right:22px; width:min(320px, calc(100vw - 32px)); background:#e5ded4; border-radius:14px; overflow:hidden; box-shadow:var(--shadow-lg); z-index:70; }
+  .help-quick{ display:flex; flex-wrap:wrap; gap:6px; padding:10px; background:#f0f0f0; }
+  .help-quick button{ border:1px solid rgba(0,0,0,0.12); background:#fff; color:#075e54; border-radius:999px; padding:6px 11px; font-size:0.74rem; font-weight:600; cursor:pointer; }
+  @media (max-width:620px){ .help-fab{ bottom:16px; right:16px; } .help-panel{ bottom:80px; right:16px; } }
+
+  /* ---- QR / whatsapp automation settings ---- */
+  .connect-toggle{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .connect-opt{ flex:1; min-width:200px; border:1.5px solid var(--hairline); border-radius:12px; padding:13px 14px; cursor:pointer; }
+  .connect-opt.active{ border-color:var(--brand); background:var(--brand-soft); }
+  .connect-opt .t{ font-weight:700; font-size:0.86rem; }
+  .connect-opt .d{ font-size:0.76rem; color:var(--ink-soft); margin-top:2px; }
+  .qr-box{ width:148px; height:148px; border-radius:12px; background:#fff; border:1px solid var(--hairline-2); padding:10px; display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(7,1fr); gap:3px; margin:0 auto; }
+  .qr-box i{ background:#fff; border-radius:1px; }
+  .qr-box i.on{ background:#111; }
+  .qr-wrap{ display:flex; gap:20px; flex-wrap:wrap; align-items:center; }
+  .qr-status{ display:flex; align-items:center; gap:8px; margin-top:10px; justify-content:center; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:1180px){
+    .metrics{ grid-template-columns:repeat(3,1fr); }
+    .grid.cols-4{ grid-template-columns:repeat(2,1fr); }
+    .grid.cols-3{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:960px){
+    .sidebar{ position:fixed; left:0; top:0; height:100vh; transform:translateX(-100%); box-shadow:var(--shadow-lg); }
+    .sidebar.mobile-open{ transform:translateX(0); }
+    .sidebar.collapsed{ width:var(--sbw); }
+    .sidebar.collapsed .side-head .txt,.sidebar.collapsed .side-group-label,.sidebar.collapsed .nav-item .lbl,.sidebar.collapsed .nav-item .cnt,.sidebar.collapsed .side-user .who{ display:block; opacity:1; height:auto; }
+    .side-collapse{ display:none; }
+    .side-backdrop{ display:none; position:fixed; inset:0; background:rgba(8,14,12,0.45); z-index:39; }
+    .side-backdrop.show{ display:block; }
+    .burger{ display:flex; }
+    .grid.cols-2,.grid.split-58{ grid-template-columns:1fr; }
+    .searchbar{ display:none; }
+  }
+  @media (max-width:620px){
+    .metrics{ grid-template-columns:repeat(2,1fr); }
+    .content{ padding:16px 14px 48px; }
+    .grid.cols-3,.grid.cols-4{ grid-template-columns:1fr; }
+    .view-head{ flex-direction:column; align-items:flex-start; }
+    .form-grid{ grid-template-columns:1fr; }
+    .panel-stats{ grid-template-columns:repeat(3,1fr); gap:6px; }
+    .previewbar{ padding:8px 12px; }
+  }
+</style>
+
+<div class="previewbar">
+  <span class="lbl">Pré-visualizar tela:</span>
+  <button type="button" data-screen="login" class="active">Login</button>
+  <button type="button" data-screen="cadastro">Cadastro</button>
+  <button type="button" data-screen="passenger">Portal do Passageiro</button>
+  <button type="button" data-screen="encarregado">Painel do Encarregado</button>
+  <button type="button" data-screen="erp">ERP Administrativo</button>
+
+  <div class="global-theme" style="display:flex;gap:8px;align-items:center;">
+    <div class="theme-toggle" role="group" aria-label="Idioma">
+      <button type="button" data-lang-btn="pt" class="active">PT</button>
+      <button type="button" data-lang-btn="es">ES</button>
+    </div>
+    <div class="theme-toggle" role="group" aria-label="Tema claro ou escuro">
+      <button type="button" data-theme-btn="light" aria-label="Tema claro"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button type="button" data-theme-btn="dark" aria-label="Tema escuro"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+      <button type="button" data-theme-btn="system" aria-label="Tema do sistema"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="12" rx="1.6" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 20h7M12 16.5V20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== LOGIN ===================== -->
+<section class="screen screen-plain" id="screen-login">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <div class="glyph"><svg viewBox="0 0 24 24" fill="none"><path d="M5 14.5V7.2C5 6 6 5 7.2 5h9.6C18 5 19 6 19 7.2v7.3" stroke="currentColor" stroke-width="1.7"/><path d="M5 14.5h14M5 14.5l-1 2.3M19 14.5l1 2.3M8 17.3v1M16 17.3v1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.3" cy="11.6" r="1" fill="currentColor"/><circle cx="15.7" cy="11.6" r="1" fill="currentColor"/><path d="M6.6 8h10.8" stroke="currentColor" stroke-width="1.7"/><path d="M2.3 19.6 6 16l3 3 4-4.6 3.5 3.6 3.2-2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg></div>
+      <h2>Jardim do Vale</h2>
+      <p id="loginEventSub">Sistema de Transporte · Congresso Itatiba SP · 17–19 jul 2026</p>
+    </div>
+
+    <div class="card card-pad">
+      <div class="role-tabs">
+        <button type="button" class="active" data-login-tab="passageiro">Passageiro</button>
+        <button type="button" data-login-tab="encarregado">Encarregado</button>
+        <button type="button" data-login-tab="admin">Administrador</button>
+      </div>
+
+      <div class="login-panel active" data-login-panel="passageiro">
+        <div id="passLoginStep1">
+          <div class="field" style="margin-bottom:12px;"><label>Usuário</label><input type="text" value="Jardim"></div>
+          <div class="field" style="margin-bottom:16px;"><label>Senha</label><input type="password" value="1914"></div>
+          <button type="button" class="actionbtn primary full-btn" id="passLoginNext">Entrar como passageiro</button>
+        </div>
+        <div id="passLoginStep2" hidden>
+          <p class="i18n-note" style="margin:0 0 14px;color:var(--ink-soft);font-size:.85rem;">Este login é compartilhado por todos os passageiros. Confirme o WhatsApp usado na sua inscrição para vermos seus dados.</p>
+          <div class="field" style="margin-bottom:16px;"><label>WhatsApp</label><input type="text" id="passWhatsInput" placeholder="(11) 90000-0000"></div>
+          <button type="button" class="actionbtn primary full-btn" data-goto="passenger">Continuar</button>
+        </div>
+      </div>
+
+      <div class="login-panel" data-login-panel="encarregado">
+        <div class="field" style="margin-bottom:12px;"><label>Ponto de encontro</label>
+          <select><option>Salão do Reino — Jardim do Vale</option><option>Praça Central — Vale Novo</option><option>Posto Ipiranga, Av. Recanto</option></select>
+        </div>
+        <div class="field" style="margin-bottom:16px;"><label>Senha do encarregado</label><input type="password" value="••••••"></div>
+        <button type="button" class="actionbtn primary full-btn" data-goto="encarregado">Entrar como encarregado</button>
+        <div class="login-foot"><span>Acesso restrito aos irmãos designados pela administração.</span></div>
+      </div>
+
+      <div class="login-panel" data-login-panel="admin">
+        <div id="adminLoginForm">
+          <div class="field" style="margin-bottom:12px;"><label>E-mail</label><input type="text" value="wellington@jardimdovale.org"></div>
+          <div class="field" style="margin-bottom:10px;"><label>Senha</label><input type="password" value="••••••••"></div>
+          <div style="text-align:right;margin-bottom:16px;"><a id="forgotLink" style="font-size:.78rem;color:var(--brand);font-weight:700;cursor:pointer;">Esqueceu a senha?</a></div>
+          <button type="button" class="actionbtn primary full-btn" data-goto="erp">Entrar no painel administrativo</button>
+          <div class="login-foot"><span>Uso exclusivo da coordenação de transporte.</span></div>
+        </div>
+        <div id="adminRecoverForm" hidden>
+          <p class="i18n-note" style="margin:0 0 14px;font-size:.85rem;color:var(--ink-soft);">Informe o e-mail cadastrado. Enviaremos um link para você criar uma nova senha.</p>
+          <div class="field" style="margin-bottom:16px;"><label>E-mail</label><input type="text" placeholder="seuemail@jardimdovale.org"></div>
+          <button type="button" class="actionbtn primary full-btn" id="sendRecoverBtn">Enviar link de recuperação</button>
+          <div class="success-banner" id="recoverSuccess" style="margin-top:14px;"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="m8 12.3 2.5 2.5L16.2 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Link enviado! Verifique seu e-mail para redefinir a senha.</div>
+          <div class="login-foot"><a id="backToAdminLogin"><span>Voltar ao login</span></a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CADASTRO ===================== -->
+<section class="screen screen-plain" id="screen-cadastro" hidden>
+  <div style="width:100%;max-width:760px;">
+    <div class="backlink" data-goto="login"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Voltar ao login</span></div>
+    <h1 style="margin-bottom:4px;">Cadastro de passageiro</h1>
+    <p style="margin:0 0 20px;color:var(--ink-soft);font-size:0.9rem;">Preencha todos os dados solicitados para garantir sua vaga no ônibus.</p>
+
+    <div class="stepper">
+      <div class="step"><span class="n">1</span><span class="t">Dados pessoais</span></div>
+      <div class="step"><span class="n">2</span><span class="t">Transporte</span></div>
+      <div class="step"><span class="n">3</span><span class="t">Pagamento</span></div>
+      <div class="step"><span class="n">4</span><span class="t">Confirmação</span></div>
+    </div>
+
+    <div class="card card-pad">
+      <div class="form-section">
+        <h4>1. Dados pessoais</h4>
+        <div class="form-grid">
+          <div class="field span2">
+            <label>Nome completo</label>
+            <input type="text" id="cadastroNome" placeholder="Ex: Marcos Antônio Ferreira">
+            <span id="cadastroNomeErr" hidden style="color:var(--st-critical);font-size:.76rem;font-weight:600;">Informe nome e sobrenome.</span>
+          </div>
+          <div class="field"><label>Tipo de documento</label><select id="cadastroDocType"></select></div>
+          <div class="field"><label id="cadastroDocLabel">Número do documento</label><input type="text" id="cadastroDocNumber" placeholder="000.000.000-00"></div>
+          <div class="field"><label>Telefone / WhatsApp</label><input type="text" placeholder="(11) 90000-0000"></div>
+          <div class="field span2"><label>E-mail (opcional)</label><input type="text" placeholder="nome@email.com"></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4>2. Transporte</h4>
+        <div class="field" style="margin-bottom:12px;"><label>Dias de participação</label>
+          <div class="radio-row">
+            <span class="chip-check on">17 de julho</span><span class="chip-check on">18 de julho</span><span class="chip-check on">19 de julho</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:var(--brand-soft);color:var(--brand);border-radius:10px;padding:10px 14px;font-size:.82rem;font-weight:600;">
+          <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;flex:none;"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5M12 16.2v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span class="i18n-note">O ponto de encontro será atribuído pela administração após a confirmação da inscrição, e vai aparecer aqui e no painel do encarregado.</span>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4>3. Acompanhantes</h4>
+        <div class="field" style="margin-bottom:12px;max-width:260px;">
+          <label>Quantos acompanhantes você vai registrar?</label>
+          <select id="companionCount"><option value="0">Nenhum — inscrição individual</option><option value="1">1 acompanhante</option><option value="2">2 acompanhantes</option><option value="3">3 acompanhantes</option><option value="4">4 acompanhantes</option></select>
+        </div>
+        <p class="i18n-note" style="margin:0 0 10px;font-size:.8rem;color:var(--ink-soft);">Cada acompanhante precisa dos próprios dados — como se fosse outra inscrição — e entra no mesmo grupo e no mesmo pagamento do titular.</p>
+        <div id="companionsContainer"></div>
+      </div>
+
+      <div class="form-section">
+        <h4>4. Responsável (se menor de idade)</h4>
+        <div class="form-grid">
+          <div class="field"><label>Nome do responsável</label><input type="text" placeholder="Opcional para maiores de 18 anos"></div>
+          <div class="field"><label>Telefone do responsável</label><input type="text" placeholder="(11) 90000-0000"></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4>5. Pagamento</h4>
+        <div class="field" style="margin-bottom:12px;"><label>Forma de pagamento</label>
+          <div class="radio-row" id="paymentMethods"></div>
+        </div>
+        <div class="grid cols-2" style="margin-bottom:12px;">
+          <div class="card-pad" style="background:var(--surface-2);border:1px solid var(--hairline);border-radius:11px;">
+            <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600;margin-bottom:4px;">Total do grupo</div>
+            <div id="valorBreakdown" class="tabular" style="font-size:.82rem;color:var(--ink-soft);margin-bottom:2px;">R$ 85,00 × 1 pessoa</div>
+            <div id="valorTotal" class="tabular" style="font-size:1.3rem;font-weight:700;">R$ 85,00</div>
+          </div>
+          <div class="field"><label>Comprovante (opcional agora)</label>
+            <div class="upload-box">Toque para anexar comprovante</div>
+          </div>
+        </div>
+        <p class="i18n-note" style="margin:0;font-size:.8rem;color:var(--ink-soft);">Quem faz esta inscrição é o responsável por enviar o comprovante do pagamento de todo o grupo.</p>
+      </div>
+
+      <div class="form-section" style="margin-bottom:8px;">
+        <h4>Contato de emergência</h4>
+        <div class="form-grid">
+          <div class="field"><label>Nome</label><input type="text" placeholder="Nome completo"></div>
+          <div class="field"><label>Telefone</label><input type="text" placeholder="(11) 90000-0000"></div>
+        </div>
+      </div>
+
+      <label style="display:flex;align-items:flex-start;gap:9px;font-size:0.82rem;color:var(--ink-soft);margin:6px 0 4px;">
+        <input type="checkbox" checked style="margin-top:3px;"> Li e aceito o regulamento do congresso e as condições de transporte.
+      </label>
+
+      <button type="button" class="actionbtn primary full-btn" id="cadastroSubmit" style="margin-top:10px;">Concluir cadastro</button>
+      <div class="success-banner" id="cadastroSuccess" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <div style="display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px;flex:none;"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="m8 12.3 2.5 2.5L16.2 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Cadastro enviado!</span></div>
+        <span id="cadastroSummaryText" style="font-weight:500;font-size:.85rem;"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PORTAL DO PASSAGEIRO ===================== -->
+<section class="screen screen-plain" id="screen-passenger" hidden>
+  <div class="portal-wrap">
+    <div class="backlink" data-goto="login"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sair</span></div>
+    <div class="portal-head">
+      <div class="av">MF</div>
+      <div><h2>Olá, Marcos 👋</h2><span id="portalEventSub">Jardim do Vale · Inscrição confirmada</span></div>
+    </div>
+
+    <div class="portal-card">
+      <div class="k">Meu ônibus</div>
+      <div class="v">Ônibus 02 · Saída 05:30</div>
+      <div class="sub">Salão do Reino — Jardim do Vale</div>
+      <div class="actions-row" style="margin-top:10px;"><a class="actionbtn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Sal%C3%A3o+do+Reino+Jardim+do+Vale">Ver no mapa</a></div>
+    </div>
+
+    <div class="portal-card">
+      <div class="k">Pagamento</div>
+      <div class="row1" style="display:flex;align-items:center;justify-content:space-between;">
+        <span class="v" data-money="R$ 85,00">R$ 85,00</span><span class="pill good"><i class="dotp"></i>Pago</span>
+      </div>
+      <div class="sub">Pago via Pix em 02/07/2026</div>
+    </div>
+
+    <div class="portal-card">
+      <div class="k">Encarregado do meu ônibus</div>
+      <div class="contact-card" style="border:0;padding:0;margin-top:4px;">
+        <div class="avatar">DM</div>
+        <div style="flex:1;min-width:0;"><div class="contact-name">Irmão Diego M.</div><div class="contact-role">Ônibus 01 e 02</div></div>
+        <button type="button" class="icon-btn whats" title="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3Zm0 1.8a7.2 7.2 0 0 1 6.2 10.9l-.24.4.68 2.5-2.55-.67-.4.24A7.2 7.2 0 1 1 12 4.8Zm-2.7 3.5c-.2 0-.5 0-.7.3-.25.3-.9.9-.9 2.1s.9 2.5 1 2.6c.15.2 1.8 2.8 4.4 3.8 2.2.85 2.6.68 3.1.6.5-.05 1.6-.65 1.8-1.3.2-.6.2-1.15.15-1.25-.05-.1-.2-.17-.4-.3-.2-.1-1.2-.6-1.4-.65-.2-.1-.3-.15-.45.1-.15.2-.5.65-.6.78-.1.13-.2.15-.4.05-.2-.1-.85-.3-1.6-1-.6-.5-1-1.2-1.15-1.4-.1-.2 0-.3.1-.45.1-.1.2-.25.3-.4.1-.1.15-.2.2-.35.05-.15 0-.3 0-.4-.05-.1-.45-1.1-.6-1.5-.15-.4-.35-.35-.5-.35Z"/></svg></button>
+        <button type="button" class="icon-btn call" title="Ligar"><svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4h2.2l1.3 4-1.9 1.6a11.5 11.5 0 0 0 5.3 5.3l1.6-1.9 4 1.3v2.2a1.5 1.5 0 0 1-1.6 1.5A15.5 15.5 0 0 1 5 5.6 1.5 1.5 0 0 1 6.5 4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
+
+    <div class="portal-card">
+      <div class="k">Lembretes recebidos</div>
+      <div class="bot-line in" style="padding-top:8px;"><span class="who">16 jul</span><p>Não esqueça de trazer seu documento e chegar 15 min antes.</p></div>
+      <div class="bot-line in"><span class="who">10 jul</span><p>Confirmamos sua inscrição para os 3 dias do congresso 🎉</p></div>
+    </div>
+  </div>
+
+  <!-- floating WhatsApp-style help widget -->
+  <button type="button" class="help-fab" id="helpFab" aria-label="Ajuda via WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3Zm0 1.8a7.2 7.2 0 0 1 6.2 10.9l-.24.4.68 2.5-2.55-.67-.4.24A7.2 7.2 0 1 1 12 4.8Zm-2.7 3.5c-.2 0-.5 0-.7.3-.25.3-.9.9-.9 2.1s.9 2.5 1 2.6c.15.2 1.8 2.8 4.4 3.8 2.2.85 2.6.68 3.1.6.5-.05 1.6-.65 1.8-1.3.2-.6.2-1.15.15-1.25-.05-.1-.2-.17-.4-.3-.2-.1-1.2-.6-1.4-.65-.2-.1-.3-.15-.45.1-.15.2-.5.65-.6.78-.1.13-.2.15-.4.05-.2-.1-.85-.3-1.6-1-.6-.5-1-1.2-1.15-1.4-.1-.2 0-.3.1-.45.1-.1.2-.25.3-.4.1-.1.15-.2.2-.35.05-.15 0-.3 0-.4-.05-.1-.45-1.1-.6-1.5-.15-.4-.35-.35-.5-.35Z"/></svg>
+  </button>
+  <div class="help-panel" id="helpPanel" hidden>
+    <div class="wa-head" style="border-radius:14px 14px 0 0;">
+      <div class="av"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 5.5h14a1.6 1.6 0 0 1 1.6 1.6v8.2A1.6 1.6 0 0 1 19 16.9H10l-4.4 3.4v-3.4H5a1.6 1.6 0 0 1-1.6-1.6V7.1A1.6 1.6 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="8.3" cy="11.1" r="1" fill="currentColor"/><circle cx="12" cy="11.1" r="1" fill="currentColor"/><circle cx="15.7" cy="11.1" r="1" fill="currentColor"/></svg></div>
+      <div><div class="nm">Assistente Jardim do Vale</div><div class="st">tire suas dúvidas na hora</div></div>
+      <button type="button" id="helpClose" style="margin-left:auto;background:transparent;border:0;color:#fff;font-size:1.1rem;cursor:pointer;">✕</button>
+    </div>
+    <div class="wa-body" id="helpBody" style="min-height:180px;max-height:260px;"></div>
+    <div class="help-quick" id="helpQuick">
+      <button type="button" data-q="onibus">Meu ônibus</button>
+      <button type="button" data-q="pagamento">Pagamento</button>
+      <button type="button" data-q="ponto">Ponto de encontro</button>
+      <button type="button" data-q="cadastro">Quero me cadastrar</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PAINEL DO ENCARREGADO ===================== -->
+<section class="screen screen-plain" id="screen-encarregado" hidden>
+  <div class="panel-wrap">
+    <div class="backlink" data-goto="login"><svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sair</span></div>
+    <div class="portal-head">
+      <div class="av">DM</div>
+      <div><h2>Irmão Diego M.</h2><span id="encarregadoEventSub">Encarregado · Salão do Reino — Jardim do Vale</span></div>
+    </div>
+
+    <div class="role-tabs" style="margin-bottom:16px;">
+      <button type="button" class="active" data-enc-tab="passageiros">Passageiros</button>
+      <button type="button" data-enc-tab="pontos">Pontos de Encontro</button>
+      <button type="button" data-enc-tab="avisos">Avisos</button>
+    </div>
+
+    <!-- ---- passageiros ---- -->
+    <div class="login-panel active" data-enc-panel="passageiros">
+      <div class="daytab-group">
+        <button type="button" class="daytab active">17 jul</button>
+        <button type="button" class="daytab">18 jul</button>
+        <button type="button" class="daytab">19 jul</button>
+      </div>
+
+      <div class="panel-stats">
+        <div class="metric"><div class="label">Total</div><div class="value tabular">44</div></div>
+        <div class="metric"><div class="label">Presentes</div><div class="value tabular" style="color:var(--st-good)">31</div></div>
+        <div class="metric"><div class="label">Faltando</div><div class="value tabular" style="color:var(--st-warning)">13</div></div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="search-mini"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.4-3.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input type="text" placeholder="Buscar passageiro…"></div>
+        <div id="encarregadoList"></div>
+        <div class="actions-row" style="margin-top:14px;">
+          <button type="button" class="actionbtn primary">Marcar todos presentes</button>
+          <button type="button" class="actionbtn">Enviar lista à administração</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- pontos de encontro ---- -->
+    <div class="login-panel" data-enc-panel="pontos">
+      <div class="card card-pad">
+        <p style="margin:0 0 12px;color:var(--ink-soft);font-size:.85rem;">Seu ponto de encontro nos três dias do congresso.</p>
+        <div class="encontro-card"><span class="encontro-time">05:30</span><div class="encontro-body"><strong>Salão do Reino — Jardim do Vale</strong><span>17 jul · Ônibus 01 e 02</span></div><span class="encontro-count">44 pax</span><a class="icon-btn call" title="Ver no mapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Sal%C3%A3o%20do%20Reino%20Jardim%20do%20Vale%20Itatiba%20SP" style="margin-left:6px;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>
+        <div class="encontro-card"><span class="encontro-time">06:00</span><div class="encontro-body"><strong>Salão do Reino — Jardim do Vale</strong><span>18 jul · Concentração geral</span></div><span class="encontro-count">44 pax</span><a class="icon-btn call" title="Ver no mapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Sal%C3%A3o%20do%20Reino%20Jardim%20do%20Vale%20Itatiba%20SP" style="margin-left:6px;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>
+        <div class="encontro-card"><span class="encontro-time">06:00</span><div class="encontro-body"><strong>Salão do Reino — Jardim do Vale</strong><span>19 jul · Último dia</span></div><span class="encontro-count">44 pax</span><a class="icon-btn call" title="Ver no mapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Sal%C3%A3o%20do%20Reino%20Jardim%20do%20Vale%20Itatiba%20SP" style="margin-left:6px;"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>
+      </div>
+    </div>
+
+    <!-- ---- avisos ---- -->
+    <div class="login-panel" data-enc-panel="avisos">
+      <div class="card card-pad">
+        <p style="margin:0 0 4px;color:var(--ink-soft);font-size:.85rem;">Avisos e lembretes enviados pela administração.</p>
+        <div class="bot-line in"><span class="who">Hoje</span><p>Confirme a presença dos passageiros do seu ponto até às 18h de hoje.</p></div>
+        <div class="bot-line in"><span class="who">16 jul</span><p>Horário de embarque atualizado: chegada 15 min antes do horário de saída.</p></div>
+        <div class="bot-line in"><span class="who">15 jul</span><p>Lembre os passageiros de trazerem documento de identificação.</p></div>
+        <div class="bot-line in"><span class="who">12 jul</span><p>2 passageiros do seu ônibus estão com pagamento em atraso — verifique no embarque.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="app screen" id="screen-erp" hidden>
+
+  <div class="side-backdrop" id="sideBackdrop"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <button class="side-collapse" id="collapseBtn" aria-label="Recolher menu" title="Recolher menu">
+      <svg viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="side-head">
+      <div class="glyph"><svg viewBox="0 0 24 24" fill="none"><path d="M5 14.5V7.2C5 6 6 5 7.2 5h9.6C18 5 19 6 19 7.2v7.3" stroke="currentColor" stroke-width="1.7"/><path d="M5 14.5h14M5 14.5l-1 2.3M19 14.5l1 2.3M8 17.3v1M16 17.3v1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.3" cy="11.6" r="1" fill="currentColor"/><circle cx="15.7" cy="11.6" r="1" fill="currentColor"/><path d="M6.6 8h10.8" stroke="currentColor" stroke-width="1.7"/><path d="M2.3 19.6 6 16l3 3 4-4.6 3.5 3.6 3.2-2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/></svg></div>
+      <div class="txt"><div class="n">Jardim do Vale</div><div class="s">ERP · Transporte</div></div>
+    </div>
+
+    <nav class="side-scroll" id="sideNav">
+      <div class="side-group-label">Visão geral</div>
+      <button class="nav-item active" data-view="dashboard" title="Dashboard"><span class="ic">${ICON_HOME}</span><span class="lbl">Dashboard</span></button>
+
+      <div class="side-group-label">Operação</div>
+      <button class="nav-item" data-view="passageiros" title="Passageiros"><span class="ic">${ICON_USERS}</span><span class="lbl">Passageiros</span><span class="cnt">612</span></button>
+      <button class="nav-item" data-view="pagamentos" title="Pagamentos"><span class="ic">${ICON_CARD}</span><span class="lbl">Pagamentos</span><span class="cnt warn">12</span></button>
+      <button class="nav-item" data-view="lembretes" title="Lembretes"><span class="ic">${ICON_BELL}</span><span class="lbl">Lembretes</span></button>
+      <button class="nav-item" data-view="encontro" title="Pontos de Encontro"><span class="ic">${ICON_PIN}</span><span class="lbl">Pontos de Encontro</span></button>
+      <button class="nav-item" data-view="frota" title="Frota &amp; Encarregados"><span class="ic">${ICON_BUS}</span><span class="lbl">Frota &amp; Encarregados</span></button>
+      <button class="nav-item" data-view="chatbot" title="Chatbot WhatsApp"><span class="ic">${ICON_CHAT}</span><span class="lbl">Chatbot WhatsApp</span></button>
+      <button class="nav-item" data-view="relatorios" title="Relatórios"><span class="ic">${ICON_REPORT}</span><span class="lbl">Relatórios</span></button>
+
+      <div class="side-group-label">Acessos</div>
+      <button class="nav-item" data-view="acesso-passageiro" title="Acesso do Passageiro"><span class="ic">${ICON_KEY}</span><span class="lbl">Acesso do Passageiro</span></button>
+      <button class="nav-item" data-view="acesso-admin" title="Acesso do Administrador"><span class="ic">${ICON_SHIELD}</span><span class="lbl">Acesso do Administrador</span></button>
+      <button class="nav-item" data-view="acesso-encarregado" title="Acesso do Encarregado"><span class="ic">${ICON_CHECK}</span><span class="lbl">Acesso do Encarregado</span></button>
+
+      <div class="side-group-label">Sistema</div>
+      <button class="nav-item" data-view="config" title="Configurações"><span class="ic">${ICON_GEAR}</span><span class="lbl">Configurações</span></button>
+    </nav>
+
+    <div class="side-foot">
+      <div class="side-user">
+        <div class="av">WT</div>
+        <div class="who"><div class="n">Wellington T.</div><div class="r">Administrador</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <button class="burger" id="burgerBtn" aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button>
+        <div class="crumbs">
+          <div class="eyebrow" id="topbarEyebrow">Congresso Itatiba SP · 17–19 jul 2026</div>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="searchbar">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.4-3.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="text" placeholder="Buscar passageiro, ônibus, relatório…">
+          <kbd>/</kbd>
+        </div>
+        <button class="icon-toolbtn" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none"><path d="M6 10.5a6 6 0 1 1 12 0c0 3.4 1 4.8 1.6 5.4H4.4C5 15.3 6 13.9 6 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 18.8a2.4 2.4 0 0 0 4.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ping"></span></button>
+        <div class="theme-toggle" role="group" aria-label="Tema">
+          <button type="button" data-theme-btn="light" aria-label="Tema claro"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button type="button" data-theme-btn="dark" aria-label="Tema escuro"><svg viewBox="0 0 24 24" fill="none"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+          <button type="button" data-theme-btn="system" aria-label="Tema do sistema"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="12" rx="1.6" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 20h7M12 16.5V20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content" id="content"><!-- views injected by JS --></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= APP STATE (event branding + language) ================= */
+  var STATE = {
+    eventName: "Congresso Itatiba SP",
+    dateStart: "17/07/2026",
+    dateEnd: "19/07/2026",
+    singleDay: false,
+    lang: "pt"
+  };
+  try{
+    var savedState = JSON.parse(localStorage.getItem("jv-state") || "null");
+    if(savedState) STATE = Object.assign(STATE, savedState);
+  }catch(e){}
+  function persistState(){ try{ localStorage.setItem("jv-state", JSON.stringify(STATE)); }catch(e){} }
+
+  function eventDateLabel(){
+    return STATE.singleDay ? STATE.dateStart : (STATE.dateStart + "–" + STATE.dateEnd);
+  }
+
+  /* ---- i18n: PT is the base language (used as dictionary key); ES holds the translations ---- */
+  var STRINGS_ES = {
+    // sidebar
+    "Visão geral":"Vista general", "Dashboard":"Panel", "Operação":"Operación",
+    "Passageiros":"Pasajeros", "Pagamentos":"Pagos", "Lembretes":"Recordatorios",
+    "Pontos de Encontro":"Puntos de Encuentro", "Frota & Encarregados":"Flota y Encargados",
+    "Chatbot WhatsApp":"Chatbot WhatsApp", "Relatórios":"Reportes",
+    "Acessos":"Accesos", "Acesso do Passageiro":"Acceso del Pasajero",
+    "Acesso do Administrador":"Acceso del Administrador", "Acesso do Encarregado":"Acceso del Encargado",
+    "Sistema":"Sistema", "Configurações":"Configuración", "Administrador":"Administrador",
+    // topbar
+    "Buscar passageiro, ônibus, relatório…":"Buscar pasajero, autobús, reporte…",
+    // common buttons / commands
+    "Nova inscrição":"Nueva inscripción", "Exportar lista":"Exportar lista",
+    "Filtrar por ônibus":"Filtrar por autobús", "Filtrar por ponto de encontro":"Filtrar por punto de encuentro",
+    "Registrar pagamento":"Registrar pago", "Enviar cobrança via WhatsApp":"Enviar cobro por WhatsApp",
+    "Criar lembrete":"Crear recordatorio", "Ver histórico":"Ver historial",
+    "Adicionar ponto":"Agregar punto", "Adicionar ponto de encontro":"Agregar punto de encuentro",
+    "Salvar alterações":"Guardar cambios", "Editar":"Editar", "Entrar":"Ingresar",
+    "Cadastre-se aqui":"Regístrate aquí", "Voltar ao login":"Volver al inicio de sesión",
+    "Sair":"Salir", "Concluir cadastro":"Finalizar registro", "Redefinir senha":"Restablecer contraseña",
+    "Copiar link de acesso":"Copiar enlace de acceso", "Abrir Portal do Passageiro":"Abrir Portal del Pasajero",
+    "Ver tela de cadastro":"Ver pantalla de registro", "Abrir Painel do Encarregado":"Abrir Panel del Encargado",
+    "Convidar administrador":"Invitar administrador", "Marcar todos presentes":"Marcar todos presentes",
+    "Enviar lista à administração":"Enviar lista a la administración", "Ver no mapa":"Ver en el mapa",
+    "▶ Repetir simulação":"▶ Repetir simulación", "Solicitar orçamento":"Solicitar presupuesto",
+    "Enviar link de recuperação":"Enviar enlace de recuperación", "Desbloquear":"Desbloquear",
+    "Aplicar alterações":"Aplicar cambios", "Copiar link do sistema":"Copiar enlace del sistema",
+    // view titles / card headers
+    "Visão geral do congresso":"Vista general del congreso",
+    "Ocupação por ônibus":"Ocupación por autobús", "Status de pagamento":"Estado de pago",
+    "Atividade recente":"Actividad reciente", "Próximos lembretes":"Próximos recordatorios",
+    "Lista de passageiros":"Lista de pasajeros", "Cobranças em atraso":"Cobros atrasados",
+    "Distribuição":"Distribución", "Próximos disparos":"Próximos envíos", "Entrega (7 dias)":"Entrega (7 días)",
+    "Status da frota":"Estado de la flota", "Encarregados":"Encargados",
+    "Conversa recente":"Conversación reciente", "Status do agente":"Estado del agente",
+    "Volume por assunto":"Volumen por tema", "Gerar relatório":"Generar reporte",
+    "Últimas exportações":"Últimas exportaciones", "Login público compartilhado":"Inicio de sesión público compartido",
+    "O que o passageiro vê":"Lo que ve el pasajero", "Administradores":"Administradores",
+    "Segurança":"Seguridad", "Encarregados com acesso":"Encargados con acceso",
+    "Dados do evento":"Datos del evento", "Integração WhatsApp":"Integración WhatsApp",
+    "Automação de WhatsApp · conectar agente":"Automatización de WhatsApp · conectar agente",
+    "Pontos de encontro":"Puntos de encuentro", "Preferências gerais":"Preferencias generales",
+    "Compartilhar & Código":"Compartir y Código", "Idioma":"Idioma",
+    // table headers
+    "Nome":"Nombre", "Congregação":"Congregación", "Ônibus":"Autobús", "Ponto de encontro":"Punto de encuentro",
+    "Pagamento":"Pago", "Valor":"Monto", "Status":"Estado", "Lembrete":"Recordatorio", "Público":"Destinatarios",
+    "Canal":"Canal", "Envio":"Envío", "Lugares":"Asientos", "Arquivo":"Archivo", "Formato":"Formato",
+    "Gerado":"Generado", "E-mail":"Correo", "Papel":"Rol", "Cargo":"Rol",
+    // status / pill words
+    "Pago":"Pagado", "Pendente":"Pendiente", "Atrasado":"Atrasado", "Confirmado":"Confirmado",
+    "Lotado":"Completo", "Aguardando contrato":"Esperando contrato", "online":"en línea",
+    "visível":"visible", "oculto":"oculto", "ativo":"activo", "pronto":"listo",
+    "automático":"automático", "conectado":"conectado",
+    // login / cadastro / portal / encarregado (static)
+    "Passageiro":"Pasajero", "Encarregado":"Encargado",
+    "Usuário":"Usuario", "Senha":"Contraseña", "Ponto de encontro:selectlabel":"Punto de encuentro",
+    "Entrar como passageiro":"Ingresar como pasajero", "Entrar como encarregado":"Ingresar como encargado",
+    "Entrar no painel administrativo":"Ingresar al panel administrativo",
+    "Este login é compartilhado por todos os passageiros. Confirme o WhatsApp usado na sua inscrição para vermos seus dados.":"Este inicio de sesión es compartido por todos los pasajeros. Confirma el WhatsApp usado en tu inscripción para ver tus datos.",
+    "Acesso restrito aos irmãos designados pela administração.":"Acceso restringido a las personas designadas por la administración.",
+    "Uso exclusivo da coordenação de transporte.":"Uso exclusivo de la coordinación de transporte.",
+    "Esqueceu a senha?":"¿Olvidaste tu contraseña?",
+    "Cadastro de passageiro":"Registro de pasajero",
+    "Preencha todos os dados solicitados para garantir sua vaga no ônibus.":"Completa todos los datos solicitados para asegurar tu lugar en el autobús.",
+    "Dados pessoais":"Datos personales", "Transporte":"Transporte", "Confirmação":"Confirmación",
+    "Nome completo":"Nombre completo", "Tipo de documento":"Tipo de documento", "Número do CPF":"Número de documento",
+    "Telefone / WhatsApp":"Teléfono / WhatsApp", "E-mail (opcional)":"Correo (opcional)",
+    "Dias de participação":"Días de participación", "Leva acompanhante(s)?":"¿Lleva acompañante(s)?",
+    "Responsável (se menor de idade)":"Responsable (si es menor de edad)",
+    "Nome do responsável":"Nombre del responsable", "Telefone do responsável":"Teléfono del responsable",
+    "Forma de pagamento":"Forma de pago", "Dinheiro no embarque":"Efectivo al abordar", "Transferência":"Transferencia",
+    "Comprovante (opcional agora)":"Comprobante (opcional por ahora)", "Toque para anexar comprovante":"Toca para adjuntar comprobante",
+    "Contato de emergência":"Contacto de emergencia", "Telefone":"Teléfono",
+    "Li e aceito o regulamento do congresso e as condições de transporte.":"Leí y acepto el reglamento del congreso y las condiciones de transporte.",
+    "Cadastro enviado! Você receberá a confirmação pelo WhatsApp.":"¡Registro enviado! Recibirás la confirmación por WhatsApp.",
+    "Meu ônibus":"Mi autobús", "Encarregado do meu ônibus":"Encargado de mi autobús",
+    "Lembretes recebidos":"Recordatorios recibidos",
+    "Total":"Total", "Presentes":"Presentes", "Faltando":"Faltan", "Avisos":"Avisos",
+    "Quero me cadastrar":"Quiero registrarme", "Meu ônibus":"Mi autobús",
+    "Não":"No", "Sim, 1 acompanhante":"Sí, 1 acompañante", "Sim, 2 ou mais":"Sí, 2 o más",
+    "Padrão":"Predeterminado", "Compacto":"Compacto", "CPF":"CPF", "RG":"RG", "Pix":"Pix",
+    "Assistente Jardim do Vale (padrão)":"Asistente Jardim do Vale (predeterminado)",
+    "Agente personalizado…":"Agente personalizado…", "Senha do administrador":"Contraseña del administrador",
+    "Compartilhar sistema":"Compartir sistema", "Link somente leitura":"Enlace de solo lectura",
+    "Editar configurações via código (JSON)":"Editar configuración vía código (JSON)",
+    "Buscar passageiro…":"Buscar pasajero…",
+    "Inscrição individual":"Inscripción individual", "Grupo de":"Grupo de", "pessoas":"personas",
+    "o ponto de encontro será enviado pelo WhatsApp assim que for atribuído.":"el punto de encuentro se enviará por WhatsApp en cuanto sea asignado.",
+    "Quantos acompanhantes você vai registrar?":"¿Cuántos acompañantes vas a registrar?",
+    "Nenhum — inscrição individual":"Ninguno — inscripción individual", "1 acompanhante":"1 acompañante",
+    "2 acompanhantes":"2 acompañantes", "3 acompanhantes":"3 acompañantes", "4 acompanhantes":"4 acompañantes",
+    "Cada acompanhante precisa dos próprios dados — como se fosse outra inscrição — e entra no mesmo grupo e no mesmo pagamento do titular.":"Cada acompañante necesita sus propios datos — como si fuera otra inscripción — y entra en el mismo grupo y el mismo pago del titular.",
+    "O ponto de encontro será atribuído pela administração após a confirmação da inscrição, e vai aparecer aqui e no painel do encarregado.":"El punto de encuentro será asignado por la administración tras confirmar la inscripción, y aparecerá aquí y en el panel del encargado.",
+    "Total do grupo":"Total del grupo", "Quem faz esta inscrição é o responsável por enviar o comprovante do pagamento de todo o grupo.":"Quien hace esta inscripción es responsable de enviar el comprobante del pago de todo el grupo.",
+    "Agora":"Ahora", "Novo aviso enviado pela administração — confira em Avisos/Lembretes.":"Nuevo aviso enviado por la administración — revísalo en Avisos/Recordatorios.",
+    "Ao enviar, o passageiro e o encarregado recebem a notificação com o tom de mensagem padrão do próprio celular deles.":"Al enviarlo, el pasajero y el encargado reciben la notificación con el tono de mensaje predeterminado de su propio celular.",
+    "O administrador principal pode ver todo o sistema e gerenciar as contas dos demais administradores (criar, redefinir senha, desativar), mas não pode entrar na sessão ativa de outro administrador nem ver o que ele está fazendo no momento.":"El administrador principal puede ver todo el sistema y gestionar las cuentas de los demás administradores (crear, restablecer contraseña, desactivar), pero no puede entrar en la sesión activa de otro administrador ni ver lo que está haciendo en ese momento.",
+    "Define quantas contas de encarregado o administrador pode criar em Acesso do Encarregado.":"Define cuántas cuentas de encargado puede crear el administrador en Acceso del Encargado.",
+    "Administrador principal":"Administrador principal", "você":"tú",
+    "Informe o e-mail cadastrado. Enviaremos um link para você criar uma nova senha.":"Ingresa el correo registrado. Te enviaremos un enlace para crear una nueva contraseña.",
+    "O status só passa para \"Pago\" quando o administrador confirma que o valor total foi recebido — mesmo que o passageiro já tenha feito um abono.":"El estado solo pasa a \"Pagado\" cuando el administrador confirma que se recibió el monto total — aunque el pasajero ya haya hecho un abono.",
+    "Cada encarregado vê apenas os passageiros do seu ponto de encontro, para confirmar presença no embarque.":"Cada encargado ve solo a los pasajeros de su punto de encuentro, para confirmar presencia al abordar.",
+    "Compartilhe o link do sistema ou edite as configurações avançadas por código — protegido pela senha do administrador.":"Comparte el enlace del sistema o edita la configuración avanzada por código — protegido por la contraseña del administrador.",
+    "Informe nome e sobrenome.":"Ingresa nombre y apellido.", "Acompanhante":"Acompañante",
+    // config
+    "Nome do evento":"Nombre del evento", "Duração":"Duración", "Vários dias":"Varios días",
+    "Somente 1 dia":"Solo 1 día", "Data de início":"Fecha de inicio", "Data de término":"Fecha de término",
+    "Este nome e estas datas aparecem para os passageiros e encarregados em seus próprios painéis.":"Este nombre y estas fechas aparecen para los pasajeros y encargados en sus propios paneles.",
+    "Alterações salvas — já visíveis para passageiros e encarregados.":"Cambios guardados — ya visibles para pasajeros y encargados.",
+    "Pré-visualizar tela:":"Vista previa de pantalla:",
+    "Login":"Inicio de sesión", "Cadastro":"Registro", "Portal do Passageiro":"Portal del Pasajero",
+    "Painel do Encarregado":"Panel del Encargado", "ERP Administrativo":"ERP Administrativo"
+  };
+  function t(s){
+    if(STATE.lang === "es" && STRINGS_ES.hasOwnProperty(s)) return STRINGS_ES[s];
+    return s;
+  }
+  function money(s){
+    if(STATE.lang !== "es") return s;
+    return String(s).replace("R$","$").replace(",",".");
+  }
+
+  /* ================= ICONS ================= */
+  var ICONS = {
+    home:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 4l8 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9h12v-9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 19v-5h4v5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    users:'<svg viewBox="0 0 24 24" fill="none"><path d="M8.5 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 19c.6-3 2.4-4.6 5-4.6s4.4 1.6 5 4.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M15.5 9.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="1.7"/><path d="M14.5 14.4c1.9.4 3.2 1.7 3.9 4.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    card:'<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3 10.2h18" stroke="currentColor" stroke-width="1.7"/><path d="M6.5 14.5h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    bell:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 10.5a6 6 0 1 1 12 0c0 3.4 1 4.8 1.6 5.4H4.4C5 15.3 6 13.9 6 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 18.8a2.4 2.4 0 0 0 4.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    pin:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg>',
+    bus:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 16V6.5A2.3 2.3 0 0 1 6.3 4.2h11.4A2.3 2.3 0 0 1 20 6.5V16" stroke="currentColor" stroke-width="1.7"/><path d="M4 16h16M4 16l-1 2.6M20 16l1 2.6M7.2 19.2v1.3M16.8 19.2v1.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.6" cy="13" r="1.15" fill="currentColor"/><circle cx="16.4" cy="13" r="1.15" fill="currentColor"/><path d="M5.6 8.6h12.8" stroke="currentColor" stroke-width="1.7"/></svg>',
+    chat:'<svg viewBox="0 0 24 24" fill="none"><path d="M5 5.5h14a1.6 1.6 0 0 1 1.6 1.6v8.2A1.6 1.6 0 0 1 19 16.9H10l-4.4 3.4v-3.4H5a1.6 1.6 0 0 1-1.6-1.6V7.1A1.6 1.6 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="8.3" cy="11.1" r="1" fill="currentColor"/><circle cx="12" cy="11.1" r="1" fill="currentColor"/><circle cx="15.7" cy="11.1" r="1" fill="currentColor"/></svg>',
+    report:'<svg viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4v13H7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3.5v4h4" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.3 12.5h6M9.3 15.3h6M9.3 9.7h2.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    key:'<svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="15" r="3.6" stroke="currentColor" stroke-width="1.7"/><path d="M10.5 12.5 18 5M15.5 8l2.2 2.2M18.3 5.2l2.2 2.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    shield:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5 6v6c0 5 3 7.8 7 9 4-1.2 7-4 7-9V6l-7-2.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.2 12 1.9 1.9 3.7-3.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="4.5" width="17" height="15" rx="2.4" stroke="currentColor" stroke-width="1.7"/><path d="M7.5 12.3 10 14.8l6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    gear:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.1" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.8v2.1M12 18.1v2.1M4.9 6.9l1.5 1.5M17.6 15.6l1.5 1.5M3.8 12h2.1M18.1 12h2.1M4.9 17.1l1.5-1.5M17.6 8.4l1.5-1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    call:'<svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4h2.2l1.3 4-1.9 1.6a11.5 11.5 0 0 0 5.3 5.3l1.6-1.9 4 1.3v2.2a1.5 1.5 0 0 1-1.6 1.5A15.5 15.5 0 0 1 5 5.6 1.5 1.5 0 0 1 6.5 4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+    whats:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3Zm0 1.8a7.2 7.2 0 0 1 6.2 10.9l-.24.4.68 2.5-2.55-.67-.4.24A7.2 7.2 0 1 1 12 4.8Zm-2.7 3.5c-.2 0-.5 0-.7.3-.25.3-.9.9-.9 2.1s.9 2.5 1 2.6c.15.2 1.8 2.8 4.4 3.8 2.2.85 2.6.68 3.1.6.5-.05 1.6-.65 1.8-1.3.2-.6.2-1.15.15-1.25-.05-.1-.2-.17-.4-.3-.2-.1-1.2-.6-1.4-.65-.2-.1-.3-.15-.45.1-.15.2-.5.65-.6.78-.1.13-.2.15-.4.05-.2-.1-.85-.3-1.6-1-.6-.5-1-1.2-1.15-1.4-.1-.2 0-.3.1-.45.1-.1.2-.25.3-.4.1-.1.15-.2.2-.35.05-.15 0-.3 0-.4-.05-.1-.45-1.1-.6-1.5-.15-.4-.35-.35-.5-.35Z"/></svg>',
+    refresh:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 13.9-5.4M20 12a8 8 0 0 1-13.9 5.4M17 3v4h-4M7 21v-4h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+
+  // fill sidebar template placeholders
+  document.getElementById("sideNav").innerHTML = document.getElementById("sideNav").innerHTML
+    .replace(/\$\{ICON_HOME\}/g, ICONS.home).replace(/\$\{ICON_USERS\}/g, ICONS.users)
+    .replace(/\$\{ICON_CARD\}/g, ICONS.card).replace(/\$\{ICON_BELL\}/g, ICONS.bell)
+    .replace(/\$\{ICON_PIN\}/g, ICONS.pin).replace(/\$\{ICON_BUS\}/g, ICONS.bus)
+    .replace(/\$\{ICON_CHAT\}/g, ICONS.chat).replace(/\$\{ICON_REPORT\}/g, ICONS.report)
+    .replace(/\$\{ICON_KEY\}/g, ICONS.key).replace(/\$\{ICON_SHIELD\}/g, ICONS.shield)
+    .replace(/\$\{ICON_CHECK\}/g, ICONS.check).replace(/\$\{ICON_GEAR\}/g, ICONS.gear);
+
+  /* ================= THEME ================= */
+  var root = document.documentElement, saved = null;
+  try{ saved = localStorage.getItem("jv-theme"); }catch(e){}
+  function applyTheme(t){
+    if(t === "light" || t === "dark"){ root.setAttribute("data-theme", t); } else { root.removeAttribute("data-theme"); }
+    document.querySelectorAll("[data-theme-btn]").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-theme-btn") === (t || "system")); });
+    try{ localStorage.setItem("jv-theme", t || "system"); }catch(e){}
+  }
+  document.querySelectorAll("[data-theme-btn]").forEach(function(b){ b.addEventListener("click", function(){ applyTheme(b.getAttribute("data-theme-btn")); }); });
+  applyTheme(saved);
+
+  /* ================= I18N (PT base language, ES translations) ================= */
+  var I18N_SELECTORS = [
+    ".nav-item .lbl", ".side-group-label", ".side-user .who .r",
+    ".previewbar .lbl", ".previewbar button[data-screen]",
+    ".role-tabs button", "label", "h1", "h2", "h3", "h4",
+    "table.data th", ".actionbtn", ".badge", ".step .t",
+    ".settings-row .txt strong", ".settings-row .txt span",
+    ".card-head .muted", ".portal-card .k", ".metric .label",
+    "select option", ".login-foot span", ".backlink span",
+    ".connect-opt .t", ".connect-opt .d", ".role-card p", ".i18n-note"
+  ];
+  function markI18n(){
+    I18N_SELECTORS.forEach(function(sel){
+      document.querySelectorAll(sel).forEach(function(el){
+        if(el.children.length === 0 && !el.hasAttribute("data-i18n")){
+          var txt = el.textContent.replace(/\s+/g," ").trim();
+          if(txt) el.setAttribute("data-i18n", txt);
+        }
+      });
+    });
+    document.querySelectorAll("input[placeholder], textarea[placeholder]").forEach(function(el){
+      if(!el.hasAttribute("data-i18n-ph")) el.setAttribute("data-i18n-ph", el.getAttribute("placeholder"));
+    });
+  }
+  function applyI18n(){
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-ph]").forEach(function(el){
+      el.setAttribute("placeholder", t(el.getAttribute("data-i18n-ph")));
+    });
+    document.documentElement.setAttribute("lang", STATE.lang === "es" ? "es" : "pt-BR");
+    document.querySelectorAll("[data-lang-btn]").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-lang-btn") === STATE.lang);
+    });
+    document.querySelectorAll("[data-money]").forEach(function(el){
+      el.textContent = money(el.getAttribute("data-money"));
+    });
+    document.querySelectorAll("[data-money-val]").forEach(function(el){
+      el.value = money(el.getAttribute("data-money-val"));
+    });
+    updateEventBranding();
+  }
+  document.querySelectorAll("[data-lang-btn]").forEach(function(b){
+    b.addEventListener("click", function(){
+      STATE.lang = b.getAttribute("data-lang-btn");
+      persistState();
+      applyI18n();
+      if(typeof renderDocOptions === "function") renderDocOptions();
+      if(typeof renderPaymentMethods === "function") renderPaymentMethods();
+      if(typeof renderCompanions === "function") renderCompanions();
+    });
+  });
+
+  /* ---- notification sound (demo of the default message tone) ---- */
+  function playNotificationSound(){
+    try{
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if(!Ctx) return;
+      var ctx = new Ctx();
+      [880, 1320].forEach(function(freq, i){
+        var osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.type = "sine"; osc.frequency.value = freq;
+        osc.connect(gain); gain.connect(ctx.destination);
+        var start = ctx.currentTime + i * 0.11;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.18, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+        osc.start(start); osc.stop(start + 0.18);
+      });
+      setTimeout(function(){ ctx.close(); }, 500);
+    }catch(e){}
+  }
+
+  function updateEventBranding(){
+    var dateLabel = eventDateLabel();
+    var loginSub = document.getElementById("loginEventSub");
+    if(loginSub) loginSub.textContent = t("Sistema de Transporte") + " · " + STATE.eventName + " · " + dateLabel;
+    var eyebrow = document.getElementById("topbarEyebrow");
+    if(eyebrow) eyebrow.textContent = STATE.eventName + " · " + dateLabel;
+    var portalSub = document.getElementById("portalEventSub");
+    if(portalSub) portalSub.textContent = "Jardim do Vale · " + dateLabel;
+    var encSub = document.getElementById("encarregadoEventSub");
+    if(encSub) encSub.textContent = t("Encarregado") + " · Salão do Reino — Jardim do Vale · " + dateLabel;
+  }
+
+  /* ================= SIDEBAR BEHAVIOR ================= */
+  var sidebar = document.getElementById("sidebar");
+  var collapseBtn = document.getElementById("collapseBtn");
+  var burgerBtn = document.getElementById("burgerBtn");
+  var backdrop = document.getElementById("sideBackdrop");
+  var collapsedSaved = null;
+  try{ collapsedSaved = localStorage.getItem("jv-sidebar-collapsed"); }catch(e){}
+  if(collapsedSaved === "1"){ sidebar.classList.add("collapsed"); }
+  collapseBtn.addEventListener("click", function(){
+    var on = sidebar.classList.toggle("collapsed");
+    try{ localStorage.setItem("jv-sidebar-collapsed", on ? "1" : "0"); }catch(e){}
+  });
+  function openMobile(){ sidebar.classList.add("mobile-open"); backdrop.classList.add("show"); }
+  function closeMobile(){ sidebar.classList.remove("mobile-open"); backdrop.classList.remove("show"); }
+  burgerBtn.addEventListener("click", openMobile);
+  backdrop.addEventListener("click", closeMobile);
+
+  /* ================= HELPERS ================= */
+  function el(html){ var t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+  function sparkPath(values, w, h){
+    var min=Math.min.apply(null,values), max=Math.max.apply(null,values), range=(max-min)||1, step=w/(values.length-1);
+    return values.map(function(v,i){ var x=i*step, y=h-((v-min)/range)*(h-4)-2; return (i===0?"M":"L")+x.toFixed(1)+","+y.toFixed(1); }).join(" ");
+  }
+  function barChart(data, opts){
+    opts = opts||{}; var max = opts.max || Math.max.apply(null, data.map(function(d){return d.value;}));
+    return '<div>'+data.map(function(d){
+      var pct = Math.max(2,(d.value/max)*100);
+      return '<div style="display:grid;grid-template-columns:104px 1fr 50px;align-items:center;gap:10px;margin:8px 0;">'+
+        '<span style="font-size:.8rem;color:var(--ink-soft)">'+d.label+'</span>'+
+        '<span style="height:9px;border-radius:5px;background:var(--plane);overflow:hidden;display:block;"><span style="display:block;height:100%;width:'+pct.toFixed(1)+'%;background:'+d.color+';border-radius:5px;"></span></span>'+
+        '<span class="tabular" style="font-size:.8rem;text-align:right;">'+d.value+(opts.suffix||'')+'</span>'+
+      '</div>';
+    }).join('')+'</div>';
+  }
+  function donut(segments, size){
+    size = size||120; var r=size/2-12, c=size/2, circ=2*Math.PI*r, offset=0;
+    var total = segments.reduce(function(a,s){return a+s.value;},0);
+    var arcs = segments.map(function(s){
+      var frac=s.value/total, len=frac*circ, dash=len+' '+(circ-len), rot=(offset/circ)*360-90; offset+=len;
+      return '<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+s.color+'" stroke-width="14" stroke-dasharray="'+dash+'" transform="rotate('+rot+' '+c+' '+c+')"/>';
+    }).join('');
+    return '<svg viewBox="0 0 '+size+' '+size+'" width="'+size+'" height="'+size+'"><circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="var(--hairline)" stroke-width="14"/>'+arcs+'</svg>';
+  }
+  function sectionLabel(txt){ return '<div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600;margin-bottom:8px;">'+txt+'</div>'; }
+
+  /* ================= VIEWS ================= */
+  var views = {};
+
+  /* ---- DASHBOARD ---- */
+  views.dashboard = {
+    title:"Dashboard",
+    render:function(){
+      var metrics = [
+        { label:"Inscritos", value:"612", of:"de 640 vagas", delta:"+18 hoje", trend:"up", spark:[420,455,480,510,540,560,580,598,605,612], color:"var(--c-1)" },
+        { label:"Pagamentos confirmados", value:"87%", of:"533 de 612", delta:"+4% na semana", trend:"up", spark:[62,66,69,71,75,78,80,83,85,87], color:"var(--st-good)" },
+        { label:"Pendentes / atrasados", value:"79", of:"12 atrasados", delta:"-6 esta semana", trend:"down", spark:[110,104,101,96,92,90,88,84,81,79], color:"var(--st-warning)" },
+        { label:"Ônibus confirmados", value:"14 / 16", of:"87,5% da frota", delta:"2 aguardando", trend:"flat", spark:[9,10,10,11,12,12,13,13,14,14], color:"var(--c-3)" },
+        { label:"Lembretes enviados", value:"1.284", of:"WhatsApp · 24h: 96", delta:"+96 hoje", trend:"up", spark:[820,900,960,1010,1080,1120,1160,1210,1250,1284], color:"var(--c-7)" },
+        { label:"Pontos de encontro", value:"9", of:"3 por dia do evento", delta:"todos confirmados", trend:"flat", spark:[9,9,9,9,9,9,9,9,9,9], color:"var(--c-4)" }
+      ];
+      var mHtml = metrics.map(function(m){
+        var arrow = m.trend==="up"?"▲":(m.trend==="down"?"▼":"＝");
+        return '<div class="metric"><div class="row1"><span class="label">'+m.label+'</span></div>'+
+          '<div class="value tabular">'+m.value+'</div>'+
+          '<svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none"><path d="'+sparkPath(m.spark,100,26)+'" fill="none" stroke="'+m.color+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+          '<div class="row1"><span class="delta '+m.trend+'">'+arrow+' '+m.delta+'</span><span style="font-size:.7rem;color:var(--ink-mute)">'+m.of+'</span></div></div>';
+      }).join('');
+
+      return '<div class="metrics">'+mHtml+'</div>'+
+        '<div class="grid split-58">'+
+          '<div class="card"><div class="card-head"><h3>Ocupação por ônibus</h3><span class="muted">hoje</span></div><div class="card-pad">'+
+            barChart([
+              {label:"Ônibus 01", value:44, color:"var(--c-1)"},{label:"Ônibus 02", value:46, color:"var(--c-1)"},
+              {label:"Ônibus 03", value:38, color:"var(--c-1)"},{label:"Ônibus 04", value:45, color:"var(--st-warning)"},
+              {label:"Ônibus 05", value:29, color:"var(--st-critical)"}
+            ],{max:46,suffix:"/46"})+
+          '</div></div>'+
+          '<div class="card"><div class="card-head"><h3>Status de pagamento</h3><span class="muted">total</span></div><div class="card-pad" style="display:flex;gap:16px;align-items:center;">'+
+            donut([{value:533,color:"var(--st-good)"},{value:67,color:"var(--st-warning)"},{value:12,color:"var(--st-critical)"}],104)+
+            '<div class="legend" style="flex-direction:column;gap:8px;"><span><i style="background:var(--st-good)"></i>Pago — 533</span><span><i style="background:var(--st-warning)"></i>Pendente — 67</span><span><i style="background:var(--st-critical)"></i>Atrasado — 12</span></div>'+
+          '</div></div>'+
+        '</div>'+
+        '<div class="grid split-58" style="margin-top:16px;">'+
+          '<div class="card"><div class="card-head"><h3>Atividade recente</h3></div><div class="card-pad">'+
+            '<div class="bot-line in"><span class="who">09:12</span><p>Relatório do dia 17 jul exportado em PDF por Wellington T.</p></div>'+
+            '<div class="bot-line out"><span class="who">08:47</span><p>Renato C. Alves confirmou pagamento de R$ 85,00 via Pix.</p></div>'+
+            '<div class="bot-line in"><span class="who">08:20</span><p>Chatbot respondeu 14 novas dúvidas sobre horário de embarque.</p></div>'+
+            '<div class="bot-line out"><span class="who">07:55</span><p>Irmão Otávio confirmou lista de presença do Ônibus 05.</p></div>'+
+          '</div></div>'+
+          '<div class="card"><div class="card-head"><h3>Próximos lembretes</h3></div><div class="card-pad">'+
+            '<div class="table-scroll"><table class="data"><thead><tr><th>Lembrete</th><th>Envio</th></tr></thead><tbody>'+
+              '<tr><td>Confirmação de vaga</td><td>Hoje, 18:00</td></tr>'+
+              '<tr><td>Horário de embarque</td><td>16 jul, 20:00</td></tr>'+
+              '<tr><td>Documentos necessários</td><td>15 jul, 09:00</td></tr>'+
+            '</tbody></table></div>'+
+          '</div></div>'+
+        '</div>';
+    }
+  };
+
+  /* ---- PASSAGEIROS ---- */
+  views.passageiros = {
+    title:"Passageiros",
+    render:function(){
+      return '<div class="grid cols-4" style="margin-bottom:16px;">'+
+          metricMini("Inscritos", "612", "var(--c-1)")+metricMini("Vagas livres", "28", "var(--c-3)")+
+          metricMini("Check-in feito", "0", "var(--ink-mute)")+metricMini("Cancelamentos", "3", "var(--st-critical)")+
+        '</div>'+
+        '<div class="card">'+
+          '<div class="card-head"><h3>Lista de passageiros</h3><span class="muted">612 registros</span></div>'+
+          '<div class="card-pad">'+
+            '<div class="actions-row" style="margin-bottom:14px;">'+
+              '<button type="button" class="actionbtn primary">Nova inscrição</button>'+
+              '<button type="button" class="actionbtn">Filtrar por ônibus</button>'+
+              '<button type="button" class="actionbtn">Filtrar por ponto de encontro</button>'+
+              '<button type="button" class="actionbtn">Exportar lista</button>'+
+            '</div>'+
+            '<div class="table-scroll"><table class="data"><thead><tr><th>Nome</th><th>Documento</th><th>Grupo</th><th>Ônibus</th><th>Ponto de encontro</th><th>Pagamento</th></tr></thead><tbody>'+
+              row("Marcos A. Ferreira","CPF 111.222.333-44","—","02","Salão do Reino — Jardim do Vale","good","Pago")+
+              row("Talita R. Souza","CPF 222.333.444-55","Titular (+2)","01","Salão do Reino — Jardim do Vale","good","Pago")+
+              row("Cícero P. Lima","CPF 333.444.555-66","—","04",null,"warning","Pendente")+
+              row("Ester M. Costa","CPF 444.555.666-77","—","03","Praça Central — Vale Novo","good","Pago")+
+              row("Renato C. Alves","CPF 555.666.777-88","—","01","Salão do Reino — Jardim do Vale","critical","Atrasado")+
+              row("Simone D. Rocha","CPF 666.777.888-99","—","02",null,"critical","Atrasado")+
+              row("Bruna K. Farias","CPF 777.888.999-00","—","01","Salão do Reino — Jardim do Vale","neutral","Abono")+
+            '</tbody></table></div>'+
+          '</div>'+
+        '</div>';
+      function row(n,doc,grupo,b,p,type,label){
+        var pontoCell = p
+          ? p
+          : '<select class="assign-ponto" style="font-size:.78rem;padding:5px 8px;border-radius:7px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink-mute);"><option value="">Atribuir ponto…</option><option>Salão do Reino — Jardim do Vale</option><option>Praça Central — Vale Novo</option><option>Posto Ipiranga, Av. Recanto</option></select>';
+        return '<tr><td>'+n+'</td><td class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+doc+'</td><td>'+grupo+'</td><td class="tabular">'+b+'</td><td>'+pontoCell+'</td><td><span class="pill '+type+'"><i class="dotp"></i>'+label+'</span></td></tr>';
+      }
+    },
+    after:function(root){
+      root.querySelectorAll(".assign-ponto").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          if(!sel.value) return;
+          var td = sel.parentElement;
+          td.textContent = sel.value;
+          var note = document.createElement("div");
+          note.style.cssText = "font-size:.7rem;color:var(--st-good);margin-top:2px;font-weight:600;";
+          note.textContent = "✓ enviado ao passageiro e ao encarregado";
+          td.appendChild(note);
+        });
+      });
+    }
+  };
+
+  /* ---- PAGAMENTOS ---- */
+  views.pagamentos = {
+    title:"Pagamentos",
+    render:function(){
+      return '<div class="grid cols-4" style="margin-bottom:16px;">'+
+          '<div class="metric"><div class="label">Total esperado</div><div class="value tabular" data-money="R$ 52.020,00">R$ 52.020,00</div></div>'+
+          '<div class="metric"><div class="label">Recebido (pago completo)</div><div class="value tabular" style="color:var(--st-good)" data-money="R$ 45.305,00">R$ 45.305,00</div></div>'+
+          '<div class="metric"><div class="label">Em abono (parcial)</div><div class="value tabular" style="color:var(--brand)" data-money="R$ 900,00">R$ 900,00</div></div>'+
+          '<div class="metric"><div class="label">Falta receber</div><div class="value tabular" style="color:var(--st-warning)" data-money="R$ 5.815,00">R$ 5.815,00</div></div>'+
+        '</div>'+
+        '<div class="grid split-58">'+
+        '<div class="card"><div class="card-head"><h3>Cobranças em atraso</h3><span class="muted">12 registros</span></div><div class="card-pad">'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>Nome</th><th>Valor</th><th>Status</th></tr></thead><tbody>'+
+            '<tr><td>Renato C. Alves</td><td class="tabular" data-money="R$ 85,00">R$ 85,00</td><td><span class="pill critical"><i class="dotp"></i>8 dias</span></td></tr>'+
+            '<tr><td>Simone D. Rocha</td><td class="tabular" data-money="R$ 85,00">R$ 85,00</td><td><span class="pill critical"><i class="dotp"></i>5 dias</span></td></tr>'+
+            '<tr><td>Aparecida N. Melo</td><td class="tabular" data-money="R$ 42,50">R$ 42,50</td><td><span class="pill warning"><i class="dotp"></i>2 dias</span></td></tr>'+
+            '<tr><td>Josué B. Andrade</td><td class="tabular" data-money="R$ 85,00">R$ 85,00</td><td><span class="pill warning"><i class="dotp"></i>1 dia</span></td></tr>'+
+          '</tbody></table></div>'+
+          '<div style="margin-top:14px;"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);font-weight:600;margin-bottom:8px;">Com abono parcial</div>'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>Nome</th><th>Pago</th><th>Falta</th><th>Status</th></tr></thead><tbody>'+
+            '<tr><td>Bruna K. Farias</td><td class="tabular" data-money="R$ 30,00">R$ 30,00</td><td class="tabular" data-money="R$ 55,00">R$ 55,00</td><td><span class="pill neutral"><i class="dotp"></i>Abono</span></td></tr>'+
+            '<tr><td>Eliezer M. Sousa</td><td class="tabular" data-money="R$ 30,00">R$ 30,00</td><td class="tabular" data-money="R$ 55,00">R$ 55,00</td><td><span class="pill neutral"><i class="dotp"></i>Abono</span></td></tr>'+
+          '</tbody></table></div></div>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary">Registrar pagamento</button><button type="button" class="actionbtn">Enviar cobrança via WhatsApp</button><button type="button" class="actionbtn">Enviar comprovante em PDF</button></div>'+
+          '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">O status só passa para "Pago" quando o administrador confirma que o valor total foi recebido — mesmo que o passageiro já tenha feito um abono.</p>'+
+        '</div></div>'+
+        '<div class="card"><div class="card-head"><h3>Distribuição</h3></div><div class="card-pad" style="display:flex;gap:16px;align-items:center;">'+
+          donut([{value:533,color:"var(--st-good)"},{value:30,color:"var(--brand)"},{value:37,color:"var(--st-warning)"},{value:12,color:"var(--st-critical)"}],110)+
+          '<div class="legend" style="flex-direction:column;gap:8px;"><span><i style="background:var(--st-good)"></i>Pago — 533</span><span><i style="background:var(--brand)"></i>Abono — 30</span><span><i style="background:var(--st-warning)"></i>Pendente — 37</span><span><i style="background:var(--st-critical)"></i>Atrasado — 12</span></div>'+
+        '</div></div>'+
+      '</div>';
+    }
+  };
+
+  /* ---- LEMBRETES ---- */
+  views.lembretes = {
+    title:"Lembretes",
+    render:function(){
+      return '<div class="grid split-58">'+
+        '<div class="card"><div class="card-head"><h3>Próximos disparos</h3></div><div class="card-pad">'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>Lembrete</th><th>Público</th><th>Canal</th><th>Envio</th></tr></thead><tbody>'+
+            '<tr><td>Confirmação de vaga</td><td class="tabular">79</td><td>WhatsApp</td><td>Hoje, 18:00</td></tr>'+
+            '<tr><td>Horário de embarque</td><td class="tabular">612</td><td>WhatsApp</td><td>16 jul, 20:00</td></tr>'+
+            '<tr><td>Documentos necessários</td><td class="tabular">612</td><td>WhatsApp</td><td>15 jul, 09:00</td></tr>'+
+            '<tr><td>Pagamento em atraso</td><td class="tabular">12</td><td>WhatsApp</td><td>Hoje, 12:00</td></tr>'+
+          '</tbody></table></div>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" id="sendReminderBtn">Criar lembrete</button><button type="button" class="actionbtn">Ver histórico</button></div>'+
+          '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">Ao enviar, o passageiro e o encarregado recebem a notificação com o tom de mensagem padrão do próprio celular deles.</p>'+
+        '</div></div>'+
+        '<div class="card"><div class="card-head"><h3>Entrega (7 dias)</h3></div><div class="card-pad">'+
+          barChart([{label:"Entregue", value:96, color:"var(--st-good)"},{label:"Lido", value:81, color:"var(--c-1)"},{label:"Falhou", value:3, color:"var(--st-critical)"}],{max:100,suffix:"%"})+
+        '</div></div>'+
+      '</div>';
+    },
+    after:function(root){
+      var btn = root.querySelector("#sendReminderBtn");
+      if(btn){
+        btn.addEventListener("click", function(){
+          playNotificationSound();
+          var portalCard = document.querySelector("#screen-passenger .portal-card:last-child");
+          if(portalCard){
+            var line = document.createElement("div");
+            line.className = "bot-line in"; line.style.paddingTop = "8px";
+            line.innerHTML = '<span class="who">'+t("Agora")+'</span><p>'+t("Novo aviso enviado pela administração — confira em Avisos/Lembretes.")+'</p>';
+            portalCard.appendChild(line);
+          }
+          var encList = document.querySelector('[data-enc-panel="avisos"] .card-pad');
+          if(encList){
+            var line2 = document.createElement("div");
+            line2.className = "bot-line in";
+            line2.innerHTML = '<span class="who">'+t("Agora")+'</span><p>'+t("Novo aviso enviado pela administração — confira em Avisos/Lembretes.")+'</p>';
+            encList.appendChild(line2);
+          }
+        });
+      }
+    }
+  };
+
+  /* ---- PONTOS DE ENCONTRO ---- */
+  views.encontro = {
+    title:"Pontos de Encontro",
+    render:function(){
+      var days = {
+        "17 jul":[
+          {time:"05:30", place:"Salão do Reino — Jardim do Vale", info:"Ônibus 01 e 02 · Responsável: Irmão Diego", count:210},
+          {time:"05:45", place:"Praça Central — Vale Novo", info:"Ônibus 03 · Responsável: Irmã Patrícia", count:112},
+          {time:"06:00", place:"Posto Ipiranga, Av. Recanto", info:"Ônibus 04 e 05 · Responsável: Irmão Otávio", count:198}
+        ],
+        "18 jul":[
+          {time:"06:00", place:"Salão do Reino — Jardim do Vale", info:"Todos os ônibus · Concentração geral", count:210},
+          {time:"06:15", place:"Praça Central — Vale Novo", info:"Ônibus 03 · Responsável: Irmã Patrícia", count:112},
+          {time:"06:15", place:"Posto Ipiranga, Av. Recanto", info:"Ônibus 04 e 05 · Responsável: Irmão Otávio", count:198}
+        ],
+        "19 jul":[
+          {time:"06:00", place:"Salão do Reino — Jardim do Vale", info:"Todos os ônibus · Último dia", count:210},
+          {time:"06:15", place:"Praça Central — Vale Novo", info:"Ônibus 03 · Responsável: Irmã Patrícia", count:112},
+          {time:"06:15", place:"Posto Ipiranga, Av. Recanto", info:"Ônibus 04 e 05 · Responsável: Irmão Otávio", count:198}
+        ]
+      };
+      var tabs = Object.keys(days).map(function(d,i){ return '<button type="button" class="daytab'+(i===0?' active':'')+'" data-day="'+d+'">'+d+'</button>'; }).join('');
+      var panels = Object.keys(days).map(function(d,i){
+        var cards = days[d].map(function(s){
+          return '<div class="encontro-card"><span class="encontro-time">'+s.time+'</span><div class="encontro-body"><strong>'+s.place+'</strong><span>'+s.info+'</span></div><span class="encontro-count">'+s.count+' pax</span><a class="icon-btn call" title="Ver no mapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(s.place+" Itatiba SP")+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21.5s6.5-6 6.5-11.3A6.5 6.5 0 0 0 5.5 10.2c0 5.3 6.5 11.3 6.5 11.3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg></a></div>';
+        }).join('');
+        return '<div class="day-panel" data-day-panel="'+d+'" style="'+(i===0?'':'display:none;')+'">'+cards+'</div>';
+      }).join('');
+      return '<div class="card card-pad">'+
+        '<div class="actions-row" style="justify-content:space-between;margin-bottom:14px;">'+
+          '<div class="daytab-group" style="margin-bottom:0;">'+tabs+'</div>'+
+          '<button type="button" class="actionbtn primary">Adicionar ponto</button>'+
+        '</div>'+panels+'</div>';
+    },
+    after:function(root){
+      var tabs = root.querySelectorAll(".daytab"), panels = root.querySelectorAll("[data-day-panel]");
+      tabs.forEach(function(tab){ tab.addEventListener("click", function(){
+        tabs.forEach(function(t){ t.classList.remove("active"); }); tab.classList.add("active");
+        var day = tab.getAttribute("data-day");
+        panels.forEach(function(p){ p.style.display = (p.getAttribute("data-day-panel")===day) ? "" : "none"; });
+      }); });
+    }
+  };
+
+  /* ---- FROTA & ENCARREGADOS ---- */
+  views.frota = {
+    title:"Frota & Encarregados",
+    render:function(){
+      var contacts = [
+        {name:"Irmão Diego M.", role:"Ônibus 01 e 02", init:"DM"},
+        {name:"Irmã Patrícia L.", role:"Ônibus 03", init:"PL"},
+        {name:"Irmão Otávio S.", role:"Ônibus 04 e 05", init:"OS"},
+        {name:"Irmão Wellington T.", role:"Coordenação geral", init:"WT"}
+      ];
+      var cards = contacts.map(function(c){
+        return '<div class="contact-card"><div class="avatar">'+c.init+'</div><div style="flex:1;min-width:0;"><div class="contact-name">'+c.name+'</div><div class="contact-role">'+c.role+'</div></div>'+
+          '<button type="button" class="icon-btn whats" title="WhatsApp">'+ICONS.whats+'</button>'+
+          '<button type="button" class="icon-btn call" title="Ligar">'+ICONS.call+'</button></div>';
+      }).join('');
+      return '<div class="grid split-58">'+
+        '<div class="card"><div class="card-head"><h3>Status da frota</h3><span class="muted">16 ônibus</span></div><div class="card-pad">'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>Ônibus</th><th>Lugares</th><th>Status</th></tr></thead><tbody>'+
+            '<tr><td class="tabular">01</td><td class="tabular">44/46</td><td><span class="pill good"><i class="dotp"></i>Confirmado</span></td></tr>'+
+            '<tr><td class="tabular">02</td><td class="tabular">46/46</td><td><span class="pill good"><i class="dotp"></i>Lotado</span></td></tr>'+
+            '<tr><td class="tabular">03</td><td class="tabular">38/46</td><td><span class="pill good"><i class="dotp"></i>Confirmado</span></td></tr>'+
+            '<tr><td class="tabular">04</td><td class="tabular">45/46</td><td><span class="pill warning"><i class="dotp"></i>Aguardando contrato</span></td></tr>'+
+            '<tr><td class="tabular">05</td><td class="tabular">29/46</td><td><span class="pill warning"><i class="dotp"></i>Aguardando contrato</span></td></tr>'+
+          '</tbody></table></div>'+
+        '</div></div>'+
+        '<div class="card"><div class="card-head"><h3>Encarregados</h3></div><div class="card-pad">'+cards+'</div></div>'+
+      '</div>';
+    }
+  };
+
+  /* ---- CHATBOT ---- */
+  views.chatbot = {
+    title:"Chatbot WhatsApp",
+    render:function(){
+      return '<div class="grid split-58">'+
+        '<div class="card card-pad" style="display:flex;justify-content:center;">'+
+          '<div style="width:100%;max-width:340px;">'+
+            '<div class="wa-phone"><div class="wa-screen">'+
+              '<div class="wa-head"><div class="av">'+ICONS.chat+'</div><div><div class="nm">Assistente Jardim do Vale</div><div class="st">online · agente inteligente</div></div></div>'+
+              '<div class="wa-body" id="waBody"></div>'+
+              '<div class="help-quick" style="background:#f0f0f0;"><button type="button" id="waQuickCadastro">📝 Quero me cadastrar</button></div>'+
+              '<div class="wa-input"><div class="box">Digite uma mensagem…</div><div class="snd"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h15M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>'+
+            '</div></div>'+
+            '<div class="actions-row" style="margin-top:14px;justify-content:center;"><button type="button" class="actionbtn" id="waReplay">▶ Repetir simulação</button></div>'+
+          '</div>'+
+        '</div>'+
+        '<div>'+
+          '<div class="card" style="margin-bottom:16px;"><div class="card-head"><h3>Status do agente</h3><span class="badge good">conectado</span></div><div class="card-pad">'+
+            '<p style="margin:0 0 12px;color:var(--ink-soft);font-size:.85rem;">O agente responde dúvidas sobre horários, pagamento e pontos de encontro, e também conduz novos cadastros diretamente pelo WhatsApp — sem precisar abrir o painel.</p>'+
+            '<div class="settings-row"><div class="txt"><strong>Responde dúvidas</strong><span>Horários, pagamento, pontos de encontro</span></div><span class="badge brand">ativo</span></div>'+
+            '<div class="settings-row"><div class="txt"><strong>Conduz cadastro pelo chat</strong><span>Coleta os dados e cria a inscrição</span></div><span class="badge brand">ativo</span></div>'+
+            '<div class="settings-row"><div class="txt"><strong>Escalar para humano</strong><span>Quando o agente não sabe responder</span></div><span class="badge brand">ativo</span></div>'+
+          '</div></div>'+
+          '<div class="card"><div class="card-head"><h3>Volume por assunto</h3></div><div class="card-pad">'+
+            barChart([{label:"Horários", value:210, color:"var(--c-1)"},{label:"Pagamento", value:150, color:"var(--c-3)"},{label:"Cadastros", value:74, color:"var(--st-good)"},{label:"Ponto de encontro", value:98, color:"var(--c-4)"},{label:"Outros", value:41, color:"var(--ink-mute)"}],{max:210})+
+          '</div></div>'+
+        '</div>'+
+      '</div>';
+    },
+    after:function(root){
+      var body = root.querySelector("#waBody");
+      var script = [
+        {who:"in", text:"Oi! Quero me inscrever no congresso 🙋"},
+        {who:"out", text:"Olá! Eu te ajudo com o cadastro. Qual é o seu nome completo?"},
+        {who:"in", text:"Talita Rocha Souza"},
+        {who:"out", text:"Perfeito, Talita! Em quais dias você vai participar: 17, 18, 19 ou os três?"},
+        {who:"in", text:"Os três dias"},
+        {who:"out", text:"Ótimo. Qual será seu ponto de encontro: Jardim do Vale, Vale Novo ou Recanto?"},
+        {who:"in", text:"Vale Novo"},
+        {who:"out", text:"Cadastro criado ✅ Você foi alocada no Ônibus 03, saída 05:45 da Praça Central. Em breve envio o link de pagamento."}
+      ];
+      function timeNow(){ var d=new Date(); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+      var timers = [];
+      function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+      function playScript(){
+        clearTimers(); body.innerHTML = "";
+        var t = 0;
+        script.forEach(function(m){
+          if(m.who === "out"){
+            timers.push(setTimeout(function(){
+              var typing = document.createElement("div");
+              typing.className = "wa-typing"; typing.innerHTML = "<i></i><i></i><i></i>";
+              body.appendChild(typing); body.scrollTop = body.scrollHeight;
+            }, t));
+            t += 900;
+            timers.push(setTimeout(function(){
+              var typing = body.querySelector(".wa-typing");
+              if(typing) typing.remove();
+              var b = document.createElement("div");
+              b.className = "wa-bubble out";
+              b.innerHTML = m.text + '<span class="tm">'+timeNow()+'</span>';
+              body.appendChild(b); body.scrollTop = body.scrollHeight;
+            }, t));
+            t += 500;
+          } else {
+            timers.push(setTimeout(function(){
+              var b = document.createElement("div");
+              b.className = "wa-bubble in";
+              b.innerHTML = m.text + '<span class="tm">'+timeNow()+'</span>';
+              body.appendChild(b); body.scrollTop = body.scrollHeight;
+            }, t));
+            t += 700;
+          }
+        });
+      }
+      playScript();
+      var replay = root.querySelector("#waReplay");
+      if(replay) replay.addEventListener("click", playScript);
+      var quickCadastro = root.querySelector("#waQuickCadastro");
+      if(quickCadastro){
+        quickCadastro.addEventListener("click", function(){
+          clearTimers();
+          var b1 = document.createElement("div"); b1.className = "wa-bubble out";
+          b1.innerHTML = "Perfeito! Vamos começar seu cadastro agora mesmo, direto por aqui — é só responder as próximas perguntas 👍" + '<span class="tm">'+timeNow()+'</span>';
+          body.appendChild(b1); body.scrollTop = body.scrollHeight;
+        });
+      }
+    }
+  };
+
+  /* ---- RELATÓRIOS ---- */
+  views.relatorios = {
+    title:"Relatórios",
+    render:function(){
+      return '<div class="grid split-58">'+
+        '<div class="card"><div class="card-head"><h3>Gerar relatório</h3></div><div class="card-pad">'+
+          '<div class="actions-row">'+
+            '<button type="button" class="actionbtn primary">PDF — 17 jul</button>'+
+            '<button type="button" class="actionbtn primary">PDF — 18 jul</button>'+
+            '<button type="button" class="actionbtn primary">PDF — 19 jul</button>'+
+            '<button type="button" class="actionbtn">Excel — consolidado</button>'+
+          '</div>'+
+        '</div></div>'+
+        '<div class="card"><div class="card-head"><h3>Últimas exportações</h3></div><div class="card-pad">'+
+          '<div class="table-scroll"><table class="data"><thead><tr><th>Arquivo</th><th>Formato</th><th>Gerado</th></tr></thead><tbody>'+
+            '<tr><td>Relatorio_17jul.pdf</td><td class="tabular">PDF</td><td>Hoje, 09:12</td></tr>'+
+            '<tr><td>Pagamentos_consolidado.xlsx</td><td class="tabular">Excel</td><td>Ontem, 21:40</td></tr>'+
+            '<tr><td>Relatorio_18jul.pdf</td><td class="tabular">PDF</td><td>Ontem, 21:38</td></tr>'+
+          '</tbody></table></div>'+
+        '</div></div>'+
+      '</div>';
+    }
+  };
+
+  /* ---- ACESSO DO PASSAGEIRO ---- */
+  views["acesso-passageiro"] = {
+    title:"Acesso do Passageiro",
+    render:function(){
+      return '<div class="grid split-58">'+
+        '<div class="card card-pad">'+
+          sectionLabel("Login público compartilhado")+
+          '<p style="margin:0 0 14px;color:var(--ink-soft);font-size:.88rem;">Usado por todos os passageiros para consultar seu ônibus, ponto de encontro e status de pagamento.</p>'+
+          '<div class="credential"><span>usuário: <strong>Jardim</strong></span><span class="copy">copiar</span></div>'+
+          '<div class="credential" style="margin-top:8px;"><span>senha: <strong>1914</strong></span><span class="copy">copiar</span></div>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" data-goto="passenger">Abrir Portal do Passageiro</button><button type="button" class="actionbtn" data-goto="cadastro">Ver tela de cadastro</button><button type="button" class="actionbtn">Redefinir senha</button></div>'+
+        '</div>'+
+        '<div class="card card-pad">'+
+          sectionLabel("O que o passageiro vê")+
+          '<div class="settings-row"><div class="txt"><strong>Meu ônibus</strong><span>Número, horário e encarregado</span></div><span class="badge brand">visível</span></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Meu ponto de encontro</strong><span>Endereço, hora e mapa</span></div><span class="badge brand">visível</span></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Status de pagamento</strong><span>Pago, pendente ou atrasado</span></div><span class="badge brand">visível</span></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Lembretes recebidos</strong><span>Histórico de mensagens do WhatsApp</span></div><span class="badge brand">visível</span></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Dados de outros passageiros</strong><span>Nunca exibidos neste acesso</span></div><span class="badge neutral">oculto</span></div>'+
+        '</div>'+
+      '</div>';
+    }
+  };
+
+  /* ---- ACESSO DO ADMINISTRADOR ---- */
+  views["acesso-admin"] = {
+    title:"Acesso do Administrador",
+    render:function(){
+      var admins = [
+        {name:"Wellington T.", email:"wellington@jardimdovale.org", role:"Administrador principal", last:"agora", init:"WT", principal:true},
+        {name:"Diego M.", email:"diego@jardimdovale.org", role:"Financeiro", last:"há 2h", init:"DM", principal:false},
+        {name:"Patrícia L.", email:"patricia@jardimdovale.org", role:"Comunicação", last:"ontem", init:"PL", principal:false}
+      ];
+      var rows = admins.map(function(a){
+        return '<div class="userlist-row"><div class="avatar">'+a.init+'</div>'+
+          '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.87rem;">'+a.name+'</div><div style="font-size:.76rem;color:var(--ink-mute);">'+a.email+'</div></div>'+
+          '<span class="badge brand">'+a.role+'</span>'+
+          (a.principal
+            ? '<span class="badge neutral" style="width:120px;text-align:center;">você</span>'
+            : '<button type="button" class="actionbtn ghost" style="font-size:.74rem;padding:5px 9px;">Redefinir senha</button>')+
+          '</div>';
+      }).join('');
+      return '<div class="grid split-58">'+
+        '<div class="card"><div class="card-head"><h3>Administradores</h3><span class="muted">3 contas</span></div><div class="card-pad">'+rows+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary">Convidar administrador</button></div>'+
+          '<p class="i18n-note" style="margin:12px 0 0;font-size:.78rem;color:var(--ink-mute);">O administrador principal pode ver todo o sistema e gerenciar as contas dos demais administradores (criar, redefinir senha, desativar), mas não pode entrar na sessão ativa de outro administrador nem ver o que ele está fazendo no momento.</p>'+
+        '</div></div>'+
+        '<div>'+
+          '<div class="card card-pad" style="margin-bottom:16px;">'+sectionLabel("Minha conta")+
+            '<div class="field" style="margin-bottom:12px;"><label>Senha atual</label><input type="password" placeholder="••••••••"></div>'+
+            '<div class="field" style="margin-bottom:12px;"><label>Nova senha</label><input type="password" placeholder="••••••••"></div>'+
+            '<button type="button" class="actionbtn primary">Alterar minha senha</button>'+
+          '</div>'+
+          '<div class="card card-pad" style="margin-bottom:16px;">'+sectionLabel("Capacidade de encarregados")+
+            '<div class="field" style="max-width:200px;"><label>Quantos encarregados este congresso vai usar?</label><input type="number" min="1" max="30" value="4"></div>'+
+            '<p class="i18n-note" style="margin:10px 0 0;font-size:.78rem;color:var(--ink-mute);">Define quantas contas de encarregado o administrador pode criar em Acesso do Encarregado.</p>'+
+          '</div>'+
+          '<div class="card card-pad">'+sectionLabel("Segurança")+
+            '<div class="settings-row"><div class="txt"><strong>Autenticação em duas etapas</strong><span>Exigir código extra no login</span></div><button type="button" class="switch on"></button></div>'+
+            '<div class="settings-row"><div class="txt"><strong>Sessão automática</strong><span>Encerrar após 30 min de inatividade</span></div><button type="button" class="switch"></button></div>'+
+            '<div class="settings-row"><div class="txt"><strong>Alertas de novo acesso</strong><span>Notificar por WhatsApp a cada login</span></div><button type="button" class="switch on"></button></div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }
+  };
+
+  /* ---- ACESSO DO ENCARREGADO ---- */
+  views["acesso-encarregado"] = {
+    title:"Acesso do Encarregado",
+    render:function(){
+      var pax = [
+        {name:"Marcos A. Ferreira", sub:"Ônibus 02 · Pago", on:true},
+        {name:"Talita R. Souza", sub:"Ônibus 01 · Pago", on:true},
+        {name:"Renato C. Alves", sub:"Ônibus 01 · Atrasado", on:false},
+        {name:"Simone D. Rocha", sub:"Ônibus 02 · Atrasado", on:false},
+        {name:"Ester M. Costa", sub:"Ônibus 03 · Pago", on:false},
+        {name:"Josué B. Andrade", sub:"Ônibus 02 · Pendente", on:false}
+      ];
+      var rows = pax.map(function(p){
+        return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'">'+(p.on?ICONS.check.replace('viewBox="0 0 24 24"','viewBox="0 0 24 24" style="width:12px;height:12px"'):'')+'</button>'+
+          '<div style="flex:1;min-width:0;"><div class="nm">'+p.name+'</div><div class="sub">'+p.sub+'</div></div></div>';
+      }).join('');
+      return '<div class="grid split-58">'+
+        '<div class="card"><div class="card-head"><h3>Salão do Reino — Jardim do Vale</h3><span class="muted">visão do encarregado</span></div><div class="card-pad">'+
+          '<p class="i18n-note" style="margin:0 0 10px;color:var(--ink-soft);font-size:.85rem;">Cada encarregado vê apenas os passageiros do seu ponto de encontro, para confirmar presença no embarque.</p>'+
+          rows+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" data-goto="encarregado">Abrir Painel do Encarregado</button></div>'+
+        '</div></div>'+
+        '<div class="card card-pad">'+sectionLabel("Encarregados com acesso")+
+          '<div class="role-card" style="margin-bottom:10px;">'+
+            '<div class="role-ic" style="background:var(--brand-soft);color:var(--brand);">'+ICONS.pin+'</div>'+
+            '<h4>Irmão Diego M.</h4><p>Vê passageiros de: Salão do Reino — Jardim do Vale (Ônibus 01 e 02)</p>'+
+          '</div>'+
+          '<div class="role-card" style="margin-bottom:10px;">'+
+            '<div class="role-ic" style="background:var(--brand-soft);color:var(--brand);">'+ICONS.pin+'</div>'+
+            '<h4>Irmã Patrícia L.</h4><p>Vê passageiros de: Praça Central — Vale Novo (Ônibus 03)</p>'+
+          '</div>'+
+          '<div class="role-card">'+
+            '<div class="role-ic" style="background:var(--brand-soft);color:var(--brand);">'+ICONS.pin+'</div>'+
+            '<h4>Irmão Otávio S.</h4><p>Vê passageiros de: Posto Ipiranga, Av. Recanto (Ônibus 04 e 05)</p>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }
+  };
+
+  /* ---- CONFIGURAÇÕES ---- */
+  views.config = {
+    title:"Configurações",
+    render:function(){
+      return '<div class="grid split-58">'+
+        '<div class="card card-pad">'+sectionLabel("Dados do evento")+
+          '<p class="i18n-note" style="margin:0 0 14px;color:var(--ink-soft);font-size:.82rem;">Este nome e estas datas aparecem para os passageiros e encarregados em seus próprios painéis.</p>'+
+          '<div class="grid cols-2">'+
+            '<div class="field span2" style="grid-column:1/-1;"><label>Nome do evento</label><input type="text" id="cfgEventName" value="'+STATE.eventName+'"></div>'+
+            '<div class="field"><label>Congregação</label><input type="text" value="Jardim do Vale"></div>'+
+            '<div class="field"><label>Duração</label><select id="cfgDuration"><option value="multi"'+(STATE.singleDay?'':' selected')+'>Vários dias</option><option value="single"'+(STATE.singleDay?' selected':'')+'>Somente 1 dia</option></select></div>'+
+            '<div class="field"><label id="cfgStartLabel">Data de início</label><input type="text" id="cfgStart" value="'+STATE.dateStart+'"></div>'+
+            '<div class="field" id="cfgEndWrap" style="'+(STATE.singleDay?'display:none;':'')+'"><label>Data de término</label><input type="text" id="cfgEnd" value="'+STATE.dateEnd+'"></div>'+
+          '</div>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary" id="cfgSaveEvent">Salvar alterações</button></div>'+
+          '<div class="success-banner" id="cfgSaveSuccess"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="m8 12.3 2.5 2.5L16.2 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Alterações salvas — já visíveis para passageiros e encarregados.</div>'+
+        '</div>'+
+        '<div class="card card-pad">'+sectionLabel("Integração WhatsApp")+
+          '<div class="field" style="margin-bottom:12px;"><label>Número do chatbot</label><input type="text" value="+55 11 98888-0000"></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Chatbot ativo</strong><span>Responde dúvidas automaticamente</span></div><button type="button" class="switch on"></button></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Lembretes automáticos</strong><span>Disparo programado por data</span></div><button type="button" class="switch on"></button></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card card-pad" style="margin-top:16px;">'+sectionLabel("Automação de WhatsApp · conectar agente")+
+        '<div class="connect-toggle">'+
+          '<div class="connect-opt active" data-connect="free"><div class="t">Conexão gratuita (QR Code)</div><div class="d">Usa o número do congresso, sem custo mensal — como o WhatsApp Web</div></div>'+
+          '<div class="connect-opt" data-connect="paid"><div class="t">API oficial (Meta / Twilio)</div><div class="d">Maior estabilidade e suporte oficial — requer plano pago</div></div>'+
+        '</div>'+
+        '<div id="connectPanelFree">'+
+          '<div class="qr-wrap">'+
+            '<div class="qr-box" id="qrBox"></div>'+
+            '<div style="flex:1;min-width:220px;">'+
+              '<div class="field" style="margin-bottom:12px;"><label>Agente conectado</label><select><option>Assistente Jardim do Vale (padrão)</option><option>Agente personalizado…</option></select></div>'+
+              '<ol style="margin:0 0 10px;padding-left:18px;font-size:.83rem;color:var(--ink-soft);line-height:1.7;">'+
+                '<li>Abra o WhatsApp no celular do congresso</li>'+
+                '<li>Toque em Configurações → Aparelhos conectados</li>'+
+                '<li>Escaneie o código ao lado</li>'+
+              '</ol>'+
+              '<div class="qr-status"><span class="pill warning" id="qrStatus"><i class="dotp"></i>Aguardando conexão</span></div>'+
+            '</div>'+
+          '</div>'+
+          '<p style="margin:16px 0 0;font-size:.76rem;color:var(--ink-mute);">Conexão gratuita, sem mensalidade — ideal para o volume de um congresso local. Por não ser a API oficial da Meta, ela depende da estabilidade do WhatsApp e não tem garantia contratual; para alto volume ou uso permanente, considere a API oficial.</p>'+
+        '</div>'+
+        '<div id="connectPanelPaid" hidden>'+
+          '<p style="margin:0;color:var(--ink-soft);font-size:.85rem;">A API oficial exige cadastro em um provedor autorizado (Meta Business, Twilio ou similar) e cobrança por mensagem. Fale com a coordenação para avaliar o custo antes de migrar.</p>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn">Solicitar orçamento</button></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="grid split-58" style="margin-top:16px;">'+
+        '<div class="card card-pad">'+sectionLabel("Pontos de encontro")+
+          '<div class="settings-row"><div class="txt"><strong>Salão do Reino — Jardim do Vale</strong><span>3 dias · Ônibus 01 e 02</span></div><button type="button" class="actionbtn ghost">Editar</button></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Praça Central — Vale Novo</strong><span>3 dias · Ônibus 03</span></div><button type="button" class="actionbtn ghost">Editar</button></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Posto Ipiranga, Av. Recanto</strong><span>3 dias · Ônibus 04 e 05</span></div><button type="button" class="actionbtn ghost">Editar</button></div>'+
+          '<div class="actions-row" style="margin-top:14px;"><button type="button" class="actionbtn primary">Adicionar ponto de encontro</button></div>'+
+        '</div>'+
+        '<div class="card card-pad">'+sectionLabel("Preferências gerais")+
+          '<div class="settings-row"><div class="txt"><strong>Modo escuro automático</strong><span>Seguir o sistema do dispositivo</span></div><button type="button" class="switch on"></button></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Backup diário</strong><span>Exportar dados às 23:00</span></div><button type="button" class="switch on"></button></div>'+
+          '<div class="settings-row"><div class="txt"><strong>Modelo de relatório</strong><span>Layout usado em PDF/Excel</span></div><select><option>Padrão</option><option>Compacto</option></select></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card card-pad" style="margin-top:16px;">'+sectionLabel("Compartilhar & Código")+
+        '<p class="i18n-note" style="margin:0 0 14px;color:var(--ink-soft);font-size:.85rem;">Compartilhe o link do sistema ou edite as configurações avançadas por código — protegido pela senha do administrador.</p>'+
+        '<div id="codeGate" class="grid cols-2" style="align-items:end;">'+
+          '<div class="field"><label>Senha do administrador</label><input type="password" id="codePassInput" placeholder="••••••••"></div>'+
+          '<div><button type="button" class="actionbtn primary" id="unlockCodeBtn">Desbloquear</button></div>'+
+        '</div>'+
+        '<p id="codePassErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:8px 0 0;">Senha incorreta. Tente novamente.</p>'+
+        '<div id="codePanel" hidden>'+
+          '<div class="grid cols-2" style="margin-bottom:16px;">'+
+            '<div>'+
+              '<div class="settings-row"><div class="txt"><strong>Compartilhar sistema</strong><span>Copiar o link desta visualização</span></div><button type="button" class="actionbtn" id="copyShareLink">Copiar link do sistema</button></div>'+
+              '<p id="copyShareNote" hidden style="color:var(--st-good);font-size:.8rem;margin:6px 0 0;">Link copiado!</p>'+
+            '</div>'+
+            '<div class="settings-row"><div class="txt"><strong>Link somente leitura</strong><span>Para encarregados sem edição</span></div><button type="button" class="switch"></button></div>'+
+          '</div>'+
+          '<div class="field" style="margin-bottom:8px;"><label>Editar configurações via código (JSON)</label><textarea id="configJsonArea" rows="7" style="font-family:\'IBM Plex Mono\',monospace;font-size:.78rem;padding:10px;border-radius:9px;border:1px solid var(--hairline-2);background:var(--surface);color:var(--ink);width:100%;resize:vertical;"></textarea></div>'+
+          '<div class="actions-row"><button type="button" class="actionbtn primary" id="applyConfigJson">Aplicar alterações</button></div>'+
+          '<p id="codeJsonOk" hidden style="color:var(--st-good);font-size:.8rem;margin:8px 0 0;">Configurações aplicadas com sucesso.</p>'+
+          '<p id="codeJsonErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:8px 0 0;">JSON inválido — verifique a sintaxe.</p>'+
+        '</div>'+
+      '</div>';
+    },
+    after:function(root){
+      var qr = root.querySelector("#qrBox");
+      if(qr){
+        var cells = "";
+        for(var i=0;i<49;i++){ cells += '<i class="'+(Math.random()>0.55?"on":"")+'"></i>'; }
+        qr.innerHTML = cells;
+        qr.addEventListener("click", function(){
+          var status = root.querySelector("#qrStatus");
+          if(!status) return;
+          var connected = status.classList.contains("good");
+          status.classList.toggle("good", !connected);
+          status.classList.toggle("warning", connected);
+          status.innerHTML = '<i class="dotp"></i>' + t(connected ? "Aguardando conexão" : "Conectado");
+        });
+      }
+      var opts = root.querySelectorAll(".connect-opt");
+      var panelFree = root.querySelector("#connectPanelFree");
+      var panelPaid = root.querySelector("#connectPanelPaid");
+      opts.forEach(function(o){
+        o.addEventListener("click", function(){
+          opts.forEach(function(x){ x.classList.remove("active"); });
+          o.classList.add("active");
+          var isFree = o.getAttribute("data-connect") === "free";
+          if(panelFree) panelFree.hidden = !isFree;
+          if(panelPaid) panelPaid.hidden = isFree;
+        });
+      });
+
+      /* ---- event branding settings ---- */
+      var durationSel = root.querySelector("#cfgDuration");
+      var endWrap = root.querySelector("#cfgEndWrap");
+      if(durationSel){
+        durationSel.addEventListener("change", function(){
+          if(endWrap) endWrap.style.display = (durationSel.value === "single") ? "none" : "";
+        });
+      }
+      var saveBtn = root.querySelector("#cfgSaveEvent");
+      if(saveBtn){
+        saveBtn.addEventListener("click", function(){
+          var nameInput = root.querySelector("#cfgEventName");
+          var startInput = root.querySelector("#cfgStart");
+          var endInput = root.querySelector("#cfgEnd");
+          if(nameInput) STATE.eventName = nameInput.value || STATE.eventName;
+          if(startInput) STATE.dateStart = startInput.value || STATE.dateStart;
+          if(durationSel) STATE.singleDay = durationSel.value === "single";
+          if(endInput) STATE.dateEnd = endInput.value || STATE.dateEnd;
+          persistState();
+          updateEventBranding();
+          var s = root.querySelector("#cfgSaveSuccess");
+          if(s) s.classList.add("show");
+        });
+      }
+
+      /* ---- share & code (password gate) ---- */
+      var unlockBtn = root.querySelector("#unlockCodeBtn");
+      if(unlockBtn){
+        unlockBtn.addEventListener("click", function(){
+          var pass = root.querySelector("#codePassInput");
+          var gate = root.querySelector("#codeGate");
+          var panel = root.querySelector("#codePanel");
+          var err = root.querySelector("#codePassErr");
+          if(pass && pass.value === "admin123"){
+            if(gate) gate.hidden = true;
+            if(panel) panel.hidden = false;
+          } else if(err){
+            err.hidden = false;
+          }
+        });
+      }
+      var copyLinkBtn = root.querySelector("#copyShareLink");
+      if(copyLinkBtn){
+        copyLinkBtn.addEventListener("click", function(){
+          var note = root.querySelector("#copyShareNote");
+          try{
+            if(navigator.clipboard) navigator.clipboard.writeText(location.href);
+          }catch(e){}
+          if(note){ note.hidden = false; }
+        });
+      }
+      var applyJsonBtn = root.querySelector("#applyConfigJson");
+      if(applyJsonBtn){
+        applyJsonBtn.addEventListener("click", function(){
+          var ta = root.querySelector("#configJsonArea");
+          var jerr = root.querySelector("#codeJsonErr");
+          var jok = root.querySelector("#codeJsonOk");
+          try{
+            var parsed = JSON.parse(ta.value);
+            STATE = Object.assign(STATE, parsed);
+            persistState();
+            applyI18n();
+            if(jerr) jerr.hidden = true;
+            if(jok) jok.hidden = false;
+          }catch(e){
+            if(jok) jok.hidden = true;
+            if(jerr) jerr.hidden = false;
+          }
+        });
+      }
+      var jsonArea = root.querySelector("#configJsonArea");
+      if(jsonArea){ jsonArea.value = JSON.stringify(STATE, null, 2); }
+    }
+  };
+
+  function metricMini(label,value,color){
+    return '<div class="metric"><div class="label">'+label+'</div><div class="value tabular" style="color:'+color+'">'+value+'</div></div>';
+  }
+
+  /* ================= ROUTER ================= */
+  var content = document.getElementById("content");
+  var pageTitle = document.getElementById("pageTitle");
+  var navItems = document.querySelectorAll(".nav-item");
+  var mounted = {};
+
+  function showView(key){
+    if(!views[key]) key = "dashboard";
+    Object.keys(views).forEach(function(k){
+      var sec = document.getElementById("view-"+k);
+      if(!sec) return;
+      sec.classList.toggle("active", k===key);
+    });
+    navItems.forEach(function(n){ n.classList.toggle("active", n.getAttribute("data-view")===key); });
+    pageTitle.textContent = views[key].title;
+    closeMobile();
+    try{ history.replaceState(null,"", "#"+key); }catch(e){}
+  }
+
+  Object.keys(views).forEach(function(k){
+    var sec = el('<section class="view" id="view-'+k+'"></section>');
+    sec.innerHTML = views[k].render();
+    content.appendChild(sec);
+    if(views[k].after) views[k].after(sec);
+  });
+
+  navItems.forEach(function(n){ n.addEventListener("click", function(){ showView(n.getAttribute("data-view")); }); });
+
+  var initial = (location.hash||"").replace("#","");
+  showView(views[initial] ? initial : "dashboard");
+
+  /* ================= TOP-LEVEL SCREENS (login / cadastro / portals / erp) ================= */
+  var screenIds = ["login","cadastro","passenger","encarregado","erp"];
+  function goScreen(id){
+    if(screenIds.indexOf(id) === -1) return;
+    screenIds.forEach(function(s){
+      var node = document.getElementById("screen-"+s);
+      if(node) node.hidden = (s !== id);
+    });
+    document.querySelectorAll(".previewbar [data-screen]").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-screen") === id);
+    });
+    if(id === "login"){
+      var s1 = document.getElementById("passLoginStep1"), s2 = document.getElementById("passLoginStep2");
+      if(s1 && s2){ s1.hidden = false; s2.hidden = true; }
+    }
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll(".previewbar [data-screen]").forEach(function(b){
+    b.addEventListener("click", function(){ goScreen(b.getAttribute("data-screen")); });
+  });
+  document.addEventListener("click", function(e){
+    var t = e.target.closest("[data-goto]");
+    if(t){ goScreen(t.getAttribute("data-goto")); }
+  });
+
+  /* ---- passenger login: shared login + whatsapp confirmation step ---- */
+  var passLoginNext = document.getElementById("passLoginNext");
+  if(passLoginNext){
+    passLoginNext.addEventListener("click", function(){
+      document.getElementById("passLoginStep1").hidden = true;
+      document.getElementById("passLoginStep2").hidden = false;
+    });
+  }
+
+  /* ---- login role tabs ---- */
+  document.querySelectorAll("[data-login-tab]").forEach(function(tab){
+    tab.addEventListener("click", function(){
+      document.querySelectorAll("[data-login-tab]").forEach(function(t){ t.classList.remove("active"); });
+      document.querySelectorAll("[data-login-panel]").forEach(function(p){ p.classList.remove("active"); });
+      tab.classList.add("active");
+      var target = document.querySelector('[data-login-panel="'+tab.getAttribute("data-login-tab")+'"]');
+      if(target) target.classList.add("active");
+    });
+  });
+
+  /* ---- encarregado sub-tabs (Passageiros / Pontos de Encontro / Avisos) ---- */
+  document.querySelectorAll("[data-enc-tab]").forEach(function(tab){
+    tab.addEventListener("click", function(){
+      document.querySelectorAll("[data-enc-tab]").forEach(function(t){ t.classList.remove("active"); });
+      document.querySelectorAll("[data-enc-panel]").forEach(function(p){ p.classList.remove("active"); });
+      tab.classList.add("active");
+      var target = document.querySelector('[data-enc-panel="'+tab.getAttribute("data-enc-tab")+'"]');
+      if(target) target.classList.add("active");
+    });
+  });
+
+  /* ---- cadastro: document type + payment methods (vary by language) ---- */
+  var PRICE_PER_PERSON = 85;
+  function formatBRL(n){ return "R$ " + n.toFixed(2).replace(".", ","); }
+  var DOC_OPTIONS = {
+    pt: [["CPF","CPF"], ["RNM","RNM (estrangeiro)"]],
+    es: [["C.I.","C.I."]]
+  };
+  var PAYMENT_OPTIONS = {
+    pt: ["Pix", "Dinheiro (dias antes, com o encarregado)", "Transferência"],
+    es: ["Efectivo (días antes o en el embarque)", "Pago móvil", "Transferencia"]
+  };
+  function renderDocOptions(){
+    var sel = document.getElementById("cadastroDocType");
+    if(!sel) return;
+    var opts = DOC_OPTIONS[STATE.lang] || DOC_OPTIONS.pt;
+    sel.innerHTML = opts.map(function(o){ return '<option value="'+o[0]+'">'+o[1]+'</option>'; }).join("");
+    var lbl = document.getElementById("cadastroDocLabel");
+    if(lbl) lbl.textContent = t("Número do CPF").replace("CPF", opts[0][0]);
+  }
+  function renderPaymentMethods(){
+    var wrap = document.getElementById("paymentMethods");
+    if(!wrap) return;
+    var opts = PAYMENT_OPTIONS[STATE.lang] || PAYMENT_OPTIONS.pt;
+    wrap.innerHTML = opts.map(function(o,i){ return '<span class="chip-check'+(i===0?" on":"")+'">'+o+'</span>'; }).join("");
+    wrap.querySelectorAll(".chip-check").forEach(function(chip){
+      chip.addEventListener("click", function(){
+        wrap.querySelectorAll(".chip-check").forEach(function(c){ c.classList.remove("on"); });
+        chip.classList.add("on");
+      });
+    });
+  }
+  function companionBlock(idx){
+    return '<div class="form-section" style="border:1px solid var(--hairline);border-radius:11px;padding:14px;margin-top:10px;background:var(--surface-2);">'+
+      '<h4 style="font-size:.86rem;margin-bottom:10px;">Acompanhante '+idx+'</h4>'+
+      '<div class="form-grid">'+
+        '<div class="field span2"><label>Nome completo</label><input type="text" class="companion-nome" placeholder="Nome e sobrenome">'+
+          '<span class="companion-nome-err" hidden style="color:var(--st-critical);font-size:.76rem;font-weight:600;">Informe nome e sobrenome.</span></div>'+
+        '<div class="field"><label>Tipo de documento</label><select class="companion-doctype"></select></div>'+
+        '<div class="field"><label>Número do documento</label><input type="text" class="companion-docnum" placeholder="000.000.000-00"></div>'+
+        '<div class="field span2"><label>Telefone (opcional)</label><input type="text" placeholder="(11) 90000-0000"></div>'+
+      '</div>'+
+    '</div>';
+  }
+  function renderCompanions(){
+    var count = +(document.getElementById("companionCount") || {}).value || 0;
+    var container = document.getElementById("companionsContainer");
+    if(!container) return;
+    var html = "";
+    for(var i=1;i<=count;i++){ html += companionBlock(i); }
+    container.innerHTML = html;
+    var opts = DOC_OPTIONS[STATE.lang] || DOC_OPTIONS.pt;
+    container.querySelectorAll(".companion-doctype").forEach(function(sel){
+      sel.innerHTML = opts.map(function(o){ return '<option value="'+o[0]+'">'+o[1]+'</option>'; }).join("");
+    });
+    updateTotal();
+  }
+  function updateTotal(){
+    var count = +(document.getElementById("companionCount") || {}).value || 0;
+    var people = count + 1;
+    var total = PRICE_PER_PERSON * people;
+    var bd = document.getElementById("valorBreakdown");
+    var tot = document.getElementById("valorTotal");
+    if(bd) bd.textContent = money(formatBRL(PRICE_PER_PERSON)) + " × " + people + (people===1 ? " pessoa" : " pessoas");
+    if(tot) tot.textContent = money(formatBRL(total));
+  }
+  var companionCountEl = document.getElementById("companionCount");
+  if(companionCountEl){ companionCountEl.addEventListener("change", renderCompanions); }
+  renderDocOptions();
+  renderPaymentMethods();
+  renderCompanions();
+
+  /* ---- cadastro chips + submit ---- */
+  document.querySelectorAll(".chip-check").forEach(function(chip){
+    chip.addEventListener("click", function(){ chip.classList.toggle("on"); });
+  });
+  /* ---- admin: forgot password ---- */
+  var forgotLink = document.getElementById("forgotLink");
+  var adminLoginForm = document.getElementById("adminLoginForm");
+  var adminRecoverForm = document.getElementById("adminRecoverForm");
+  var backToAdminLogin = document.getElementById("backToAdminLogin");
+  var sendRecoverBtn = document.getElementById("sendRecoverBtn");
+  if(forgotLink){
+    forgotLink.addEventListener("click", function(){
+      adminLoginForm.hidden = true; adminRecoverForm.hidden = false;
+    });
+  }
+  if(backToAdminLogin){
+    backToAdminLogin.addEventListener("click", function(){
+      adminRecoverForm.hidden = true; adminLoginForm.hidden = false;
+      var s = document.getElementById("recoverSuccess"); if(s) s.classList.remove("show");
+    });
+  }
+  if(sendRecoverBtn){
+    sendRecoverBtn.addEventListener("click", function(){
+      var s = document.getElementById("recoverSuccess"); if(s) s.classList.add("show");
+    });
+  }
+
+  function isFullName(v){ return v.trim().split(/\s+/).filter(Boolean).length >= 2; }
+
+  var cadastroBtn = document.getElementById("cadastroSubmit");
+  if(cadastroBtn){
+    cadastroBtn.addEventListener("click", function(){
+      var ok = true;
+      var nomeInput = document.getElementById("cadastroNome");
+      var nomeErr = document.getElementById("cadastroNomeErr");
+      var nomeVal = nomeInput ? nomeInput.value : "";
+      if(nomeInput && !isFullName(nomeVal)){
+        nomeErr.hidden = false; nomeInput.style.borderColor = "var(--st-critical)"; ok = false;
+      } else if(nomeErr){
+        nomeErr.hidden = true; if(nomeInput) nomeInput.style.borderColor = "";
+      }
+      var names = [nomeVal.trim() || "Titular"];
+      document.querySelectorAll(".companion-nome").forEach(function(inp){
+        var err = inp.parentElement.querySelector(".companion-nome-err");
+        if(!isFullName(inp.value)){
+          if(err) err.hidden = false; inp.style.borderColor = "var(--st-critical)"; ok = false;
+        } else {
+          if(err) err.hidden = true; inp.style.borderColor = "";
+          names.push(inp.value.trim());
+        }
+      });
+      if(!ok) return;
+
+      var count = +(document.getElementById("companionCount") || {}).value || 0;
+      var people = count + 1;
+      var total = money(formatBRL(PRICE_PER_PERSON * people));
+      var banner = document.getElementById("cadastroSuccess");
+      var summary = document.getElementById("cadastroSummaryText");
+      if(summary){
+        summary.textContent = (people === 1)
+          ? (t("Inscrição individual") + " · " + names[0] + " · " + total + " · " + t("o ponto de encontro será enviado pelo WhatsApp assim que for atribuído."))
+          : (t("Grupo de") + " " + people + " " + t("pessoas") + ": " + names.join(", ") + " · " + t("Total") + ": " + total + " · " + t("o ponto de encontro será enviado pelo WhatsApp assim que for atribuído."));
+      }
+      if(banner) banner.classList.add("show");
+    });
+  }
+
+  /* ---- encarregado checklist ---- */
+  var encList = document.getElementById("encarregadoList");
+  if(encList){
+    var encPax = [
+      {name:"Marcos A. Ferreira", sub:"Ônibus 02 · Pago", on:true},
+      {name:"Talita R. Souza", sub:"Ônibus 02 · Pago", on:true},
+      {name:"Renato C. Alves", sub:"Ônibus 01 · Atrasado", on:false},
+      {name:"Simone D. Rocha", sub:"Ônibus 02 · Atrasado", on:false},
+      {name:"Ester M. Costa", sub:"Ônibus 01 · Pago", on:false},
+      {name:"Josué B. Andrade", sub:"Ônibus 02 · Pendente", on:false},
+      {name:"Aparecida N. Melo", sub:"Ônibus 01 · Pendente", on:true}
+    ];
+    var checkSvg = '<svg viewBox="0 0 24 24" fill="none" style="width:12px;height:12px;"><path d="m5 12.5 4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    function renderEnc(){
+      encList.innerHTML = encPax.map(function(p,i){
+        return '<div class="check-row"><button type="button" class="cb'+(p.on?' on':'')+'" data-idx="'+i+'">'+(p.on?checkSvg:'')+'</button>'+
+          '<div style="flex:1;min-width:0;"><div class="nm">'+p.name+'</div><div class="sub">'+p.sub+'</div></div></div>';
+      }).join('');
+      encList.querySelectorAll(".cb").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var idx = +btn.getAttribute("data-idx");
+          encPax[idx].on = !encPax[idx].on;
+          renderEnc();
+        });
+      });
+    }
+    renderEnc();
+  }
+
+  /* ---- floating help widget ---- */
+  var helpFab = document.getElementById("helpFab");
+  var helpPanel = document.getElementById("helpPanel");
+  var helpClose = document.getElementById("helpClose");
+  var helpBody = document.getElementById("helpBody");
+  var helpAnswers = {
+    onibus: "Você está no Ônibus 02, com saída às 05:30 do Salão do Reino — Jardim do Vale.",
+    pagamento: "Seu pagamento de R$ 85,00 já está confirmado (Pix, 02/07/2026). Nada pendente por aqui!",
+    ponto: "Seu ponto de encontro é o Salão do Reino — Jardim do Vale, às 05:30.",
+    cadastro: "Claro! Vou te levar para a tela de cadastro para você (ou um familiar) se inscrever."
+  };
+  if(helpFab){
+    helpFab.addEventListener("click", function(){
+      helpPanel.hidden = !helpPanel.hidden;
+      if(!helpPanel.hidden && !helpBody.hasChildNodes()){
+        var b = document.createElement("div");
+        b.className = "wa-bubble in";
+        b.textContent = "Olá! Posso ajudar com horários, pagamento, ponto de encontro ou um novo cadastro. Escolha uma opção abaixo 👇";
+        helpBody.appendChild(b);
+      }
+    });
+  }
+  if(helpClose){ helpClose.addEventListener("click", function(){ helpPanel.hidden = true; }); }
+  document.querySelectorAll("#helpQuick [data-q]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var key = btn.getAttribute("data-q");
+      var out = document.createElement("div"); out.className = "wa-bubble out"; out.textContent = btn.textContent;
+      helpBody.appendChild(out);
+      var reply = document.createElement("div"); reply.className = "wa-bubble in"; reply.textContent = helpAnswers[key] || "Já vou verificar isso para você.";
+      helpBody.appendChild(reply);
+      helpBody.scrollTop = helpBody.scrollHeight;
+      if(key === "cadastro"){
+        setTimeout(function(){ helpPanel.hidden = true; goScreen("cadastro"); }, 900);
+      }
+    });
+  });
+
+  goScreen("login");
+
+  markI18n();
+  applyI18n();
+
+})();
+</script>
