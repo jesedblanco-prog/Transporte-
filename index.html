@@ -3717,6 +3717,8 @@
       if(banner) banner.classList.add("show");
       lastRegistrationId = result.data ? result.data.id : null;
       lastRegistrationName = result.data ? result.data.titular_name : names[0];
+      lastRegistrationPhone = result.data ? result.data.phone : (phoneInput ? phoneInput.value.trim() : "");
+      lastRegistrationDoc = result.data ? result.data.doc_number : (docNumInput ? docNumInput.value.trim() : "");
       var proofBox = document.getElementById("proofUploadBox");
       if(proofBox && lastRegistrationId) proofBox.hidden = false;
     });
@@ -3724,7 +3726,9 @@
 
   var lastRegistrationId = null;
   var lastRegistrationName = "";
-  async function uploadPaymentProof(regId, regName, fileInputId, okId, errId, btn){
+  var lastRegistrationPhone = "";
+  var lastRegistrationDoc = "";
+  async function uploadPaymentProof(regId, regName, fileInputId, okId, errId, btn, regPhone, regDoc){
     var fileInput = document.getElementById(fileInputId);
     var okBox = document.getElementById(okId), errBox = document.getElementById(errId);
     if(okBox) okBox.hidden = true; if(errBox) errBox.hidden = true;
@@ -3740,8 +3744,30 @@
       if(upRes.error) throw upRes.error;
       var pub = supa.storage.from("comprovantes").getPublicUrl(path);
       var url = pub && pub.data ? pub.data.publicUrl : null;
-      var updRes = await supa.from("registrations").update({payment_proof_url:url}).eq("id", regId);
-      if(updRes.error) throw updRes.error;
+      /* o passageiro não está autenticado como admin, então um update direto na
+         tabela "registrations" é bloqueado em silêncio pela segurança do banco
+         (RLS) — por isso o comprovante "enviava com sucesso" mas nunca aparecia
+         para o administrador. Em vez disso, chama uma função no banco (RPC) que
+         confirma telefone + documento (as mesmas credenciais do login do
+         passageiro) antes de salvar o link do comprovante. Veja
+         supabase_schema_update9.sql. */
+      var updRes = await supa.rpc("submit_payment_proof", {
+        p_registration_id: regId,
+        p_phone: regPhone || "",
+        p_doc_number: regDoc || "",
+        p_proof_url: url
+      });
+      if(updRes.error){
+        if(/function public\.submit_payment_proof|could not find the function/i.test(updRes.error.message||"")){
+          /* ainda não rodou o supabase_schema_update9.sql — tenta do jeito antigo
+             para não deixar o passageiro completamente travado, mas isso só
+             funciona se a política de update também tiver sido ajustada. */
+          var fallback = await supa.from("registrations").update({payment_proof_url:url}).eq("id", regId);
+          if(fallback.error) throw fallback.error;
+        } else {
+          throw updRes.error;
+        }
+      }
       try{
         await supa.from("notifications").insert({
           title: t("Novo comprovante de pagamento"),
@@ -3763,14 +3789,14 @@
   var proofUploadBtn = document.getElementById("proofUploadBtn");
   if(proofUploadBtn){
     proofUploadBtn.addEventListener("click", function(){
-      uploadPaymentProof(lastRegistrationId, lastRegistrationName, "proofFileInput", "proofOk", "proofErr", proofUploadBtn);
+      uploadPaymentProof(lastRegistrationId, lastRegistrationName, "proofFileInput", "proofOk", "proofErr", proofUploadBtn, lastRegistrationPhone, lastRegistrationDoc);
     });
   }
   var portalProofUploadBtn = document.getElementById("portalProofUploadBtn");
   if(portalProofUploadBtn){
     portalProofUploadBtn.addEventListener("click", function(){
       if(!currentPassengerReg){ jvAlert(t("Faça login novamente para enviar o comprovante.")); return; }
-      uploadPaymentProof(currentPassengerReg.id, currentPassengerReg.titular_name, "portalProofFileInput", "portalProofOk", "portalProofErr", portalProofUploadBtn);
+      uploadPaymentProof(currentPassengerReg.id, currentPassengerReg.titular_name, "portalProofFileInput", "portalProofOk", "portalProofErr", portalProofUploadBtn, currentPassengerReg.phone, currentPassengerReg.doc_number);
     });
   }
 
