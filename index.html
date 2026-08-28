@@ -236,16 +236,28 @@
   .icon-toolbtn svg{ width:16px; height:16px; }
   .icon-toolbtn .ping{ position:absolute; top:-3px; right:-3px; width:9px; height:9px; border-radius:50%; background:var(--st-critical); border:2px solid var(--bg); }
   .notif-wrap{ position:relative; flex:none; }
-  .notif-dropdown{ position:absolute; top:calc(100% + 8px); right:0; width:min(340px, 90vw); max-height:380px; overflow-y:auto; background:var(--surface); border:1px solid var(--hairline); border-radius:12px; box-shadow:var(--shadow-lg); z-index:85; }
-  .notif-dropdown .notif-item{ padding:11px 14px; border-bottom:1px solid var(--hairline); }
-  .notif-dropdown .notif-item:last-child{ border-bottom:none; }
-  .notif-dropdown .notif-item .ntitle{ font-weight:700; font-size:.83rem; }
-  .notif-dropdown .notif-item .nmsg{ font-size:.78rem; color:var(--ink-soft); margin-top:2px; }
-  .notif-dropdown .notif-item .ntime{ font-size:.7rem; color:var(--ink-mute); margin-top:4px; }
-  .notif-dropdown .notif-empty{ padding:20px 14px; text-align:center; color:var(--ink-mute); font-size:.82rem; }
+  /* Sempre um modal centralizado (celular, tablet e PC) para que a mensagem
+     nunca fique cortada nem escondida atrás de outros elementos. */
+  .notif-backdrop{ position:fixed; inset:0; background:rgba(8,14,12,0.5); z-index:84; }
+  .notif-dropdown{
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:min(440px, calc(100vw - 24px)); max-height:min(72vh, 560px);
+    display:flex; flex-direction:column; overflow:hidden;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:16px;
+    box-shadow:var(--shadow-lg); z-index:85;
+  }
+  .notif-head{ flex:none; display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--hairline); font-weight:700; font-size:.95rem; }
+  .notif-head button{ background:transparent; border:0; color:var(--ink-mute); font-size:1.05rem; line-height:1; cursor:pointer; padding:4px; }
+  .notif-list{ flex:1; min-height:0; overflow-y:auto; }
+  .notif-list .notif-item{ padding:13px 16px; border-bottom:1px solid var(--hairline); }
+  .notif-list .notif-item:last-child{ border-bottom:none; }
+  .notif-list .notif-item .ntitle{ font-weight:700; font-size:.88rem; overflow-wrap:anywhere; }
+  .notif-list .notif-item .nmsg{ font-size:.84rem; color:var(--ink-soft); margin-top:3px; line-height:1.4; white-space:normal; overflow-wrap:anywhere; }
+  .notif-list .notif-item .ntime{ font-size:.72rem; color:var(--ink-mute); margin-top:6px; }
+  .notif-list .notif-empty{ padding:26px 16px; text-align:center; color:var(--ink-mute); font-size:.86rem; }
   @media (max-width:620px){
-    .notif-backdrop{ position:fixed; inset:0; background:rgba(8,14,12,0.5); z-index:84; }
-    .notif-dropdown{ position:fixed; top:50%; left:50%; right:auto; transform:translate(-50%,-50%); width:min(360px, calc(100vw - 28px)); max-height:min(70vh, 480px); z-index:85; }
+    .notif-dropdown{ width:calc(100vw - 24px); max-height:min(76vh, 520px); border-radius:16px; }
+    .notif-list .notif-item .nmsg{ font-size:.88rem; }
   }
 
   .theme-toggle{ display:flex; align-items:center; gap:2px; background:var(--surface); border:1px solid var(--hairline); border-radius:999px; padding:3px; flex:none; }
@@ -949,7 +961,13 @@
         <div class="notif-wrap">
           <button class="icon-toolbtn" id="notifBellBtn" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none"><path d="M6 10.5a6 6 0 1 1 12 0c0 3.4 1 4.8 1.6 5.4H4.4C5 15.3 6 13.9 6 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 18.8a2.4 2.4 0 0 0 4.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ping" id="notifPing" hidden></span></button>
           <div class="notif-backdrop" id="notifBackdrop" hidden></div>
-          <div class="notif-dropdown" id="notifDropdown" hidden></div>
+          <div class="notif-dropdown" id="notifDropdown" hidden role="dialog" aria-label="Notificações">
+            <div class="notif-head">
+              <span>Notificações</span>
+              <button type="button" id="notifCloseBtn" aria-label="Fechar">✕</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+          </div>
         </div>
         <div class="theme-toggle" role="group" aria-label="Idioma">
           <button type="button" data-lang-btn="pt" class="active">PT</button>
@@ -3775,20 +3793,31 @@
   }
 
   function renderNotifDropdown(){
-    var dd = document.getElementById("notifDropdown");
+    var list = document.getElementById("notifList");
     var ping = document.getElementById("notifPing");
-    if(!dd) return;
+    if(!list) return;
     var notifs = (DATA.notifications||[]).slice(0,15);
     var lastSeen = 0;
     try{ lastSeen = Number(localStorage.getItem("jv-notif-seen")||0); }catch(e){}
     var unread = notifs.filter(function(n){ return n.created_at && new Date(n.created_at).getTime() > lastSeen; }).length;
     if(ping) ping.hidden = unread === 0;
-    dd.innerHTML = notifs.length ? notifs.map(function(n){
+    list.innerHTML = notifs.length ? notifs.map(function(n){
       var when = n.created_at ? new Date(n.created_at).toLocaleString(STATE.lang==="es"?"es-AR":"pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "";
       return '<div class="notif-item"><div class="ntitle">'+n.title+'</div>'+(n.message?('<div class="nmsg">'+n.message+'</div>'):'')+'<div class="ntime">'+when+'</div></div>';
     }).join('') : '<div class="notif-empty">'+t("Nenhuma notificação ainda.")+'</div>';
   }
+  /* move o modal e o fundo escurecido para fora da topbar: a topbar usa
+     backdrop-filter, o que faz "position:fixed" se prender a ela em vez de
+     à tela inteira — por isso a notificação aparecia cortada/mal posicionada
+     no celular. Anexando ao <body> ela sempre fica centralizada na tela. */
+  (function(){
+    var dd0 = document.getElementById("notifDropdown");
+    var bd0 = document.getElementById("notifBackdrop");
+    if(dd0) document.body.appendChild(dd0);
+    if(bd0) document.body.appendChild(bd0);
+  })();
   var notifBellBtn = document.getElementById("notifBellBtn");
+  var notifCloseBtn = document.getElementById("notifCloseBtn");
   function closeNotifDropdown(){
     var dd = document.getElementById("notifDropdown"); if(dd) dd.hidden = true;
     var bd = document.getElementById("notifBackdrop"); if(bd) bd.hidden = true;
@@ -3811,6 +3840,9 @@
     });
     var notifBackdropEl = document.getElementById("notifBackdrop");
     if(notifBackdropEl){ notifBackdropEl.addEventListener("click", closeNotifDropdown); }
+    if(notifCloseBtn){ notifCloseBtn.addEventListener("click", function(e){ e.stopPropagation(); closeNotifDropdown(); }); }
+    var notifDropdownEl = document.getElementById("notifDropdown");
+    if(notifDropdownEl){ notifDropdownEl.addEventListener("click", function(e){ e.stopPropagation(); }); }
     document.addEventListener("click", closeNotifDropdown);
   }
 
