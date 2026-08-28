@@ -1492,6 +1492,12 @@
     "Sem ônibus atribuído":"Sin autobús asignado",
     "Copiar o link desta visualização":"Copiar el enlace de esta vista",
     "Link copiado!":"¡Enlace copiado!",
+    "Compartilhar o aplicativo com os passageiros":"Compartir la aplicación con los pasajeros",
+    "O aplicativo é um site — não precisa baixar de nenhuma loja. Basta abrir este link no celular (Chrome ou Safari) e, se quiser, adicionar à tela inicial como um app.":"La aplicación es un sitio web — no hace falta descargarla de ninguna tienda. Solo hay que abrir este enlace en el celular (Chrome o Safari) y, si se desea, agregarlo a la pantalla de inicio como una app.",
+    "Link do aplicativo":"Enlace de la aplicación",
+    "Copiar link do aplicativo":"Copiar enlace de la aplicación",
+    "Enviar por WhatsApp":"Enviar por WhatsApp",
+    "Olá! Aqui está o link do aplicativo do transporte para o Congresso Itatiba SP. Faça seu cadastro por aqui:":"¡Hola! Aquí está el enlace de la aplicación de transporte para el Congreso Itatiba SP. Regístrate por aquí:",
     "Lembretes enviados":"Recordatorios enviados", "Resumo":"Resumen", "Pessoas alcançadas":"Personas alcanzadas",
     "Informe seu telefone e documento.":"Ingrese su teléfono y documento.",
     "Telefone ou documento não encontrados. Verifique os dados ou faça sua inscrição.":"Teléfono o documento no encontrados. Verifique los datos o haga su inscripción.",
@@ -2809,9 +2815,14 @@
         '<p id="backupOk" hidden style="color:var(--st-good);font-size:.8rem;margin:4px 0 0;">Backup baixado com sucesso.</p>'+
         '<p id="resetErr" hidden style="color:var(--st-critical);font-size:.8rem;margin:4px 0 0;"></p>'+
       '</div>'+
-      '<div class="card card-pad" style="margin-top:16px;">'+sectionLabel("Compartilhar sistema")+
-        '<div class="settings-row"><div class="txt"><strong>'+t("Compartilhar sistema")+'</strong><span>'+t("Copiar o link desta visualização")+'</span></div><button type="button" class="actionbtn" id="copyShareLink">'+t("Copiar link do sistema")+'</button></div>'+
-        '<p id="copyShareNote" hidden style="color:var(--st-good);font-size:.8rem;margin:6px 0 0;">'+t("Link copiado!")+'</p>'+
+      '<div class="card card-pad" style="margin-top:16px;">'+sectionLabel(t("Compartilhar o aplicativo com os passageiros"))+
+        '<p class="i18n-note" style="margin:0 0 12px;color:var(--ink-soft);font-size:.85rem;">'+t("O aplicativo é um site — não precisa baixar de nenhuma loja. Basta abrir este link no celular (Chrome ou Safari) e, se quiser, adicionar à tela inicial como um app.")+'</p>'+
+        '<div class="field" style="margin-bottom:12px;"><label>'+t("Link do aplicativo")+'</label><input type="text" id="shareAppLink" readonly value="" style="font-family:monospace;font-size:.82rem;"></div>'+
+        '<div class="actions-row">'+
+          '<button type="button" class="actionbtn primary" id="copyShareLink">'+t("Copiar link do aplicativo")+'</button>'+
+          '<a href="#" target="_blank" rel="noopener" class="actionbtn" id="shareWhatsBtn" style="text-decoration:none;">'+t("Enviar por WhatsApp")+'</a>'+
+        '</div>'+
+        '<p id="copyShareNote" hidden style="color:var(--st-good);font-size:.8rem;margin:8px 0 0;">'+t("Link copiado!")+'</p>'+
       '</div>';
     },
     after:function(root){
@@ -2970,13 +2981,25 @@
         });
       }
 
-      /* ---- share system link ---- */
+      /* ---- link do aplicativo para compartilhar com os passageiros ----
+         Usa a raiz do site (sem #hash de tela nem sessão de admin), para que
+         quem receber o link caia sempre na tela de login, e não dentro do
+         painel do administrador. */
+      var appLink = location.origin + location.pathname.replace(/index\.html$/, "");
+      var appLinkInput = root.querySelector("#shareAppLink");
+      if(appLinkInput) appLinkInput.value = appLink;
+      var shareWhatsBtn = root.querySelector("#shareWhatsBtn");
+      if(shareWhatsBtn){
+        var waMsg = t("Olá! Aqui está o link do aplicativo do transporte para o Congresso Itatiba SP. Faça seu cadastro por aqui:")+" "+appLink;
+        shareWhatsBtn.href = "https://wa.me/?text=" + encodeURIComponent(waMsg);
+      }
       var copyLinkBtn = root.querySelector("#copyShareLink");
       if(copyLinkBtn){
         copyLinkBtn.addEventListener("click", function(){
           var note = root.querySelector("#copyShareNote");
           try{
-            if(navigator.clipboard) navigator.clipboard.writeText(location.href);
+            if(navigator.clipboard) navigator.clipboard.writeText(appLink);
+            else if(appLinkInput){ appLinkInput.select(); document.execCommand("copy"); }
           }catch(e){}
           if(note){ note.hidden = false; }
         });
