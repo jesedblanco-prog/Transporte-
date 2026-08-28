@@ -697,7 +697,11 @@
             <span id="cadastroNomeErr" hidden style="color:var(--st-critical);font-size:.76rem;font-weight:600;">Informe nome e sobrenome.</span>
           </div>
           <div class="field"><label>Tipo de documento</label><select id="cadastroDocType"></select></div>
-          <div class="field"><label id="cadastroDocLabel">Número do documento</label><input type="text" id="cadastroDocNumber" placeholder="000.000.000-00"></div>
+          <div class="field">
+            <label id="cadastroDocLabel">Número do documento</label>
+            <input type="text" id="cadastroDocNumber" placeholder="000.000.000-00">
+            <span id="cadastroDocErr" hidden style="color:var(--st-critical);font-size:.76rem;font-weight:600;">Informe o número do documento.</span>
+          </div>
           <div class="field"><label>Telefone / WhatsApp</label><input type="text" id="cadastroTelefone" placeholder="(11) 90000-0000"></div>
           <div class="field span2"><label>E-mail (opcional)</label><input type="text" placeholder="nome@email.com"></div>
         </div>
@@ -997,6 +1001,19 @@
   </div>
 </div>
 
+<div class="jv-modal-overlay" id="jvFormOverlay" hidden>
+  <div class="jv-modal-box" role="dialog" aria-modal="true" style="max-width:420px;">
+    <div class="jv-modal-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4.2L18.8 9.4a1.7 1.7 0 0 0 0-2.4l-1.8-1.8a1.7 1.7 0 0 0-2.4 0L4 15.8V20Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+    <h3 id="jvFormTitle"></h3>
+    <p id="jvFormMsg" style="margin:-8px 0 4px;"></p>
+    <div id="jvFormFields" style="display:flex;flex-direction:column;gap:12px;margin-bottom:6px;"></div>
+    <div class="jv-modal-actions" style="margin-top:12px;">
+      <button type="button" class="jv-cancel" id="jvFormCancel"></button>
+      <button type="button" class="jv-primary" id="jvFormOk"></button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.1/dist/jspdf.plugin.autotable.min.js"></script>
@@ -1127,6 +1144,79 @@
   function jvConfirm(message, opts){ return jvModal(Object.assign({type:"confirm", message:message}, opts||{})); }
   function jvPrompt(message, defaultValue, opts){ return jvModal(Object.assign({type:"prompt", message:message, defaultValue:defaultValue}, opts||{})); }
 
+  /* ---- modal com vários campos (usado para editar dados do passageiro) ----
+     fields: [{key, label, value, required, hint}]
+     Retorna um objeto {key: valor} ou null se cancelado. Valida os campos
+     marcados como required (mostra a mensagem embaixo do campo e um aviso
+     geral) sem fechar o modal até os dados obrigatórios estarem completos. */
+  function jvFormModal(title, fields, opts){
+    opts = opts || {};
+    return new Promise(function(resolve){
+      var overlay = document.getElementById("jvFormOverlay");
+      var titleEl = document.getElementById("jvFormTitle");
+      var msgEl = document.getElementById("jvFormMsg");
+      var fieldsEl = document.getElementById("jvFormFields");
+      var cancelBtn = document.getElementById("jvFormCancel");
+      var okBtn = document.getElementById("jvFormOk");
+
+      titleEl.textContent = title || t("Editar dados");
+      msgEl.textContent = opts.message || "";
+      msgEl.hidden = !opts.message;
+      msgEl.style.color = "";
+      cancelBtn.textContent = t("Cancelar");
+      okBtn.textContent = t(opts.okLabel || "Salvar");
+
+      fieldsEl.innerHTML = fields.map(function(f, i){
+        return '<div class="field"><label>'+f.label+(f.required?' *':'')+'</label>'+
+          '<input type="text" data-fkey="'+f.key+'" id="jvFormField'+i+'" value="'+String(f.value==null?"":f.value).replace(/"/g,'&quot;')+'" placeholder="'+(f.placeholder||'')+'">'+
+          '<span class="jv-field-err" data-for="'+f.key+'" hidden style="display:block;color:var(--st-critical);font-size:.76rem;font-weight:600;margin-top:4px;">'+(f.errorMsg||t("Este campo é obrigatório."))+'</span>'+
+        '</div>';
+      }).join('');
+
+      overlay.hidden = false;
+      setTimeout(function(){ var first = fieldsEl.querySelector("input"); if(first){ first.focus(); first.select(); } }, 30);
+
+      function cleanup(){
+        overlay.hidden = true;
+        okBtn.removeEventListener("click", onOk);
+        cancelBtn.removeEventListener("click", onCancel);
+        overlay.removeEventListener("keydown", onOverlayKey);
+      }
+      function onOk(){
+        var out = {};
+        var ok = true;
+        fields.forEach(function(f, i){
+          var input = document.getElementById("jvFormField"+i);
+          var err = fieldsEl.querySelector('.jv-field-err[data-for="'+f.key+'"]');
+          var val = input ? input.value.trim() : "";
+          var valid = f.required ? (f.validate ? f.validate(val) : val.length > 0) : true;
+          if(!valid){
+            ok = false;
+            if(err) err.hidden = false;
+            if(input) input.style.borderColor = "var(--st-critical)";
+          } else {
+            if(err) err.hidden = true;
+            if(input) input.style.borderColor = "";
+          }
+          out[f.key] = val;
+        });
+        if(!ok){
+          msgEl.hidden = false;
+          msgEl.textContent = t("Faltam dados obrigatórios. Verifique os campos destacados abaixo.");
+          msgEl.style.color = "var(--st-critical)";
+          return;
+        }
+        cleanup();
+        resolve(out);
+      }
+      function onCancel(){ cleanup(); resolve(null); }
+      function onOverlayKey(e){ if(e.key==="Escape") onCancel(); if(e.key==="Enter"){ e.preventDefault(); onOk(); } }
+      okBtn.addEventListener("click", onOk);
+      cancelBtn.addEventListener("click", onCancel);
+      overlay.addEventListener("keydown", onOverlayKey);
+    });
+  }
+
   async function dbInsertRegistration(reg, companionNames){
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
     try{
@@ -1199,6 +1289,17 @@
     if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
     try{
       var res = await supa.from("registrations").update(patch).eq("id", id);
+      if(!res.error) await loadAllData();
+      return res;
+    }catch(e){
+      return {error:{message: (e && e.message) || String(e)}};
+    }
+  }
+
+  async function dbUpdatePassenger(id, patch){
+    if(!dbOk()) return {error:{message:"Banco de dados não conectado."}};
+    try{
+      var res = await supa.from("passengers").update(patch).eq("id", id);
       if(!res.error) await loadAllData();
       return res;
     }catch(e){
@@ -1406,6 +1507,7 @@
     "Preencha todos os dados solicitados para garantir sua vaga no ônibus.":"Completa todos los datos solicitados para asegurar tu lugar en el autobús.",
     "Dados pessoais":"Datos personales", "Transporte":"Transporte", "Confirmação":"Confirmación",
     "Nome completo":"Nombre completo", "Tipo de documento":"Tipo de documento", "Número do CPF":"Número de documento",
+    "Nome e sobrenome":"Nombre y apellido", "Número do documento":"Número de documento",
     "Telefone / WhatsApp":"Teléfono / WhatsApp", "E-mail (opcional)":"Correo (opcional)",
     "Dias de participação":"Días de participación", "Leva acompanhante(s)?":"¿Lleva acompañante(s)?",
     "Responsável (se menor de idade)":"Responsable (si es menor de edad)",
@@ -1606,7 +1708,16 @@
     "Deixe em branco para limpar o filtro.":"Déjalo en blanco para quitar el filtro.",
     "Nenhum ponto de encontro cadastrado ainda.":"Ningún punto de encuentro registrado todavía.",
     "Digite o número do ponto de encontro para filtrar":"Ingresa el número del punto de encuentro para filtrar",
-    "Opção inválida.":"Opción inválida."
+    "Opção inválida.":"Opción inválida.",
+    "Faltam dados obrigatórios: informe nome completo (nome e sobrenome) e o número do documento de todos os inscritos.":"Faltan datos obligatorios: indica el nombre completo (nombre y apellido) y el número de documento de todos los inscritos.",
+    "Dados incompletos":"Datos incompletos",
+    "Informe o número do documento.":"Indica el número de documento.",
+    "Editar dados":"Editar datos",
+    "Editar dados do titular":"Editar datos del titular",
+    "Editar dados do acompanhante":"Editar datos del acompañante",
+    "Número do documento (CPF)":"Número de documento (CPF)",
+    "Faltam dados obrigatórios. Verifique os campos destacados abaixo.":"Faltan datos obligatorios. Revisa los campos destacados abajo.",
+    "Salvar":"Guardar"
   };
   function t(s){
     if(STATE.lang === "es" && STRINGS_ES.hasOwnProperty(s)) return STRINGS_ES[s];
@@ -1667,7 +1778,8 @@
     ".settings-row .txt strong", ".settings-row .txt span",
     ".card-head .muted", ".portal-card .k", ".metric .label",
     "select option", ".login-foot span", ".backlink span",
-    ".connect-opt .t", ".connect-opt .d", ".role-card p", ".i18n-note"
+    ".connect-opt .t", ".connect-opt .d", ".role-card p", ".i18n-note",
+    "#cadastroNomeErr", "#cadastroDocErr"
   ];
   function markI18n(){
     I18N_SELECTORS.forEach(function(sel){
@@ -1911,23 +2023,26 @@
         var titularDoc = r.doc_type ? (r.doc_type + " " + (r.doc_number||"")) : "—";
         var titularGrupo = companions.length ? (t("Titular do grupo")+' ('+t("+")+companions.length+')') : "—";
         var payCell = paySelectHTML(r);
-        var delCell = '<button type="button" class="icon-btn del-reg" data-reg="'+r.id+'" data-name="'+r.titular_name+'" title="'+t("Excluir cadastro")+'" style="color:var(--st-critical);"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5a1 1 0 0 0 1 .95h6a1 1 0 0 0 1-.95L17 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+        var editIcon = '<svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M4 20h4.2L18.8 9.4a1.7 1.7 0 0 0 0-2.4l-1.8-1.8a1.7 1.7 0 0 0-2.4 0L4 15.8V20Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+        var editTitularBtn = '<button type="button" class="icon-btn edit-titular" data-reg="'+r.id+'" title="'+t("Editar dados")+'">'+editIcon+'</button>';
+        var delCell = editTitularBtn+'<button type="button" class="icon-btn del-reg" data-reg="'+r.id+'" data-name="'+r.titular_name+'" title="'+t("Excluir cadastro")+'" style="color:var(--st-critical);"><svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12.5a1 1 0 0 0 1 .95h6a1 1 0 0 0 1-.95L17 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
         var rows = '<tr><td data-label="'+t("Nome")+'"><strong>'+r.titular_name+'</strong></td>'+
           '<td data-label="'+t("Documento")+'" class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+titularDoc+'</td>'+
           '<td data-label="'+t("Grupo")+'">'+titularGrupo+'</td>'+
           '<td data-label="'+t("Ônibus")+'" class="tabular">'+busCell+'</td>'+
           '<td data-label="'+t("Ponto de encontro")+'">'+pontoCell+'</td>'+
           '<td data-label="'+t("Pagamento")+'">'+payCell+'</td>'+
-          '<td data-label="'+t("Ação")+'">'+delCell+'</td></tr>';
+          '<td data-label="'+t("Ação")+'" style="display:flex;gap:4px;">'+delCell+'</td></tr>';
         companions.forEach(function(c){
           var compDoc = c.doc_number ? ((c.doc_type||"")+" "+c.doc_number) : "—";
+          var editCompBtn = '<button type="button" class="icon-btn edit-companion" data-pid="'+c.id+'" data-reg="'+r.id+'" title="'+t("Editar dados")+'">'+editIcon+'</button>';
           rows += '<tr class="companion-row"><td data-label="'+t("Nome")+'">'+c.full_name+'</td>'+
             '<td data-label="'+t("Documento")+'" class="tabular" style="font-size:.78rem;color:var(--ink-mute);">'+compDoc+'</td>'+
             '<td data-label="'+t("Grupo")+'" style="font-size:.78rem;color:var(--ink-mute);">'+t("Acompanhante de")+' '+r.titular_name+'</td>'+
             '<td data-label="'+t("Ônibus")+'" class="tabular">'+busCell+'</td>'+
             '<td data-label="'+t("Ponto de encontro")+'">'+(mp ? mp.name : '<span style="color:var(--ink-mute);font-size:.78rem;">'+t("mesmo do titular")+'</span>')+'</td>'+
             '<td data-label="'+t("Pagamento")+'"><span style="font-size:.78rem;color:var(--ink-mute);">'+t("mesmo do titular")+'</span></td>'+
-            '<td data-label="'+t("Ação")+'"></td></tr>';
+            '<td data-label="'+t("Ação")+'">'+editCompBtn+'</td></tr>';
         });
         return rows;
       }).join('') : (function(){
@@ -1971,6 +2086,52 @@
       });
       root.querySelectorAll(".pay-select").forEach(function(sel){
         sel.addEventListener("change", function(){ handlePaySelectChange(sel); });
+      });
+      root.querySelectorAll(".edit-titular").forEach(function(btn){
+        btn.addEventListener("click", async function(){
+          var regId = btn.getAttribute("data-reg");
+          var r = (DATA.registrations||[]).find(function(x){ return String(x.id)===String(regId); });
+          if(!r) return;
+          var vals = await jvFormModal(t("Editar dados do titular"), [
+            {key:"titular_name", label:t("Nome completo"), value:r.titular_name, required:true, validate:isFullName, errorMsg:t("Informe nome e sobrenome.")},
+            {key:"doc_number", label:t("Número do documento (CPF)"), value:r.doc_number, required:true, errorMsg:t("Informe o número do documento.")},
+            {key:"phone", label:t("Telefone (WhatsApp)"), value:r.phone, required:true, errorMsg:t("Informe o telefone.")},
+            {key:"bus_number", label:t("Ônibus"), value:r.bus_number, required:false}
+          ]);
+          if(!vals) return;
+          var patch = {
+            titular_name: toTitleCase(vals.titular_name),
+            doc_number: vals.doc_number,
+            phone: vals.phone,
+            bus_number: vals.bus_number || null
+          };
+          var res = await dbUpdateRegistration(regId, patch);
+          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
+          /* mantém a linha do titular na tabela "passengers" (usada em relatórios) sincronizada */
+          var titularPax = (r.passengers||[]).find(function(p){ return p.is_titular; });
+          if(titularPax){
+            try{ await supa.from("passengers").update({full_name: patch.titular_name, doc_number: patch.doc_number}).eq("id", titularPax.id); }catch(e){}
+          }
+          await loadAllData();
+          rerenderViews();
+        });
+      });
+      root.querySelectorAll(".edit-companion").forEach(function(btn){
+        btn.addEventListener("click", async function(){
+          var regId = btn.getAttribute("data-reg");
+          var pid = btn.getAttribute("data-pid");
+          var r = (DATA.registrations||[]).find(function(x){ return String(x.id)===String(regId); });
+          var c = r ? (r.passengers||[]).find(function(p){ return String(p.id)===String(pid); }) : null;
+          if(!c) return;
+          var vals = await jvFormModal(t("Editar dados do acompanhante"), [
+            {key:"full_name", label:t("Nome completo"), value:c.full_name, required:true, validate:isFullName, errorMsg:t("Informe nome e sobrenome.")},
+            {key:"doc_number", label:t("Número do documento (CPF)"), value:c.doc_number, required:true, errorMsg:t("Informe o número do documento.")}
+          ]);
+          if(!vals) return;
+          var res = await dbUpdatePassenger(pid, {full_name: toTitleCase(vals.full_name), doc_number: vals.doc_number});
+          if(res.error){ await jvAlert(t("Não foi possível salvar: ") + res.error.message); return; }
+          rerenderViews();
+        });
       });
       root.querySelectorAll(".del-reg").forEach(function(btn){
         btn.addEventListener("click", async function(){
@@ -3301,12 +3462,13 @@
   }
   function companionBlock(idx){
     return '<div class="form-section companion-block" style="border:1px solid var(--hairline);border-radius:11px;padding:14px;margin-top:10px;background:var(--surface-2);">'+
-      '<h4 style="font-size:.86rem;margin-bottom:10px;">Acompanhante '+idx+'</h4>'+
+      '<h4 style="font-size:.86rem;margin-bottom:10px;">'+t("Acompanhante")+' '+idx+'</h4>'+
       '<div class="form-grid">'+
-        '<div class="field span2"><label>Nome completo</label><input type="text" class="companion-nome" placeholder="Nome e sobrenome">'+
-          '<span class="companion-nome-err" hidden style="color:var(--st-critical);font-size:.76rem;font-weight:600;">Informe nome e sobrenome.</span></div>'+
-        '<div class="field"><label>Tipo de documento</label><select class="companion-doctype"></select></div>'+
-        '<div class="field"><label>Número do documento</label><input type="text" class="companion-docnum" placeholder="000.000.000-00"></div>'+
+        '<div class="field span2"><label>'+t("Nome completo")+'</label><input type="text" class="companion-nome" placeholder="'+t("Nome e sobrenome")+'">'+
+          '<span class="companion-nome-err" hidden style="color:var(--st-critical);font-size:.76rem;font-weight:600;">'+t("Informe nome e sobrenome.")+'</span></div>'+
+        '<div class="field"><label>'+t("Tipo de documento")+'</label><select class="companion-doctype"></select></div>'+
+        '<div class="field"><label>'+t("Número do documento")+'</label><input type="text" class="companion-docnum" placeholder="000.000.000-00">'+
+          '<span class="companion-docnum-err" hidden style="color:var(--st-critical);font-size:.76rem;font-weight:600;">'+t("Informe o número do documento.")+'</span></div>'+
         '<div class="field span2"><label>Telefone (opcional)</label><input type="text" placeholder="(11) 90000-0000"></div>'+
         '<div class="field span2"><label>Dias de participação deste acompanhante</label><div class="radio-row companion-dias">'+diaChipsHTML("companion-dia")+'</div></div>'+
       '</div>'+
@@ -3466,8 +3628,23 @@
       } else if(nomeErr){
         nomeErr.hidden = true; if(nomeInput) nomeInput.style.borderColor = "";
       }
+      var docInput = document.getElementById("cadastroDocNumber");
+      var docErr = document.getElementById("cadastroDocErr");
+      if(docInput && !docInput.value.trim()){
+        if(docErr) docErr.hidden = false; docInput.style.borderColor = "var(--st-critical)"; ok = false;
+      } else if(docErr){
+        docErr.hidden = true; if(docInput) docInput.style.borderColor = "";
+      }
       var names = [nomeVal.trim() || "Titular"];
       var companionDaysList = [];
+      document.querySelectorAll(".companion-docnum").forEach(function(inp){
+        var err = inp.parentElement.querySelector(".companion-docnum-err");
+        if(!inp.value.trim()){
+          if(err) err.hidden = false; inp.style.borderColor = "var(--st-critical)"; ok = false;
+        } else {
+          if(err) err.hidden = true; inp.style.borderColor = "";
+        }
+      });
       document.querySelectorAll(".companion-nome").forEach(function(inp){
         var err = inp.parentElement.querySelector(".companion-nome-err");
         if(!isFullName(inp.value)){
@@ -3479,7 +3656,12 @@
           companionDaysList.push(block ? getCompanionDias(block) : []);
         }
       });
-      if(!ok) return;
+      if(!ok){
+        await jvAlert(t("Faltam dados obrigatórios: informe nome completo (nome e sobrenome) e o número do documento de todos os inscritos."), {title:t("Dados incompletos")});
+        var firstBad = document.querySelector('#screen-cadastro input[style*="critical"]');
+        if(firstBad) firstBad.focus();
+        return;
+      }
 
       var count = +(document.getElementById("companionCount") || {}).value || 0;
       var people = count + 1;
